@@ -1,0 +1,193 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Registrar Empleado | Fede BarberShop{% endblock %}
+
+{% block content %}
+<div class="min-h-screen flex items-center justify-center px-4 bg-[#0a0a0a] relative overflow-hidden">
+  <div id="particles" class="absolute inset-0 z-0"></div>
+
+  <div class="glass z-10 max-w-md w-full p-8 rounded-2xl shadow-xl text-white">
+    <div class="text-center mb-6">
+      <i class="fas fa-user-tie text-5xl text-white/80 mb-4"></i>
+      <h1 class="text-2xl font-light tracking-widest uppercase">Registrar Empleado</h1>
+    </div>
+
+    {% if messages %}
+      {% for message in messages %}
+        <div class="bg-red-500 text-white text-sm rounded p-2 mb-4 text-center">
+          {{ message }}
+        </div>
+      {% endfor %}
+    {% endif %}
+
+    <form method="POST" class="space-y-4" novalidate>
+        {% csrf_token %}
+
+        <!-- Usuario -->
+        <div class="relative">
+            <div class="absolute inset-y-0 left-0 w-12 flex items-center justify-center bg-white/10 rounded-l-md border-r border-white/10">
+                <i class="fas fa-user text-white/70 text-sm"></i>
+            </div>
+            {{ form.username }}
+            {% for error in form.username.errors %}
+            <p class="text-red-500 text-sm mt-1">{{ error }}</p>
+            {% endfor %}
+        </div>
+
+        <!-- Nombre -->
+        <div class="relative">
+            <div class="absolute inset-y-0 left-0 w-12 flex items-center justify-center bg-white/10 rounded-l-md border-r border-white/10">
+                <i class="fas fa-id-badge text-white/70 text-sm"></i>
+            </div>
+            {{ form.first_name }}
+            {% for error in form.first_name.errors %}
+            <p class="text-red-500 text-sm mt-1">{{ error }}</p>
+            {% endfor %}
+        </div>
+
+        <!-- Apellido -->
+        <div class="relative">
+            <div class="absolute inset-y-0 left-0 w-12 flex items-center justify-center bg-white/10 rounded-l-md border-r border-white/10">
+                <i class="fas fa-id-badge text-white/70 text-sm"></i>
+            </div>
+            {{ form.last_name }}
+            {% for error in form.last_name.errors %}
+            <p class="text-red-500 text-sm mt-1">{{ error }}</p>
+            {% endfor %}
+        </div>
+
+        <!-- Email -->
+        <div class="relative">
+            <div class="absolute inset-y-0 left-0 w-12 flex items-center justify-center bg-white/10 rounded-l-md border-r border-white/10">
+                <i class="fas fa-envelope text-white/70 text-sm"></i>
+            </div>
+            {{ form.email }}
+            {% for error in form.email.errors %}
+            <p class="text-red-500 text-sm mt-1">{{ error }}</p>
+            {% endfor %}
+        </div>
+
+        <!-- Teléfono -->
+        <div class="relative">
+            <div class="absolute inset-y-0 left-0 w-12 flex items-center justify-center bg-white/10 rounded-l-md border-r border-white/10">
+                <i class="fas fa-phone text-white/70 text-sm"></i>
+            </div>
+            {{ form.telefono }}
+            {% for error in form.telefono.errors %}
+            <p class="text-red-500 text-sm mt-1">{{ error }}</p>
+            {% endfor %}
+        </div>
+
+        <!-- DNI -->
+        <div class="relative">
+            <div class="absolute inset-y-0 left-0 w-12 flex items-center justify-center bg-white/10 rounded-l-md border-r border-white/10">
+                <i class="fas fa-id-card text-white/70 text-sm"></i>
+            </div>
+            {{ form.dni }}
+            {% for error in form.dni.errors %}
+            <p class="text-red-500 text-sm mt-1">{{ error }}</p>
+            {% endfor %}
+        </div>
+
+        <!-- Especialidad -->
+        <div class="relative">
+            <div class="absolute inset-y-0 left-0 w-12 flex items-center justify-center bg-white/10 rounded-l-md border-r border-white/10">
+                <i class="fas fa-briefcase text-white/70 text-sm"></i>
+            </div>
+            {{ form.especialidad }}
+            {% for error in form.especialidad.errors %}
+            <p class="text-red-500 text-sm mt-1">{{ error }}</p>
+            {% endfor %}
+        </div>
+
+        <!-- Contraseña -->
+        <div class="relative">
+            <div class="absolute inset-y-0 left-0 w-12 flex items-center justify-center bg-white/10 rounded-l-md border-r border-white/10">
+                <i class="fas fa-lock text-white/70 text-sm"></i>
+            </div>
+            {{ form.password1 }}
+            {% for error in form.password1.errors %}
+            <p class="text-red-500 text-sm mt-1">{{ error }}</p>
+            {% endfor %}
+        </div>
+
+        <!-- Repetir contraseña -->
+        <div class="relative">
+            <div class="absolute inset-y-0 left-0 w-12 flex items-center justify-center bg-white/10 rounded-l-md border-r border-white/10">
+                <i class="fas fa-lock text-white/70 text-sm"></i>
+            </div>
+            {{ form.password2 }}
+            {% for error in form.password2.errors %}
+            <p class="text-red-500 text-sm mt-1">{{ error }}</p>
+            {% endfor %}
+        </div>
+
+        <button type="submit" class="w-full py-3 bg-yellow-500 hover:bg-yellow-600 rounded-full font-semibold mt-6 text-black transition">
+            Crear cuenta
+        </button>
+    </form>
+
+  </div>
+</div>
+{% endblock %}
+
+{% block extra_head %}
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+<style>
+  .form-input {
+    background: rgba(255, 255, 255, 0.9);
+    border: none;
+    outline: none;
+    transition: all 0.3s ease;
+  }
+
+  .form-input:focus {
+    background: white;
+    transform: translateY(-2px);
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+  }
+
+  .glass {
+    background: rgba(255, 255, 255, 0.05);
+    backdrop-filter: blur(15px);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+  }
+</style>
+{% endblock %}
+
+{% block scripts %}
+<script>
+  function createParticles() {
+    const container = document.getElementById('particles');
+    for (let i = 0; i < 6; i++) {
+      const el = document.createElement('div');
+      el.style.cssText = `
+        position: fixed;
+        width: ${Math.random() * 10 + 5}px;
+        height: ${Math.random() * 10 + 5}px;
+        background: rgba(255, 255, 255, 0.1);
+        border-radius: 50%;
+        top: ${Math.random() * 100}vh;
+        left: ${Math.random() * 100}vw;
+        animation: float ${Math.random() * 6 + 4}s infinite linear;
+        pointer-events: none;
+        z-index: -1;
+      `;
+      container.appendChild(el);
+    }
+  }
+
+  const style = document.createElement('style');
+  style.textContent = `
+    @keyframes float {
+      0% { transform: translateY(100vh) rotate(0deg); opacity: 0; }
+      10%, 90% { opacity: 1; }
+      100% { transform: translateY(-100vh) rotate(360deg); opacity: 0; }
+    }
+  `;
+  document.head.appendChild(style);
+  createParticles();
+  setInterval(createParticles, 10000);
+</script>
+{% endblock %}

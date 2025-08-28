@@ -1,0 +1,121 @@
+{% extends 'base.html' %}
+
+{% block title %}Tienda | Fede BarberShop{% endblock %}
+
+{% block content %}
+<section class="pt-36 pb-20 px-6 bg-black text-white min-h-screen">
+  <div class="max-w-7xl mx-auto grid grid-cols-1 md:grid-cols-4 gap-10">
+
+    <!-- Sidebar de filtros -->
+    <aside class="glass p-6 rounded-xl shadow h-fit sticky top-36">
+      <h3 class="text-xl font-semibold mb-4">Filtrar</h3>
+      
+      <!-- Búsqueda -->
+      <div class="mb-4">
+        <label class="block text-sm font-medium mb-1">Buscar</label>
+        <input type="text" id="busqueda" placeholder="Ej: shampoo..." class="w-full px-4 py-2 bg-gray-800 text-white rounded border border-yellow-500 focus:outline-none">
+      </div>
+
+      <!-- Categoría -->
+      <div class="mb-4">
+        <label class="block text-sm font-medium mb-1">Categoría</label>
+        <select id="categoria" class="w-full px-4 py-2 bg-gray-800 text-white rounded border border-yellow-500">
+          <option value="">Todas</option>
+          <option value="shampoo">Shampoo</option>
+          <option value="cera">Cera</option>
+          <option value="peine">Peines</option>
+          <option value="accesorio">Accesorios</option>
+        </select>
+      </div>
+
+      <!-- Orden -->
+      <div>
+        <label class="block text-sm font-medium mb-1">Ordenar por</label>
+        <select id="orden" class="w-full px-4 py-2 bg-gray-800 text-white rounded border border-yellow-500">
+          <option value="default">Por defecto</option>
+          <option value="menor">Precio: menor a mayor</option>
+          <option value="mayor">Precio: mayor a menor</option>
+        </select>
+      </div>
+    </aside>
+
+    <!-- Sección de productos -->
+    <div class="col-span-1 md:col-span-3">
+      <div class="flex justify-end items-center mb-6">
+        <span class="text-sm text-gray-400 mr-4">Vista:</span>
+        <button id="vistaGrid" class="px-3 py-1 bg-yellow-500 text-black font-bold rounded-l hover:bg-yellow-600">🟦</button>
+        <button id="vistaLista" class="px-3 py-1 bg-yellow-500 text-black font-bold rounded-r hover:bg-yellow-600">📄</button>
+      </div>
+
+      <div id="contenedorProductos" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8 transition-all duration-300">
+        <!-- Productos de ejemplo hardcodeados -->
+        {% for i in "ABCDEFGHIJKLMNOP" %}
+        <div class="producto bg-[#111] rounded-xl overflow-hidden border border-gray-800 shadow hover:scale-105 transition p-4" data-nombre="Producto {{ i }}" data-categoria="{% cycle 'shampoo' 'cera' 'peine' 'accesorio' %}" data-precio="{{ forloop.counter }}000">
+          <img src="https://source.unsplash.com/400x400/?barber,product,{{ i }}" alt="Producto {{ i }}" class="w-full h-48 object-cover rounded-xl mb-3">
+          <h3 class="text-lg font-semibold text-yellow-400">Producto {{ i }}</h3>
+          <p class="text-white font-bold mt-1">${{ forloop.counter }}000.00</p>
+          <p class="text-sm text-gray-400">Descripción del producto {{ i }}</p>
+          <button class="mt-3 bg-yellow-500 hover:bg-yellow-600 text-black text-sm font-semibold px-4 py-2 rounded-full">Agregar</button>
+        </div>
+        {% endfor %}
+      </div>
+    </div>
+  </div>
+</section>
+{% endblock %}
+
+{% block scripts %}
+<script>
+  // Vista tipo
+  const gridBtn = document.getElementById('vistaGrid');
+  const listBtn = document.getElementById('vistaLista');
+  const contenedor = document.getElementById('contenedorProductos');
+
+  gridBtn.addEventListener('click', () => {
+    contenedor.classList.remove('flex', 'flex-col');
+    contenedor.classList.add('grid', 'grid-cols-1', 'sm:grid-cols-2', 'lg:grid-cols-3');
+  });
+
+  listBtn.addEventListener('click', () => {
+    contenedor.classList.remove('grid', 'grid-cols-1', 'sm:grid-cols-2', 'lg:grid-cols-3');
+    contenedor.classList.add('flex', 'flex-col');
+  });
+
+  // Filtros básicos JS (solo front)
+  const busquedaInput = document.getElementById('busqueda');
+  const categoriaSelect = document.getElementById('categoria');
+  const ordenSelect = document.getElementById('orden');
+
+  function filtrarProductos() {
+    const productos = document.querySelectorAll('.producto');
+    const texto = busquedaInput.value.toLowerCase();
+    const categoria = categoriaSelect.value;
+    const orden = ordenSelect.value;
+
+    let productosArray = Array.from(productos);
+
+    // Filtro por nombre y categoría
+    productosArray.forEach(p => {
+      const nombre = p.dataset.nombre.toLowerCase();
+      const cat = p.dataset.categoria;
+      const visible = nombre.includes(texto) && (categoria === '' || cat === categoria);
+      p.style.display = visible ? 'block' : 'none';
+    });
+
+    // Orden por precio
+    if (orden !== 'default') {
+      productosArray = productosArray
+        .filter(p => p.style.display !== 'none')
+        .sort((a, b) => {
+          const pa = parseInt(a.dataset.precio);
+          const pb = parseInt(b.dataset.precio);
+          return orden === 'menor' ? pa - pb : pb - pa;
+        });
+
+      productosArray.forEach(p => contenedor.appendChild(p));
+    }
+  }
+
+  [busquedaInput, categoriaSelect, ordenSelect].forEach(e => e.addEventListener('input', filtrarProductos));
+</script>
+{% endblock %}
