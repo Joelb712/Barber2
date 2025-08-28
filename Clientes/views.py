@@ -1,10 +1,9 @@
 from django.http import HttpResponse
-from django.shortcuts import render, redirect
+from django.shortcuts import render, redirect,get_object_or_404
 from django.views.decorators.clickjacking import xframe_options_exempt
 from django.contrib.auth.decorators import user_passes_test,login_required
 from Otros.models import Cliente
-from .forms import ClienteAltaForm
-from Usuarios.forms import EmpleadoCreateForm
+from .forms import ClienteAltaForm,ClienteEditarForm
 
 
 def es_gerente(user):
@@ -35,3 +34,28 @@ def crear_cliente(request):
         form = ClienteAltaForm()
     
     return render(request, 'formcli.html', {'form': form})
+
+@login_required
+@user_passes_test(es_gerente)
+def editar_cliente(request, pk):
+    cliente = get_object_or_404(Cliente, pk=pk)
+    if request.method == 'POST':
+        form = ClienteEditarForm(request.POST, instance=cliente)
+        if form.is_valid():
+            form.save()
+            return HttpResponse("<script>window.parent.postMessage({action: 'closeBootbox'}, '*');</script>")
+    else:
+        form = ClienteEditarForm(instance=cliente)
+    return render(request, 'formcli.html', {'form': form, 'cliente': cliente})
+
+@login_required
+@user_passes_test(es_gerente)
+@xframe_options_exempt
+def eliminar_cliente(request, pk):
+    cliente = get_object_or_404(Cliente, pk=pk)
+    if request.method == 'POST':
+        cliente.delete()       # opcional, solo si no se elimina con cascade
+        return HttpResponse(
+            "<script>window.parent.postMessage({action: 'closeBootbox'}, '*');</script>"
+        )
+    return render(request, 'eliminarcli.html', {'cliente': cliente})

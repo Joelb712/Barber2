@@ -37,7 +37,7 @@
         </thead>
         <tbody>
           {% for e in empleados %}
-          <tr>
+          <tr data-pk="{{ e.pk }}">
             <td>{{ e.user.username }}</td>
             <td>{{ e.dni }}</td>
             <td>{{ e.user.first_name }}</td>
@@ -47,8 +47,8 @@
             <td>{{ e.activo|yesno:"Activo,Inactivo" }}</td>
             <td>
               <button class="btn btn-sm btn-info"><i class="fas fa-eye"></i></button>
-              <button class="btn btn-sm btn-warning"><i class="fas fa-edit"></i></button>
-              <button class="btn btn-sm btn-danger"><i class="fas fa-trash"></i></button>
+              <button class="btnEditar btn btn-sm btn-warning"><i class="fas fa-edit"></i></button>
+              <button class="btnEliminar btn btn-sm btn-danger"><i class="fas fa-trash"></i></button>
             </td>
           </tr>
           {% endfor %}
@@ -60,6 +60,10 @@
 
 <script type="text/javascript">
 $(document).ready(function () {
+    if ( $.fn.DataTable.isDataTable('#listaemp') ) {
+      $('#listaemp').DataTable().destroy();
+    }
+    
     $('#listaemp').DataTable({
         language: {
             //se pone en español crack
@@ -111,4 +115,47 @@ $(document).ready(function () {
                 }},{ once: true });
             });
             });
-</script>
+        $(document).off('click').on('click','.btnEditar', function() {
+            const pk = $(this).closest('tr').data('pk');
+            const url = '/empleados/editar/' + pk + '/';
+            bootbox.dialog({
+                title: 'Formulario Editar',
+                message: "<iframe id='formIframe' src='" + url + "' scrolling='yes' frameborder='0' width='100%' height='500'></iframe>",
+                buttons: {
+                    cancel: {
+                        label: 'Cerrar',
+                        className: 'btn-secondary',
+                        callback: function () {
+                            cargarContenido("{% url 'lista_empleados' %}");
+                        }
+                    }
+                }
+            });
+            window.addEventListener('message', function(event) {
+                if (event.data && event.data.action === 'closeBootbox') {
+                    bootbox.hideAll();
+                    cargarContenido("{% url 'lista_empleados' %}");
+                }},{ once: true });
+            });
+        $('#listaemp').off('click').on('click','.btnEliminar', function() {
+            const pk = $(this).closest('tr').data('pk');
+            const url = '/empleados/eliminar/' + pk + '/';
+            bootbox.dialog({
+                title: 'Eliminar',
+                message: "<iframe id='formIframe' src='" + url + "' scrolling='yes' frameborder='0' width='100%' height='500'></iframe>",
+                buttons: {
+                    cancel: {
+                        label: 'Cerrar',
+                        className: 'btn-secondary',
+                        callback: function () {
+                            cargarContenido("{% url 'lista_empleados' %}");
+                        }
+                    }
+                }
+            });
+            window.addEventListener('message', function(event) {
+                if (event.data && event.data.action === 'closeBootbox') {
+                    bootbox.hideAll();
+                    cargarContenido("{% url 'lista_empleados' %}");
+                }},{ once: true });
+            });
