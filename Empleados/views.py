@@ -8,13 +8,15 @@ from Usuarios.forms import EmpleadoCreateForm,EmpleadoEditarForm
 
 
 
+def es_gerente(user):
+    return user.groups.filter(name="Gerente").exists() or user.is_superuser
 
+@login_required
+@user_passes_test(es_gerente)
+@xframe_options_exempt
 def lista_empleados(request):
     empleados = Empleado.objects.all()
     return render(request, 'empleados.html', {'empleados': empleados})
-
-def es_gerente(user):
-    return user.groups.filter(name="Gerente").exists() or user.is_superuser
 
 @login_required
 @user_passes_test(es_gerente)

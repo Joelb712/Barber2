@@ -46,7 +46,7 @@
             <td>{{ e.get_especialidad_display }}</td>
             <td>{{ e.activo|yesno:"Activo,Inactivo" }}</td>
             <td>
-              <button class="btn btn-sm btn-info"><i class="fas fa-eye"></i></button>
+              <!-- <button class="btn btn-sm btn-info"><i class="fas fa-eye"></i></button> -->
               <button class="btnEditar btn btn-sm btn-warning"><i class="fas fa-edit"></i></button>
               <button class="btnEliminar btn btn-sm btn-danger"><i class="fas fa-trash"></i></button>
             </td>
@@ -90,8 +90,28 @@ $(document).ready(function () {
                 "sSortDescending": ": Activar para ordenar la columna de manera descendente"
             }
         },
-        });
+              dom: 'Bfrtip',
+        buttons: [
+            {// Botón de Copiar
+                extend: 'copyHtml5',
+                className: 'btn btn-primary'
+            },
+            {// Botón de Excel
+                extend: 'excelHtml5',
+                className: 'btn btn-success'
+            },
+            {// Botón de PDF
+                extend: 'pdfHtml5',
+                className: 'btn btn-danger'
+            },
+            {// Botón de Imprimir
+                extend: 'print',
+                className: 'btn btn-info'
+            }
+        ]
     });
+});
+    
     $(document).ready(function() {
         $('#btnAgregarEmpleado').off('click').on('click', function() {
             const url = "{% url 'formemp' %}";

@@ -1,0 +1,98 @@
+{% load static %}
+<style>
+  .card-img-top {
+    height: 100px;
+    object-fit: cover;
+  }
+  .card {
+    font-size: 0.85rem; /* texto más chico */
+  }
+</style>
+
+<div class="card">
+  <div class="card-header">
+    <h2 class="text text-center">Inventario de productos</h2>
+  </div>
+  <div class="card-body" class="p-6">
+    <div class="bg-white/30 backdrop-blur-md shadow-lg rounded-2xl p-4 mb-6">
+      <h2 class="text-2xl font-bold flex items-center gap-2">
+        <i class="fas fa-box "></i> Productos
+      </h2>
+      <p>Acá puedes ver todos los productos que están registrados, disponibles o no</p>
+      <div class="flex justify-between mt-4">        
+        <button id="btnAgregarProducto" class="btn btn-primary me-2">Nuevo Producto</button>
+      </div>
+    </div>
+      <div class="row" id="contenedor-productos">
+        {% for producto in productos %}
+        <div class="col-lg-2 col-md-3 col-sm-4 col-6 mb-3">
+          <div class="card bg-dark text-white border-0 shadow-sm h-100">
+            <img src="{% if producto.imagen %}{{ producto.imagen.url }}{% else %}{% static 'imgs/productos/aceite.png' %}{% endif %}" class="card-img-top" alt="{{ producto.nombre }}">
+            <div class="card-body d-flex flex-column p-2">
+              <h6 class="card-title mb-1 text-truncate">{{ producto.nombre }}</h6>
+              <p class="card-text text-success fw-bold mb-1">${{ producto.precio }}</p>
+              <div class="mt-auto">
+                <button class="btn btn-sm btn-outline-light w-100 mb-1" ><i class="fas fa-eye"></i> Ver detalles</button>
+                <button class="btnEditarProducto btn btn-sm btn-outline-warning w-100 mb-1"  data-url="{% url 'editar_producto' producto.pk %}?iframe=1"><i class="fas fa-edit"></i> Modificar</button>
+                <button class="btnEliminarProducto btn btn-sm btn-outline-danger w-100" data-id="{{ producto.id }}"><i class="fas fa-trash"></i> Eliminar</button>
+              </div>
+            </div>
+          </div>
+        </div>
+        {% empty %}
+        <p>No hay productos cargados.</p>
+        {% endfor %}
+      </div>
+  </div>
+</div>
+
+
+
+<script type="text/javascript">
+$(document).ready(function() {
+  $('#btnAgregarProducto').off('click').on('click', function() {
+    const url = "{% url 'formp' %}";
+    bootbox.dialog({
+      title: 'Formulario',
+      message: "<iframe id='formIframe' src='" + url + "' scrolling='yes' frameborder='0' width='100%' height='600'></iframe>",
+      buttons: {
+        cancel: {
+          label: 'Cerrar',
+          className: 'btn-secondary',
+          callback: function () {
+            cargarContenido("{% url 'lista_productos' %}");
+          }
+        }
+      }
+    });
+
+    window.addEventListener('message', function(event) {
+      if (event.data && event.data.action === 'closeBootbox') {
+        bootbox.hideAll();
+        cargarContenido("{% url 'lista_productos' %}");
+      }
+    }, { once: true });
+  });
+});
+</script>
+<script>
+  
+$(document).off('click', '.btnEditarProducto').on('click', '.btnEditarProducto', function() {
+  const url = $(this).data('url') + '?_=' + new Date().getTime();
+  bootbox.dialog({
+    title: 'Editar producto',
+    message: "<iframe id='formIframe' src='" + url + "' scrolling='yes' frameborder='0' width='100%' height='600'></iframe>",
+    size: 'large',
+    buttons: {
+      cancel: {
+        label: 'Cerrar',
+        className: 'btn-secondary',
+        callback: function () {
+          cargarContenido("{% url 'lista_productos' %}");
+        }
+      }
+    }
+  });
+});
+
+</script>
