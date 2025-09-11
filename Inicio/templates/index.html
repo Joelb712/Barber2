@@ -146,7 +146,8 @@
   <div class="glass max-w-xl mx-auto p-10 rounded-xl">
     <h3 class="text-2xl font-bold mb-4">¿Listo para cambiar tu estilo?</h3>
     <p class="text-gray-300 mb-6">Reservá tu turno online en segundos</p>
-    <a href="#" class="bg-yellow-500 text-black px-6 py-2 rounded hover:bg-yellow-600 font-semibold">Reservar Ahora</a>
+    <!-- <a href="#" class="bg-yellow-500 text-black px-6 py-2 rounded hover:bg-yellow-600 font-semibold">Reservar Ahora</a> -->
+    <button id="btn-reservar" class="btn btn-primary mt-3">Reservar Turno</button>
   </div>
 </section>
 {% endblock %}
@@ -165,4 +166,110 @@
     </div>
   </div>
 </footer>
+{% endblock %}
+
+{% block scripts %}
+  <script>
+  const servicios = {{ servicios_json|safe }};
+  const empleados = {{ empleados_json|safe }};
+
+  document.getElementById("btn-reservar").addEventListener("click", function() {
+      let turnoData = {};
+
+      // Paso 1: Servicio
+      bootbox.prompt({
+          title: "Selecciona un servicio",
+          inputType: 'select',
+          inputOptions: servicios.map(s => ({ text: `${s.nombre} - $${s.precio}`, value: s.id })),
+          callback: function(servicioId){
+              if(!servicioId) return;
+              turnoData.servicio_id = servicioId;
+
+              // Paso 2: Empleado
+              bootbox.prompt({
+                  title: "Selecciona un barbero",
+                  inputType: 'select',
+                  inputOptions: empleados.map(e => ({ text: e.nombre, value: e.id })),
+                  callback: function(empleadoId){
+                      if(!empleadoId) return;
+                      turnoData.empleado_id = empleadoId;
+
+                      // Paso 3: Fecha
+                      bootbox.prompt({
+                          title: "Selecciona una fecha",
+                          inputType: 'date',
+                          callback: function(fecha){
+                              if(!fecha) return;
+                              turnoData.fecha = fecha;
+
+                              // Paso 4: Horarios disponibles
+                              fetch(`/horarios_disponibles/?empleado=${empleadoId}&fecha=${fecha}`)
+                              .then(res => res.json())
+                              .then(data => {
+                                  if(data.length === 0){
+                                      bootbox.alert("No hay horarios disponibles para este día");
+                                      return;
+                                  }
+
+                                  bootbox.prompt({
+                                      title: "Selecciona un horario",
+                                      inputType: 'select',
+                                      inputOptions: data.map(h => ({ text: `${h.inicio} - ${h.fin}`, value: h.id })),
+                                      callback: function(horarioId){
+                                          if(!horarioId) return;
+                                          turnoData.horario_id = horarioId;
+
+                                          // Paso 5: Confirmación
+                                          const servicioNombre = servicios.find(s=>s.id==turnoData.servicio_id).nombre;
+                                          const empleadoNombre = empleados.find(e=>e.id==turnoData.empleado_id).nombre;
+                                          const horario = data.find(h=>h.id==turnoData.horario_id);
+
+                                          bootbox.confirm({
+                                              title: "Confirma tu turno",
+                                              message: `
+                                                  <b>Servicio:</b> ${servicioNombre} <br>
+                                                  <b>Barbero:</b> ${empleadoNombre} <br>
+                                                  <b>Fecha:</b> ${turnoData.fecha} <br>
+                                                  <b>Horario:</b> ${horario.inicio} - ${horario.fin} <br>
+                                              `,
+                                              buttons: {
+                                                  confirm: { label: 'Confirmar', className: 'btn-success' },
+                                                  cancel: { label: 'Editar', className: 'btn-secondary' }
+                                              },
+                                              callback: function(result){
+                                                  if(result){
+                                                      fetch("{% url 'reservar_turno' %}", {
+                                                          method: "POST",
+                                                          headers: {
+                                                              "X-CSRFToken": "{{ csrf_token }}",
+                                                              "Content-Type": "application/x-www-form-urlencoded"
+                                                          },
+                                                          body: `servicio=${turnoData.servicio_id}&empleado=${turnoData.empleado_id}&fecha=${turnoData.fecha}&horario=${turnoData.horario_id}`
+                                                      })
+                                                      .then(res=>res.json())
+                                                      .then(resp=>{
+                                                          if(resp.success) bootbox.alert(resp.success);
+                                                          else bootbox.alert(resp.error);
+                                                      });
+                                                  } else {
+                                                      // Reiniciar wizard
+                                                      document.getElementById("btn-reservar").click();
+                                                  }
+                                              }
+                                          });
+
+                                      }
+                                  });
+                              });
+
+                          }
+                      });
+
+                  }
+              });
+
+          }
+      });
+  });
+  </script>
 {% endblock %}

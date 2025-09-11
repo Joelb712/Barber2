@@ -1,0 +1,63 @@
+from django.shortcuts import render, get_object_or_404, redirect, HttpResponse
+from Otros.models import Servicio
+from .forms import ServicioForm
+from django.contrib import messages
+from django.contrib.auth.decorators import user_passes_test,login_required
+from django.views.decorators.clickjacking import xframe_options_exempt
+
+
+def es_gerente(user):
+    return user.groups.filter(name="Gerente").exists() or user.is_superuser
+
+@login_required
+@user_passes_test(es_gerente)
+@xframe_options_exempt
+def lista_servicios(request):
+    servicios = Servicio.objects.all()
+    return render(request, 'servicios.html', {'servicios': servicios})
+
+@login_required
+@user_passes_test(es_gerente)
+@xframe_options_exempt
+def crear_servicio(request):
+    if request.method == 'POST':
+        form = ServicioForm(request.POST)
+        if form.is_valid():
+            form.save()
+            # Avisar al iframe que debe cerrarse:
+            return HttpResponse(
+                "<script>window.parent.postMessage({action: 'closeBootbox'}, '*');</script>"
+            )
+    else:
+        form = ServicioForm()
+    return render(request, 'formserv.html', {'form': form})
+
+@login_required
+@user_passes_test(es_gerente)
+@xframe_options_exempt
+def editar_servicio(request, pk):
+    servicio = get_object_or_404(Servicio, pk=pk)
+    if request.method == 'POST':
+        form = ServicioForm(request.POST, instance=servicio)
+        if form.is_valid():
+            form.save()
+            messages.success(request, 'Servicio actualizado correctamente.')
+            return HttpResponse(
+                "<script>window.parent.postMessage({action: 'closeBootbox'}, '*');</script>"
+            )
+    else:
+        form = ServicioForm(instance=servicio)
+    return render(request, 'formserv.html', {'form': form, 'titulo': 'Editar Producto'})
+
+@login_required
+@user_passes_test(es_gerente)
+@xframe_options_exempt
+def eliminar_servicio(request, pk):
+    servicio = get_object_or_404(Servicio, pk=pk)
+    if request.method == 'POST':
+        servicio.delete()
+        messages.success(request, 'Servicio eliminado correctamente.')
+        return HttpResponse(
+            "<script>window.parent.postMessage({action: 'closeBootbox'}, '*');</script>"
+        )
+    return render(request, 'eliminarserv.html', {'objeto': servicio, 'tipo': 'Servicio'})

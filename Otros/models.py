@@ -45,3 +45,46 @@ class Producto(models.Model):
 
     def __str__(self):
         return f"{self.nombre} {self.precio}"
+
+# --- SERVICIOS ---
+class Servicio(models.Model):
+    nombre = models.CharField(max_length=100)
+    descripcion = models.TextField(blank=True, null=True)
+    precio = models.DecimalField(max_digits=10, decimal_places=2)
+    duracion = models.PositiveIntegerField()
+    activo = models.BooleanField(default=True)
+
+    def __str__(self):
+        return self.nombre
+    
+# --- HORARIO (fijos de 30 min) ---
+class Horario(models.Model):
+    hora_inicio = models.TimeField(unique=True)
+    hora_fin = models.TimeField()
+
+    def __str__(self):
+        return f"{self.hora_inicio.strftime('%H:%M')} - {self.hora_fin.strftime('%H:%M')}"
+
+# --- TURNO ---
+class Turno(models.Model):
+    cliente = models.ForeignKey("Cliente", on_delete=models.CASCADE)
+    empleado = models.ForeignKey("Empleado", on_delete=models.SET_NULL, null=True)
+    servicio = models.ForeignKey("Servicio", on_delete=models.CASCADE)
+    fecha = models.DateField()
+    horario = models.ForeignKey("Horario", on_delete=models.CASCADE)
+    estado = models.ForeignKey("EstadoTurno", on_delete=models.CASCADE)  
+
+    class Meta:
+        unique_together = ('empleado', 'fecha', 'horario')  # 🔒 un turno por bloque/empleado
+
+    def __str__(self):
+        return f"{self.fecha} {self.horario} - {self.cliente}"
+
+
+# --- ESTADO DE TURNOS ---
+class EstadoTurno(models.Model):
+    nombre = models.CharField(max_length=50, unique=True)
+    descripcion = models.TextField(blank=True, null=True)
+
+    def __str__(self):
+        return self.nombre
