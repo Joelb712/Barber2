@@ -1,0 +1,8 @@
+<form>
+  {% for s in servicios %}
+    <div>
+      <input type="checkbox" name="servicios" value="{{ s.id }}">
+      {{ s.nombre }} - ${{ s.precio }}
+    </div>
+  {% endfor %}
+</form>

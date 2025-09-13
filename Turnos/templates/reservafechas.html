@@ -1,0 +1,9 @@
+<label for="fecha">Selecciona fecha:</label>
+<input type="date" id="fecha"  class="form-control">
+
+<label for="horario">Horario:</label>
+<select id="horario" class="form-control">
+  {% for h in horarios %}
+    <option value="{{ h.id }}">{{ h }}</option>
+  {% endfor %}
+</select>

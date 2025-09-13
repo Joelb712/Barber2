@@ -1,0 +1,7 @@
+<form>
+  {% for e in empleados %}
+    <div>
+      <input type="radio" name="empleado" value="{{ e.id }}"> {{ e.user.username }}
+    </div>
+  {% endfor %}
+</form>

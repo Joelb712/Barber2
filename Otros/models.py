@@ -69,17 +69,26 @@ class Horario(models.Model):
 class Turno(models.Model):
     cliente = models.ForeignKey("Cliente", on_delete=models.CASCADE)
     empleado = models.ForeignKey("Empleado", on_delete=models.SET_NULL, null=True)
-    servicio = models.ForeignKey("Servicio", on_delete=models.CASCADE)
     fecha = models.DateField()
     horario = models.ForeignKey("Horario", on_delete=models.CASCADE)
-    estado = models.ForeignKey("EstadoTurno", on_delete=models.CASCADE)  
+    estado = models.ForeignKey("EstadoTurno", on_delete=models.CASCADE)
+
+    duracion_real = models.PositiveIntegerField(default=30, help_text="En minutos")
+    created_at = models.DateTimeField(auto_now_add=True)
 
     class Meta:
-        unique_together = ('empleado', 'fecha', 'horario')  # 🔒 un turno por bloque/empleado
+        unique_together = ('empleado', 'fecha', 'horario')
 
     def __str__(self):
         return f"{self.fecha} {self.horario} - {self.cliente}"
 
+# --- SERVICIOS POR TURNO ---
+class ServiciosXTurno(models.Model):
+    turno = models.ForeignKey("Turno", on_delete=models.CASCADE, related_name="servicios_turno")
+    servicio = models.ForeignKey("Servicio", on_delete=models.CASCADE)
+
+    def __str__(self):
+        return f"{self.turno} - {self.servicio.nombre}"
 
 # --- ESTADO DE TURNOS ---
 class EstadoTurno(models.Model):

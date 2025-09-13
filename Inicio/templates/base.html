@@ -91,7 +91,7 @@
 
           // Caso normal: inyectar contenido
           $('#main-content').html(respuesta);
-
+          
           },
           error: function(error) {
               console.error('Error:', error);
@@ -111,7 +111,76 @@
         return false;
       });
       });
+      
   </script>
+  
+<script>
+$(document).on("click", "#reservar-btn", function () {
+    // Paso 1: seleccionar servicios
+    $.get('reserva/servicios', function (data) {
+        bootbox.dialog({
+            title: "Selecciona tus servicios",
+            message: data,
+            buttons: {
+                siguiente: {
+                    label: "Siguiente",
+                    className: "btn-success",
+                    callback: function () {
+                        let servicios = $("input[name='servicios']:checked").map(function(){return $(this).val();}).get();
+                        pasoFecha(servicios);
+                    }
+                }
+            }
+        });
+    });
+});
 
+function pasoFecha(servicios) {
+    $.get('reserva/fechas', function (data) {
+        bootbox.dialog({
+            title: "Selecciona fecha y horario",
+            message: data,
+            buttons: {
+                siguiente: {
+                    label: "Siguiente",
+                    className: "btn-success",
+                    callback: function () {
+                        let fecha = $("#fecha").val();
+                        let horario = $("#horario").val();
+                        pasoEmpleado(servicios, fecha, horario);
+                    }
+                }
+            }
+        });
+    });
+}
+
+function pasoEmpleado(servicios, fecha, horario) {
+    $.get('reserva/empleados', function (data) {
+        bootbox.dialog({
+            title: "Selecciona barbero",
+            message: data,
+            buttons: {
+                confirmar: {
+                    label: "Confirmar",
+                    className: "btn-primary",
+                    callback: function () {
+                        let empleado = $("input[name='empleado']:checked").val();
+                        $.post("reserva/confirmar/", {
+                            servicios: servicios,
+                            fecha: fecha,
+                            horario: horario,
+                            empleado: empleado,
+                            csrfmiddlewaretoken: '{{ csrf_token }}'
+                        }, function (resp) {
+                            bootbox.alert(resp.mensaje);
+                        });
+                    }
+                }
+            }
+        });
+    });
+}
+</script>
 </body>
 </html>
