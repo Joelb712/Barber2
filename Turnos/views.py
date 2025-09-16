@@ -109,3 +109,22 @@ def confirmar_turno(request):
         turno.save()
 
         return JsonResponse({"mensaje": "¡Turno reservado con éxito!"})
+    
+
+@login_required
+@user_passes_test(es_gerente)
+@xframe_options_exempt
+def turnos_general(request):
+    turnos = Turno.objects.select_related("cliente", "empleado", "estado", "horario")
+
+    data = []
+    for t in turnos:
+        data.append({
+            "fecha": t.fecha.strftime("%d/%m/%Y"),
+            "hora": t.horario.hora_inicio.strftime('%H:%M'),
+            "cliente": t.cliente.first_name,
+            "empleado": t.empleado.user.first_name,
+            "estado": t.estado.nombre,
+        })
+
+    return render(request, "turnos_general.html", {"turnos": data})

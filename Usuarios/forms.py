@@ -88,7 +88,6 @@ class RegistroClienteForm(UserCreationForm):
             first_name=self.cleaned_data.get('first_name') ,
             last_name=self.cleaned_data.get('last_name') ,
             telefono=self.cleaned_data.get('telefono'),
-            email=self.cleaned_data.get('email'),
             dni=self.cleaned_data.get('dni')
         )
         # Asignar grupo Cliente automáticamente

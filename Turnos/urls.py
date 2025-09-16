@@ -10,4 +10,5 @@ urlpatterns = [
     path("reserva/fechas/", fechas_view, name="fechas"),
     path("reserva/empleados/", empleados_view, name="empleados"),
     path("reserva/confirmar/", confirmar_turno, name="confirmar_turno"),
+    path('turnos/', turnos_general, name='turnos'),
 ]
