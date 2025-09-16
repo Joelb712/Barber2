@@ -37,6 +37,7 @@ def crear_cliente(request):
 
 @login_required
 @user_passes_test(es_gerente)
+@xframe_options_exempt
 def editar_cliente(request, pk):
     cliente = get_object_or_404(Cliente, pk=pk)
     if request.method == 'POST':
