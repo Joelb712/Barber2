@@ -1,18 +1,84 @@
 from django import forms
+from django.core.validators import RegexValidator
 from django.contrib.auth.forms import UserCreationForm
 from django.contrib.auth.models import User, Group
 from Otros.models import Cliente, Empleado
 
-class RegistroClienteForm(UserCreationForm):
-    first_name = forms.CharField(required=True, label="Nombre")
-    last_name = forms.CharField(required=True, label="Apellido")
-    email = forms.EmailField(required=True)
-    telefono = forms.CharField(required=False, label="Teléfono")
-    dni = forms.CharField(required=False, label="DNI")
+from django.contrib.auth.forms import AuthenticationForm
 
-    class Meta:
+estilos_formulario = 'w-full pl-14 pr-4 py-3 form-input text-black rounded-md'
+
+class LoginUsuarioForm(AuthenticationForm):
+    # Personaliza el campo 'username'
+    username = forms.CharField(
+        label="Usuario",
+        widget=forms.TextInput(attrs={
+            'placeholder': 'Ingresa tu usuario',
+            'class': estilos_formulario
+        })
+    )
+    # Personaliza el campo 'password'
+    password = forms.CharField(
+        label="Contraseña",
+        widget=forms.PasswordInput(attrs={
+            'placeholder': 'Ingresa tu contraseña',
+            'class': estilos_formulario
+        }))
+    
+
+
+
+
+class RegistroClienteForm(UserCreationForm):
+    telefono_validator = RegexValidator(
+        regex=r'^\+?\d{7,15}$',
+        message='El número debe contener solo dígitos y puede comenzar con +. Ej: +543871234567'
+    )
+
+    telefono = forms.CharField(
+        required=False,
+        validators=[telefono_validator],
+        widget=forms.TextInput(attrs={
+            'class': estilos_formulario,
+            'placeholder': 'Teléfono (Opcional)'
+        }),
+        help_text='Ej: +54 387 1234567'
+    )
+    dni = forms.CharField(required=False, widget=forms.TextInput(attrs={'class': estilos_formulario, 'placeholder': 'DNI (Opcional)'}),
+                          help_text='ej: 12345678')
+    email = forms.EmailField(required=True, widget=forms.EmailInput(attrs={'class': estilos_formulario, 'placeholder': 'Correo electrónico'}),help_text='Ingresa una dirección de correo electrónico válida.')
+    first_name = forms.CharField(required=False,widget=forms.TextInput(attrs={'class': estilos_formulario, 'placeholder': 'Nombre'}),label='Nombre')
+    last_name = forms.CharField(required=False,widget=forms.TextInput(attrs={'class': estilos_formulario, 'placeholder': 'Apellido'}),label='Apellido')
+
+    class Meta(UserCreationForm.Meta):
         model = User
-        fields = ['username', 'first_name', 'last_name', 'email', 'telefono', 'dni', 'password1', 'password2']
+        fields = ('username', 'first_name', 'last_name', 'email', 'telefono', 'dni', 'password1', 'password2')
+
+        
+    def __init__(self, *args, **kwargs):
+        super(RegistroClienteForm, self).__init__(*args, **kwargs)
+        # Le damos un estilo a los campos que UserCreationForm maneja por defecto
+        self.fields['username'].widget.attrs.update({'class': estilos_formulario, 'placeholder': 'Nombre de usuario'})
+        self.fields['password1'].widget.attrs.update({'class': estilos_formulario, 'placeholder': 'Contraseña'})
+        self.fields['password1'].help_text = 'La contraseña debe tener al menos 8 caracteres y como maximo 22 caracteres.' \
+        ' Debe contener al menos una letra y un número.' \
+
+        self.fields['password2'].widget.attrs.update({'class': estilos_formulario, 'placeholder': 'Confirmar contraseña'})
+        self.fields['password2'].help_text = 'Ingrese la misma contraseña para verificación.'
+        
+    def clean_telefono(self):
+        telefono = self.cleaned_data.get('telefono')
+        if telefono:
+            import re
+            if not re.fullmatch(r'^\+?\d{7,15}$', telefono):
+                raise forms.ValidationError("El teléfono debe contener solo números y puede comenzar con +.")
+        return telefono
+
+    def clean_email(self):
+        email = self.cleaned_data.get('email')
+        if User.objects.filter(email=email).exists():
+            raise forms.ValidationError("Ya existe un usuario con este correo electrónico.")
+        return email
 
     def save(self, commit=True):
         user = super().save(commit)
@@ -26,7 +92,31 @@ class RegistroClienteForm(UserCreationForm):
         grupo_cliente, created = Group.objects.get_or_create(name='Cliente')
         user.groups.add(grupo_cliente)
         return user
-    
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 class EmpleadoCreateForm(forms.ModelForm):
     username = forms.CharField(required=True, label="Nombre de usuario")
     first_name = forms.CharField(required=True, label="Nombre")

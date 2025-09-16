@@ -92,7 +92,13 @@ class ServiciosXTurno(models.Model):
 
 # --- ESTADO DE TURNOS ---
 class EstadoTurno(models.Model):
-    nombre = models.CharField(max_length=50, unique=True)
+    choices = [
+        ('pendiente', 'Pendiente'),
+        ('confirmado', 'Confirmado'),
+        ('completado', 'Completado'),
+        ('cancelado', 'Cancelado'),
+    ]
+    nombre = models.CharField(max_length=50,choices=choices  , unique=True)
     descripcion = models.TextField(blank=True, null=True)
 
     def __str__(self):

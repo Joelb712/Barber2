@@ -24,24 +24,31 @@
       {% endif %}
 
       <div class="relative">
-        <div class="absolute inset-y-0 left-0 w-12 flex items-center justify-center bg-white/10 rounded-l-md border-r border-white/10">
-          <i class="fas fa-envelope text-white/70 text-sm"></i>
-        </div>
+        <label for="{{ form.username.id_for_label }}">
+          {{ form.username.label }}
+        </label>
         {{ form.username }}
         {% if form.username.errors %}
-          <p class="text-red-500 text-sm mt-1">{{ form.username.errors.0 }}</p>
+        <p class="text-red-500 text-sm mt-1">{{ form.username.errors.0 }}</p>
         {% endif %}
       </div>
 
       <div class="relative">
-        <div class="absolute inset-y-0 left-0 w-12 flex items-center justify-center bg-white/10 rounded-l-md border-r border-white/10">
-          <i class="fas fa-lock text-white/70 text-sm"></i>
-        </div>
+        <label for="{{ form.password.id_for_label }}">
+          {{ form.password.label }}
+        </label>
         {{ form.password }}
         {% if form.password.errors %}
-          <p class="text-red-500 text-sm mt-1">{{ form.password.errors.0 }}</p>
+        <p class="text-red-500 text-sm mt-1">{{ form.password.errors }}</p>
         {% endif %}
       </div>
+
+
+
+
+
+
+
 
       <div class="flex justify-between text-sm text-white/70 mt-4">
         <label class="flex items-center space-x-2">
@@ -51,7 +58,8 @@
         <a href="#" class="hover:text-yellow-400 transition">¿Olvidaste tu contraseña?</a>
       </div>
 
-      <button type="submit" class="w-full py-3 bg-yellow-500 hover:bg-yellow-600 rounded-full font-semibold mt-6 text-black transition">
+      <button type="submit"
+        class="w-full py-3 bg-yellow-500 hover:bg-yellow-600 rounded-full font-semibold mt-6 text-black transition">
         Iniciar sesión
       </button>
     </form>
@@ -73,6 +81,9 @@
 <!-- Font Awesome -->
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
 <style>
+  *{
+    color: black;
+  }
   .form-input {
     background: rgba(255, 255, 255, 0.9);
     border: none;
@@ -107,7 +118,7 @@
 {% endblock %}
 
 {% block scripts %}
-<script>
+<!-- <script>
   function createParticles() {
     const container = document.getElementById('particles');
     for (let i = 0; i < 6; i++) {
@@ -140,5 +151,5 @@
   document.head.appendChild(style);
   createParticles();
   setInterval(createParticles, 10000);
-</script>
+</script> -->
 {% endblock %}
