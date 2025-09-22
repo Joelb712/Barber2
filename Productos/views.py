@@ -21,7 +21,7 @@ def lista_productos(request):
 @xframe_options_exempt
 def crear_producto(request):
     if request.method == 'POST':
-        form = ProductoForm(request.POST)
+        form = ProductoForm(request.POST, request.FILES)
         if form.is_valid():
             form.save()
             # Avisar al iframe que debe cerrarse:

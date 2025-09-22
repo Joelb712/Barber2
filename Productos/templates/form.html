@@ -16,12 +16,6 @@
     <form action="" method="post" enctype="multipart/form-data">
      {% csrf_token %}
      {{ form.as_p }}
-     {% if form.instance.imagen %}
-        <img src="{{ form.instance.imagen.url }}" class="img-thumbnail mb-2" style="height:100px;">
-     {% else %}
-        <img src="{% static 'imgs/productos/aceite.png' %}" class="img-thumbnail mb-2" style="height:100px;">
-     {% endif %}
-        
      <button type="submit" class="btn btn-primary">Guardar</button>
     </form>
     <script src="{% static 'jQuery-3.7.0/jquery-3.7.0.js' %}"></script> 
