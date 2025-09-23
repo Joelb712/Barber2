@@ -1,12 +1,12 @@
 <style>
-  body{ color:black; }
+  body { color: black; }
 </style>
-<label for="fecha">Selecciona fecha:</label>
-<input type="date" id="fecha"  class="form-control">
 
-<label for="horario">Horario:</label>
-<select id="horario" class="form-control">
-  {% for h in horarios %}
-    <option value="{{ h.id }}">{{ h }}</option>
-  {% endfor %}
-</select>
+<div class="container">
+  <h5 class="mb-3">Selecciona fecha y horario</h5>
+
+  <div class="mb-3">
+    <label for="fecha" class="form-label">Fecha:</label>
+    <input type="date" id="fecha" class="form-control">
+  </div>
+</div>

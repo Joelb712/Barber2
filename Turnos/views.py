@@ -5,7 +5,8 @@ from django.contrib import messages
 from django.contrib.auth.decorators import user_passes_test,login_required
 from django.views.decorators.clickjacking import xframe_options_exempt
 from django.http import JsonResponse
-from datetime import date
+from datetime import datetime
+from django.db.models import Q
 from django.views.decorators.csrf import csrf_exempt
 
 
@@ -123,8 +124,54 @@ def turnos_general(request):
             "fecha": t.fecha.strftime("%d/%m/%Y"),
             "hora": t.horario.hora_inicio.strftime('%H:%M'),
             "cliente": t.cliente.first_name,
-            "empleado": t.empleado.user.first_name,
+            "empleado": t.empleado.user.first_name if t.empleado else "No asignado",
             "estado": t.estado.nombre,
         })
 
     return render(request, "turnos_general.html", {"turnos": data})
+
+
+# def horarios_disponibles(request):
+#     empleado_id = request.GET.get('empleado_id')
+#     fecha = request.GET.get('fecha')
+
+#     if not empleado_id or not fecha:
+#         return JsonResponse({"error": "Faltan parámetros"}, status=400)
+
+#     try:
+#         fecha_obj = datetime.strptime(fecha, "%Y-%m-%d").date()
+#     except ValueError:
+#         return JsonResponse({"error": "Formato de fecha inválido"}, status=400)
+
+#     horarios = Horario.objects.all()
+
+#     # Excluir horarios que ya estén ocupados por ese empleado en esa fecha
+#     ocupados = Turno.objects.filter(empleado_id=empleado_id, fecha=fecha_obj).values_list('horario_id', flat=True)
+#     disponibles = horarios.exclude(id__in=ocupados)
+
+#     data = [{"id": h.id, "hora": h.hora_inicio.strftime("%H:%M")} for h in disponibles]
+#     return JsonResponse(data, safe=False)
+
+def horarios_disponibles(request):
+    empleado_id = request.GET.get("empleado_id")
+    fecha = request.GET.get("fecha")
+    
+    if not empleado_id or not fecha:
+        return JsonResponse({"error": "Faltan datos"}, status=400)
+    
+    # Obtener todos los horarios
+    todos = Horario.objects.all()
+    
+    # Obtener horarios ocupados para ese empleado en esa fecha
+    ocupados = Turno.objects.filter(
+        empleado_id=empleado_id,
+        fecha=fecha
+    ).values_list("horario_id", flat=True)
+    
+    # Filtrar los horarios disponibles
+    disponibles = todos.exclude(id__in=ocupados)
+    
+    # Preparar respuesta
+    data = [{"id": h.id, "hora": h.hora_inicio.strftime("%H:%M")} for h in disponibles]
+    return JsonResponse(data, safe=False)
+

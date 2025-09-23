@@ -1,10 +1,17 @@
 <style>
-  body{ color:black; }
+  body { color: black; }
 </style>
-<form>
-  {% for e in empleados %}
-    <div>
-      <input type="radio" name="empleado" value="{{ e.id }}"> {{ e.user.username }}
-    </div>
-  {% endfor %}
-</form>
+
+<div class="container">
+  <h5 class="mb-3">Selecciona tu barbero</h5>
+  <form>
+    {% for e in empleados %}
+      <div class="form-check mb-2">
+        <input type="radio" class="form-check-input" name="empleado" value="{{ e.id }}" id="empleado{{ e.id }}">
+        <label class="form-check-label" for="empleado{{ e.id }}">
+          {{ e.user.username }}
+        </label>
+      </div>
+    {% endfor %}
+  </form>
+</div>

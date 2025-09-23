@@ -1,11 +1,17 @@
 <style>
-  body{ color:black; }
+  body { color: black; }
 </style>
-<form>
-  {% for s in servicios %}
-    <div>
-      <input type="checkbox" name="servicios" value="{{ s.id }}">
-      {{ s.nombre }} - ${{ s.precio }}
-    </div>
-  {% endfor %}
-</form>
+
+<div class="container">
+  <h5 class="mb-3">Selecciona tus servicios</h5>
+  <form>
+    {% for s in servicios %}
+      <div class="form-check mb-2">
+        <input type="checkbox" class="form-check-input" name="servicios" value="{{ s.id }}" id="servicio{{ s.id }}">
+        <label class="form-check-label" for="servicio{{ s.id }}">
+          {{ s.nombre }} - ${{ s.precio }}
+        </label>
+      </div>
+    {% endfor %}
+  </form>
+</div>

@@ -113,74 +113,144 @@
       });
       
   </script>
-  
 <script>
-$(document).on("click", "#reservar-btn", function () {
-    // Paso 1: seleccionar servicios
-    $.get('reserva/servicios', function (data) {
-        bootbox.dialog({
-            title: "Selecciona tus servicios",
-            message: data,
-            buttons: {
-                siguiente: {
-                    label: "Siguiente",
-                    className: "btn-success",
-                    callback: function () {
-                        let servicios = $("input[name='servicios']:checked").map(function(){return $(this).val();}).get();
-                        pasoFecha(servicios);
-                    }
-                }
-            }
-        });
-    });
-});
+let seleccion = {
+    servicios: [],
+    barbero: null,
+    fecha: null,
+    horario: null
+};
 
-function pasoFecha(servicios) {
-    $.get('reserva/fechas', function (data) {
-        bootbox.dialog({
-            title: "Selecciona fecha y horario",
-            message: data,
-            buttons: {
-                siguiente: {
-                    label: "Siguiente",
-                    className: "btn-success",
-                    callback: function () {
-                        let fecha = $("#fecha").val();
-                        let horario = $("#horario").val();
-                        pasoEmpleado(servicios, fecha, horario);
-                    }
-                }
-            }
-        });
+function abrirModal(contentHtml, title, footerHtml) {
+    // Eliminar cualquier backdrop existente
+    $('.modal-backdrop').remove();
+
+    // Cerrar el modal si ya estaba abierto
+    const modalEl = document.getElementById('reservaModal');
+    const modalInst = bootstrap.Modal.getInstance(modalEl);
+    if(modalInst) modalInst.hide();
+
+    // Configurar contenido
+    $('#reservaModalTitle').text(title);
+    $('#reservaModalBody').html(contentHtml);
+    $('#reservaModalFooter').html(footerHtml);
+
+    // Abrir modal
+    const nuevoModal = new bootstrap.Modal(modalEl);
+    nuevoModal.show();
+}
+
+function pasoServicios() {
+    $.get('reserva/servicios', function(data){
+        abrirModal(data, "Selecciona Servicios", `
+            <button class="btn btn-secondary" onclick="cerrarModal()">Cancelar</button>
+            <button class="btn btn-success" onclick="guardarServicios()">Siguiente</button>
+        `);
     });
 }
 
-function pasoEmpleado(servicios, fecha, horario) {
-    $.get('reserva/empleados', function (data) {
-        bootbox.dialog({
-            title: "Selecciona barbero",
-            message: data,
-            buttons: {
-                confirmar: {
-                    label: "Confirmar",
-                    className: "btn-primary",
-                    callback: function () {
-                        let empleado = $("input[name='empleado']:checked").val();
-                        $.post("reserva/confirmar/", {
-                            servicios: servicios,
-                            fecha: fecha,
-                            horario: horario,
-                            empleado: empleado,
-                            csrfmiddlewaretoken: '{{ csrf_token }}'
-                        }, function (resp) {
-                            bootbox.alert(resp.mensaje);
-                        });
-                    }
-                }
-            }
-        });
+function guardarServicios(){
+    seleccion.servicios = $("input[name='servicios']:checked").map(function(){return $(this).val();}).get();
+    if(seleccion.servicios.length==0){ alert("Debes seleccionar al menos un servicio"); return; }
+    pasoBarbero();
+}
+
+function pasoBarbero(){
+    $.get('reserva/empleados', function(data){
+        abrirModal(data, "Selecciona Barbero", `
+            <button class="btn btn-secondary" onclick="pasoServicios()">Atrás</button>
+            <button class="btn btn-success" onclick="guardarBarbero()">Siguiente</button>
+        `);
     });
 }
+
+function guardarBarbero(){
+    seleccion.barbero = $("input[name='empleado']:checked").val();
+    if(!seleccion.barbero){ alert("Debes seleccionar un barbero"); return; }
+    pasoFecha();
+}
+
+function pasoFecha(){
+    $.get('reserva/fechas', function(data){
+        abrirModal(data, "Selecciona Fecha", `
+            <button class="btn btn-secondary" onclick="pasoBarbero()">Atrás</button>
+            <button class="btn btn-success" onclick="guardarFecha()">Siguiente</button>
+        `);
+    });
+}
+
+function guardarFecha(){
+    seleccion.fecha = $("#fecha").val();
+    if(!seleccion.fecha){ alert("Debes seleccionar una fecha"); return; }
+    cargarHorariosDisponibles();
+}
+
+function cargarHorariosDisponibles(){
+    $.get('reserva/horarios-disponibles/', { empleado_id: seleccion.barbero, fecha: seleccion.fecha }, function(data){
+        if(data.length == 0){
+            alert("No hay horarios disponibles para este barbero en la fecha seleccionada.");
+            pasoFecha();
+            return;
+        }
+        let html = '<label>Horario:</label><select id="horario" class="form-control">';
+        data.forEach(h => html += `<option value="${h.id}">${h.hora}</option>`);
+        html += '</select>';
+        abrirModal(html, "Selecciona Horario", `
+            <button class="btn btn-secondary" onclick="pasoFecha()">Atrás</button>
+            <button class="btn btn-success" onclick="guardarHorario()">Siguiente</button>
+        `);
+    }).fail(function(){
+        alert("Error al cargar horarios disponibles. Intenta nuevamente.");
+        pasoFecha();
+    });
+}
+
+function guardarHorario(){
+    seleccion.horario = $("#horario").val();
+    if(!seleccion.horario){ alert("Debes seleccionar un horario"); return; }
+    pasoConfirmar();
+}
+
+function pasoConfirmar(){
+    let serviciosHtml = seleccion.servicios.join(", ");
+    let barberoHtml = $("input[name='empleado']:checked").parent().text();
+    let fechaHtml = seleccion.fecha;
+    let horarioHtml = $("#horario option:selected").text();
+
+    let html = `<ul>
+        <li>Servicios: ${serviciosHtml} <button class="btn btn-link btn-sm" onclick="pasoServicios()">Editar</button></li>
+        <li>Barbero: ${barberoHtml} <button class="btn btn-link btn-sm" onclick="pasoBarbero()">Editar</button></li>
+        <li>Fecha: ${fechaHtml} <button class="btn btn-link btn-sm" onclick="pasoFecha()">Editar</button></li>
+        <li>Horario: ${horarioHtml} <button class="btn btn-link btn-sm" onclick="cargarHorariosDisponibles()">Editar</button></li>
+    </ul>`;
+
+    abrirModal(html, "Confirma tu Turno", `
+        <button class="btn btn-secondary" onclick="cerrarModal()">Cancelar</button>
+        <button class="btn btn-primary" onclick="confirmarTurno()">Confirmar</button>
+    `);
+}
+
+function confirmarTurno(){
+    $.post("reserva/confirmar/", {
+        servicios: seleccion.servicios,
+        empleado: seleccion.barbero,
+        fecha: seleccion.fecha,
+        horario: seleccion.horario,
+        csrfmiddlewaretoken: '{{ csrf_token }}'
+    }, function(resp){
+        alert(resp.mensaje);
+        cerrarModal();
+    }).fail(function(){
+        alert("No se pudo reservar el turno. Verifica los datos e intenta nuevamente.");
+    });
+}
+
+function cerrarModal(){
+    const modalEl = document.getElementById('reservaModal');
+    const modal = bootstrap.Modal.getInstance(modalEl);
+    if(modal) modal.hide();
+    $('.modal-backdrop').remove(); // eliminar cualquier backdrop residual
+}
+
+$('#reservar-btn').on('click', pasoServicios);
 </script>
-</body>
-</html>
