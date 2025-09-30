@@ -28,6 +28,8 @@ urlpatterns = [
     path('',include('Productos.urls')),
     path('',include('Servicios.urls')),
     path('',include('Turnos.urls')),
+    path('',include('Cajas.urls')),
+    path('',include('Ventas.urls')),
 ]
 
 if settings.DEBUG:

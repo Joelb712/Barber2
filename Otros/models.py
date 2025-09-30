@@ -103,3 +103,71 @@ class EstadoTurno(models.Model):
 
     def __str__(self):
         return self.nombre
+    
+# --- CAJA ---
+class Caja(models.Model):
+    empleado = models.ForeignKey("Empleado", on_delete=models.CASCADE)  # recepcionista/gerente
+    fecha_apertura = models.DateTimeField(auto_now_add=True)
+    fecha_cierre = models.DateTimeField(null=True, blank=True)
+    monto_inicial = models.DecimalField(max_digits=10, decimal_places=2)
+    monto_final = models.DecimalField(max_digits=10, decimal_places=2, null=True, blank=True)
+    estado = models.BooleanField(default=True)  # True = abierta, False = cerrada
+
+    def __str__(self):
+        return f"Caja {self.id} - {'Abierta' if self.estado else 'Cerrada'}"
+
+# --- MOVIMIENTO DE CAJA ---
+class MovimientoCaja(models.Model):
+    TIPO_CHOICES = [
+        ('INGRESO', 'Ingreso'),
+        ('EGRESO', 'Egreso'),
+    ]
+    caja = models.ForeignKey(Caja, on_delete=models.CASCADE, related_name="movimientos")
+    fecha = models.DateTimeField(auto_now_add=True)
+    tipo = models.CharField(max_length=10, choices=TIPO_CHOICES)
+    monto = models.DecimalField(max_digits=10, decimal_places=2)
+    descripcion = models.TextField(blank=True, null=True)
+    empleado = models.ForeignKey("Empleado", on_delete=models.SET_NULL, null=True)
+
+    def __str__(self):
+        return f"{self.tipo} - {self.monto} ({self.fecha})"
+    
+# --- VENTA ---
+class Venta(models.Model):
+    cliente = models.ForeignKey("Cliente",on_delete=models.CASCADE)  # o FK si tenés tabla Clientes
+    empleado = models.ForeignKey("Empleado", on_delete=models.CASCADE)  # quien registró la venta
+    caja = models.ForeignKey("Caja", on_delete=models.CASCADE)  # debe estar abierta
+    fecha = models.DateTimeField(auto_now_add=True)
+    total = models.DecimalField(max_digits=10, decimal_places=2)
+
+    def __str__(self):
+        return f"Venta {self.id} - {self.cliente.first_name}"
+
+# --- DETALLE DE VENTA ---
+class DetalleVenta(models.Model):
+    venta = models.ForeignKey("Venta", on_delete=models.CASCADE, related_name="detalles")
+    producto = models.ForeignKey("Producto", on_delete=models.CASCADE)
+    cantidad = models.PositiveIntegerField()
+    precio_unitario = models.DecimalField(max_digits=10, decimal_places=2)
+    subtotal = models.DecimalField(max_digits=10, decimal_places=2)
+
+    def __str__(self):
+        return f"{self.producto.nombre} x {self.cantidad}"
+
+
+# --- MOVIMIENTO DE STOCK ---
+class MovimientoStock(models.Model):
+    TIPO_CHOICES = [
+        ('ENTRADA', 'Entrada'),
+        ('SALIDA', 'Salida'),
+    ]
+
+    producto = models.ForeignKey("Producto", on_delete=models.CASCADE, related_name="movimientos_stock")
+    fecha = models.DateTimeField(auto_now_add=True)
+    tipo = models.CharField(max_length=10, choices=TIPO_CHOICES)
+    cantidad = models.PositiveIntegerField()
+    motivo = models.CharField(max_length=100, blank=True, null=True)  # ejemplo: Venta, Reposición, Ajuste
+    empleado = models.ForeignKey("Empleado", on_delete=models.SET_NULL, null=True)
+
+    def __str__(self):
+        return f"{self.tipo} {self.cantidad} {self.producto.nombre}"

@@ -1,0 +1,8 @@
+<h2>Cierre de Caja</h2>
+<p>Caja actual abierta desde: {{ caja.fecha_apertura }}</p>
+<p>Monto inicial: {{ caja.monto_inicial }}</p>
+<button type="submit" form="form-cierre">Cerrar Caja</button>
+
+<form method="post" id="form-cierre">
+  {% csrf_token %}
+</form>

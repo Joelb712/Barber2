@@ -1,0 +1,8 @@
+<div class="container mt-4">
+  <h2>Apertura de Caja</h2>
+  <form method="post">
+    {% csrf_token %}
+    {{ form.as_p }}
+    <button type="submit" class="btn btn-primary">Abrir Caja</button>
+  </form>
+</div>
