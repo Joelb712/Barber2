@@ -1,0 +1,81 @@
+{% load static %}
+<div class="container mt-4">
+    <h3>Nueva Venta</h3>
+    <form method="post">
+        {% csrf_token %}
+
+        <!-- Cliente -->
+        <div class="mb-3">
+            <label for="cliente" class="form-label">Cliente</label>
+            <select name="cliente" id="cliente" class="form-select" required>
+                <option value="">Seleccione un cliente</option>
+                {% for c in clientes %}
+                <option value="{{ c.id }}">{{ c.nombre }} {{ c.apellido }}</option>
+                {% endfor %}
+            </select>
+        </div>
+
+        <!-- Productos -->
+        <div class="mb-3">
+            <label class="form-label">Productos</label>
+            <div id="productos-container">
+                <div class="row mb-2 producto-item">
+                    <div class="col-md-6">
+                        <select name="productos[]" class="form-select">
+                            <option value="">Seleccione producto</option>
+                            {% for p in productos %}
+                            <option value="{{ p.id }}-1">{{ p.nombre }} (Stock: {{ p.stock_actual }})</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <div class="col-md-4">
+                        <input type="number" min="1" value="1" class="form-control cantidad" 
+                               onchange="updateProducto(this)">
+                    </div>
+                    <div class="col-md-2">
+                        <button type="button" class="btn btn-danger btn-sm" onclick="removeProducto(this)">X</button>
+                    </div>
+                </div>
+            </div>
+            <button type="button" class="btn btn-secondary btn-sm" onclick="addProducto()">Agregar producto</button>
+        </div>
+
+        <!-- Servicios -->
+        <div class="mb-3">
+            <label class="form-label">Servicios</label>
+            <select name="servicios[]" class="form-select" multiple>
+                {% for s in servicios %}
+                <option value="{{ s.id }}">{{ s.nombre }} - ${{ s.precio }}</option>
+                {% endfor %}
+            </select>
+            <small class="text-muted">Mantenga presionado CTRL para seleccionar varios</small>
+        </div>
+
+        <button type="submit" class="btn btn-primary">Confirmar Venta</button>
+    </form>
+</div>
+
+<script>
+function addProducto() {
+    let container = document.getElementById("productos-container");
+    let row = container.querySelector(".producto-item").cloneNode(true);
+    row.querySelector("select").value = "";
+    row.querySelector(".cantidad").value = 1;
+    container.appendChild(row);
+}
+
+function removeProducto(btn) {
+    let container = document.getElementById("productos-container");
+    if (container.querySelectorAll(".producto-item").length > 1) {
+        btn.closest(".producto-item").remove();
+    }
+}
+
+function updateProducto(input) {
+    let row = input.closest(".producto-item");
+    let select = row.querySelector("select");
+    let value = select.value.split("-")[0];
+    select.value = value + "-" + input.value;
+}
+</script>
+

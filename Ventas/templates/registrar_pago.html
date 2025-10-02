@@ -1,0 +1,61 @@
+
+{% load static %}
+
+<div class="container mt-4">
+    <h3>Registrar Pago - Venta #{{ venta.id }}</h3>
+    <p><strong>Cliente:</strong> {{ venta.cliente }}</p>
+    <p><strong>Total a pagar:</strong> ${{ venta.total }}</p>
+
+    <form method="post">
+        {% csrf_token %}
+
+        <div id="pagos-container">
+            <div class="row mb-2 pago-item">
+                <div class="col-md-6">
+                    <select name="pagos[]" class="form-select metodo-pago">
+                        <option value="">Seleccione método</option>
+                        {% for m in metodos_pago %}
+                        <option value="{{ m.id }}-0">{{ m.nombre }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div class="col-md-4">
+                    <input type="number" step="0.01" min="0" class="form-control monto-pago" 
+                           onchange="updatePago(this)">
+                </div>
+                <div class="col-md-2">
+                    <button type="button" class="btn btn-danger btn-sm" onclick="removePago(this)">X</button>
+                </div>
+            </div>
+        </div>
+
+        <button type="button" class="btn btn-secondary btn-sm" onclick="addPago()">Agregar método de pago</button>
+        <br><br>
+        <button type="submit" class="btn btn-success">Confirmar Pago</button>
+    </form>
+</div>
+
+<script>
+function addPago() {
+    let container = document.getElementById("pagos-container");
+    let row = container.querySelector(".pago-item").cloneNode(true);
+    row.querySelector("select").value = "";
+    row.querySelector(".monto-pago").value = 0;
+    container.appendChild(row);
+}
+
+function removePago(btn) {
+    let container = document.getElementById("pagos-container");
+    if (container.querySelectorAll(".pago-item").length > 1) {
+        btn.closest(".pago-item").remove();
+    }
+}
+
+function updatePago(input) {
+    let row = input.closest(".pago-item");
+    let select = row.querySelector("select");
+    let metodo_id = select.value.split("-")[0];
+    select.value = metodo_id + "-" + input.value;
+}
+</script>
+
