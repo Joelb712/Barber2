@@ -4,95 +4,68 @@
 
 {% block content %}
 
-
-<!-- Hero con carrusel Bootstrap + glass + full screen -->
+<!-- Hero con carrusel personalizado (sin Bootstrap) -->
 <section class="relative h-screen overflow-hidden">
-  <!-- Carrusel de fondo -->
-  <div id="heroCarousel" class="carousel slide carousel-fade h-full w-full" data-bs-ride="carousel" data-bs-interval="5000" data-bs-pause="false">
-    <div class="carousel-inner h-full w-full">
-      <div class="carousel-item active h-full">
-        <img src="/static/imgs/c1.jpg" class="d-block w-100 h-full object-cover" alt="Imagen 1">
-      </div>
-      <div class="carousel-item h-full">
-        <img src="/static/imgs/c2.jpg" class="d-block w-100 h-full object-cover" alt="Imagen 2">
-      </div>
-      <div class="carousel-item h-full">
-        <img src="/static/imgs/c3.jpg" class="d-block w-100 h-full object-cover" alt="Imagen 3">
-      </div>
-       <div class="carousel-item h-full">
-        <img src="/static/imgs/c4.jpg" class="d-block w-100 h-full object-cover" alt="Imagen 4">
-      </div>
-       <div class="carousel-item h-full">
-        <img src="/static/imgs/c5.jpg" class="d-block w-100 h-full object-cover" alt="Imagen 5">
-      </div>
-       <div class="carousel-item h-full">
-        <img src="/static/imgs/c6.jpg" class="d-block w-100 h-full object-cover" alt="Imagen 6">
-      </div>
-       <div class="carousel-item h-full">
-        <img src="/static/imgs/c7.jpg" class="d-block w-100 h-full object-cover" alt="Imagen 7">
-      </div>
-       <div class="carousel-item h-full">
-        <img src="/static/imgs/c8.jpg" class="d-block w-100 h-full object-cover" alt="Imagen 8">
-      </div>
+  <!-- Contenedor del carrusel -->
+  <div id="heroCarousel" class="h-full w-full relative">
+    <!-- Imágenes del carrusel -->
+    <div class="absolute inset-0 transition-opacity duration-1000 ease-in-out opacity-100" data-slide="0">
+      <img src="/static/imgs/c1.jpg" class="w-full h-full object-cover" alt="Imagen 1">
+    </div>
+    <div class="absolute inset-0 transition-opacity duration-1000 ease-in-out opacity-0" data-slide="1">
+      <img src="/static/imgs/c2.jpg" class="w-full h-full object-cover" alt="Imagen 2">
+    </div>
+    <div class="absolute inset-0 transition-opacity duration-1000 ease-in-out opacity-0" data-slide="2">
+      <img src="/static/imgs/c3.jpg" class="w-full h-full object-cover" alt="Imagen 3">
+    </div>
+    <div class="absolute inset-0 transition-opacity duration-1000 ease-in-out opacity-0" data-slide="3">
+      <img src="/static/imgs/c4.jpg" class="w-full h-full object-cover" alt="Imagen 4">
+    </div>
+    <div class="absolute inset-0 transition-opacity duration-1000 ease-in-out opacity-0" data-slide="4">
+      <img src="/static/imgs/c5.jpg" class="w-full h-full object-cover" alt="Imagen 5">
+    </div>
+    <div class="absolute inset-0 transition-opacity duration-1000 ease-in-out opacity-0" data-slide="5">
+      <img src="/static/imgs/c6.jpg" class="w-full h-full object-cover" alt="Imagen 6">
+    </div>
+    <div class="absolute inset-0 transition-opacity duration-1000 ease-in-out opacity-0" data-slide="6">
+      <img src="/static/imgs/c7.jpg" class="w-full h-full object-cover" alt="Imagen 7">
+    </div>
+    <div class="absolute inset-0 transition-opacity duration-1000 ease-in-out opacity-0" data-slide="7">
+      <img src="/static/imgs/c8.jpg" class="w-full h-full object-cover" alt="Imagen 8">
     </div>
 
     <!-- Controles del carrusel -->
-    <button class="carousel-control-prev" type="button" data-bs-target="#heroCarousel" data-bs-slide="prev">
-      <span class="carousel-control-prev-icon" aria-hidden="true"></span>
-      <span class="visually-hidden">Anterior</span>
+    <button id="carouselPrev" class="absolute left-4 top-1/2 -translate-y-1/2 z-20 bg-black/40 hover:bg-black/60 text-white p-2 rounded-full">
+      ❮
     </button>
-    <button class="carousel-control-next" type="button" data-bs-target="#heroCarousel" data-bs-slide="next">
-      <span class="carousel-control-next-icon" aria-hidden="true"></span>
-      <span class="visually-hidden">Siguiente</span>
+    <button id="carouselNext" class="absolute right-4 top-1/2 -translate-y-1/2 z-20 bg-black/40 hover:bg-black/60 text-white p-2 rounded-full">
+      ❯
     </button>
   </div>
 
   <!-- Capa oscura y contenido glass encima -->
   <div class="absolute inset-0 bg-black bg-opacity-60 flex items-center justify-center">
-    <div class="glass text-center p-5 rounded-4 z-10">
+    <div class="glass text-center p-5 rounded-2xl z-10">
       <h2 class="text-white text-4xl font-bold mb-3">Cortes de precisión y estilo único</h2>
       <p class="text-gray-300 mb-4">Transformamos tu look con arte y actitud</p>
-      <!-- <a href="#reserva" class="btn btn-warning fw-semibold px-4 py-2">Reservar Turno</a> -->
     </div>
   </div>
 </section>
-<!-- Hero
-<section class="h-screen bg-cover bg-center flex items-center justify-center relative" style="background-image: url('https://images.unsplash.com/photo-1600185365081-0496b4b6c011?auto=format&fit=crop&w=1920&q=80');">
-  <div class="absolute inset-0 bg-black bg-opacity-60"></div>
-  <div class="relative glass p-10 rounded-xl text-center max-w-xl z-10">
-    <h2 class="text-4xl font-bold mb-4">Cortes de precisión y estilo único</h2>
-    <p class="mb-6 text-gray-300">Transformamos tu look con arte y actitud</p>
-    <a href="#reserva" class="bg-yellow-500 hover:bg-yellow-600 text-black px-6 py-2 rounded font-semibold">Reservar Turno</a>
-  </div>
-</section> -->
 
-<!-- Servicios (Todavia le falta reemplazar con los servicios cargados)-->
+<!-- Servicios -->
 <section id="servicios" class="py-20 px-6 bg-[#111]">
   <div class="text-center mb-12">
     <h3 class="text-3xl font-bold">Nuestros Servicios</h3>
     <p class="text-gray-400">Lo mejor para tu estilo</p>
   </div>
-  <div class="grid grid-cols-1 md:grid-cols-3 gap-8 max-w-6xl mx-auto">
-    <div class="glass p-6 rounded-xl text-center shadow hover:scale-105 transition">
-      <h4 class="text-xl font-semibold text-yellow-400">Corte Clásico</h4>
-      <p class="text-gray-300 mt-2">Estilo limpio y tradicional con terminación profesional.</p>
-      <p class="text-yellow-500 mt-4 font-bold">$2500</p>
-    </div>
-    <div class="glass p-6 rounded-xl text-center shadow hover:scale-105 transition">
-      <h4 class="text-xl font-semibold text-yellow-400">Barba & Perfilado</h4>
-      <p class="text-gray-300 mt-2">Afeitado y definición con navaja y vapor.</p>
-      <p class="text-yellow-500 mt-4 font-bold">$1800</p>
-    </div>
-    <div class="glass p-6 rounded-xl text-center shadow hover:scale-105 transition">
-      <h4 class="text-xl font-semibold text-yellow-400">Combo Full</h4>
-      <p class="text-gray-300 mt-2">Corte + barba + tratamiento capilar.</p>
-      <p class="text-yellow-500 mt-4 font-bold">$4000</p>
-    </div>
+   <div id="servicios-container" class="grid grid-cols-1 md:grid-cols-3 gap-8 max-w-6xl mx-auto">
+    <!-- Los servicios se insertarán aquí -->
   </div>
+ 
 </section>
 
 <!-- Galería -->
-<section id="galeria" class="py-20 bg-black px-6">
+<!-- <section id="galeria" class="py-20 bg-black px-6">
   <div class="text-center mb-12">
     <h3 class="text-3xl font-bold">Galería de Estilos</h3>
     <p class="text-gray-400">Conocé nuestro trabajo</p>
@@ -101,6 +74,16 @@
     <img src="https://images.unsplash.com/photo-1598294381372-208f7f09c0d1?auto=format&fit=crop&w=600&q=80" class="rounded-xl hover:scale-105 transition duration-300" />
     <img src="https://images.unsplash.com/photo-1612969308442-9028ce1e3a35?auto=format&fit=crop&w=600&q=80" class="rounded-xl hover:scale-105 transition duration-300" />
     <img src="https://images.unsplash.com/photo-1595433562696-c241a75ec6cb?auto=format&fit=crop&w=600&q=80" class="rounded-xl hover:scale-105 transition duration-300" />
+  </div>
+</section> -->
+<section id="productos" class="py-20 bg-black px-6">
+  <div class="text-center mb-12">
+    <h3 class="text-3xl font-bold">Productos Destacados</h3>
+    <p class="text-gray-400">Descubrí lo que tenemos para vos</p>
+  </div>
+
+  <div id="productos-container" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-8 max-w-6xl mx-auto">
+    <!-- Los productos se insertarán aquí -->
   </div>
 </section>
 
@@ -113,7 +96,7 @@
       <!-- Info institucional -->
       <div>
         <p class="text-lg mb-4">
-          En <span class="text-yellow-400 font-semibold">Fede BarberShop</span> combinamos tradición y estilo moderno para ofrecerte un servicio personalizado en cada visita. Somos más que un lugar de cortes: somos un espacio donde cada cliente se siente como en casa.
+          En <span class="text-yellow-400 font-semibold">Barber Studio</span> combinamos tradición y estilo moderno para ofrecerte un servicio personalizado en cada visita. Somos más que un lugar de cortes: somos un espacio donde cada cliente se siente como en casa.
         </p>
         <h3 class="text-2xl font-semibold text-yellow-400 mt-6 mb-2">Nuestra Misión</h3>
         <p class="text-lg">
@@ -146,35 +129,89 @@
   <div class="glass max-w-xl mx-auto p-10 rounded-xl">
     <h3 class="text-2xl font-bold mb-4">¿Listo para cambiar tu estilo?</h3>
     <p class="text-gray-300 mb-6">Reservá tu turno online en segundos</p>
-    <!-- <a href="#" class="bg-yellow-500 text-black px-6 py-2 rounded hover:bg-yellow-600 font-semibold">Reservar Ahora</a> -->
-    <button id="reservar-btn" class="btn btn-primary mt-3">Reservar Turno</button>
+    <button id="btnReservar" class="bg-yellow-500 hover:bg-yellow-600 text-black px-6 py-2 rounded font-semibold text-sm transition duration-200">
+        Reservar
+    </button>
   </div>
 </section>
-<!-- Modal general de reserva -->
-<div id="reservaModal" class="modal fade" tabindex="-1">
-  <div class="modal-dialog">
-    <div class="modal-content bg-black text-white">
-      <div class="modal-header">
-        <h5 class="modal-title" id="reservaModalTitle">Reservar Turno</h5>
-        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+
+<!-- Modal -->
+<div id="modalTurno" class="fixed inset-0 bg-black/50 backdrop-blur-sm hidden flex justify-center items-center z-50 p-4">
+  <div class="bg-[#111] glass rounded-xl w-full max-w-3xl p-6 relative">
+    <!-- Cerrar modal -->
+    <button id="cerrarModal" class="absolute top-4 right-4 text-white text-xl font-bold">&times;</button>
+
+    <h2 class="text-2xl font-bold text-yellow-400 mb-4">Solicitar Turno</h2>
+
+    <!-- Acordeón -->
+    <div id="accordionTurno" class="space-y-3">
+
+      <!-- Paso 1: Servicios -->
+      <div class="border border-gray-700 rounded">
+        <button class="w-full flex justify-between items-center px-4 py-2 bg-gray-900 text-white font-semibold accordion-btn">
+          1. Selecciona tus servicios
+          <span class="text-xl">+</span>
+        </button>
+        <div class="accordion-content hidden px-4 py-3 text-white" id="step1">
+          <div id="servicios-list" class="space-y-2"></div>
+        </div>
       </div>
-      <div class="modal-body" id="reservaModalBody">
-        <!-- Contenido dinámico -->
+
+      <!-- Paso 2: Barbero -->
+      <div class="border border-gray-700 rounded">
+        <button class="w-full flex justify-between items-center px-4 py-2 bg-gray-900 text-white font-semibold accordion-btn">
+          2. Elige un barbero
+          <span class="text-xl">+</span>
+        </button>
+        <div class="accordion-content hidden px-4 py-3 text-white" id="step2">
+          <select id="selectBarbero" class="w-full p-2 rounded bg-[#222] text-white"></select>
+        </div>
       </div>
-      <div class="modal-footer" id="reservaModalFooter">
-        <!-- Botones dinámicos -->
+
+      <!-- Paso 3: Fecha -->
+      <div class="border border-gray-700 rounded">
+        <button class="w-full flex justify-between items-center px-4 py-2 bg-gray-900 text-white font-semibold accordion-btn">
+          3. Selecciona fecha
+          <span class="text-xl">+</span>
+        </button>
+        <div class="accordion-content hidden px-4 py-3 text-white" id="step3">
+          <div class="relative">
+            <input type="date" id="inputFecha" class="w-full p-2 rounded bg-[#222] text-white pl-10">
+            <svg xmlns="http://www.w3.org/2000/svg" class="absolute left-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-white pointer-events-none" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+            </svg>
+          </div>
+        </div>
       </div>
+
+      <!-- Paso 4: Horario -->
+      <div class="border border-gray-700 rounded">
+        <button class="w-full flex justify-between items-center px-4 py-2 bg-gray-900 text-white font-semibold accordion-btn">
+          4. Elige horario disponible
+          <span class="text-xl">+</span>
+        </button>
+        <div class="accordion-content hidden px-4 py-3 text-white" id="step4">
+          <div id="horarios-disponibles" class="flex flex-wrap gap-2"></div>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- Footer del modal -->
+    <div class="mt-6 flex justify-end gap-3">
+      <button id="btnCancelarTurno" class="bg-gray-700 hover:bg-gray-800 text-white px-4 py-2 rounded">Cancelar</button>
+      <button id="btnConfirmarTurno" class="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded">Confirmar Turno</button>
     </div>
   </div>
 </div>
+
 {% endblock %}
 
 {% block footer %}
-<!-- Footer inspirado en Estética en Línea -->
 <footer class="bg-[#111] text-center py-10 text-gray-400 text-sm">
   <div class="max-w-5xl mx-auto px-4">
     <div class="flex flex-col sm:flex-row justify-between items-center space-y-4 sm:space-y-0">
-      <p>&copy; 2025 La Barbería. Todos los derechos reservados.</p>
+      <p>&copy; 2025 Barber Studio. Todos los derechos reservados.</p>
       <div class="flex space-x-4">
         <a href="#" class="hover:text-yellow-500 transition">Política de Privacidad</a>
         <a href="#" class="hover:text-yellow-500 transition">Términos y Condiciones</a>
@@ -186,5 +223,243 @@
 {% endblock %}
 
 {% block scripts %}
+<script>
+  // Carrusel manual simple
+  document.addEventListener('DOMContentLoaded', function () {
+    const slides = document.querySelectorAll('#heroCarousel [data-slide]');
+    let current = 0;
+    const total = slides.length;
 
+    function showSlide(index) {
+      slides.forEach((slide, i) => {
+        slide.classList.toggle('opacity-100', i === index);
+        slide.classList.toggle('opacity-0', i !== index);
+      });
+    }
+
+    function nextSlide() {
+      current = (current + 1) % total;
+      showSlide(current);
+    }
+
+    function prevSlide() {
+      current = (current - 1 + total) % total;
+      showSlide(current);
+    }
+
+    // Controles
+    document.getElementById('carouselNext')?.addEventListener('click', nextSlide);
+    document.getElementById('carouselPrev')?.addEventListener('click', prevSlide);
+
+    // Autoplay
+    setInterval(nextSlide, 5000);
+
+  });
+  document.addEventListener('DOMContentLoaded', async () => {
+    try {
+      const response = await fetch('api/servicios/');
+      const servicios = await response.json();
+      const container = document.getElementById('servicios-container');
+
+      servicios.forEach(servicio => {
+        const card = document.createElement('div');
+        card.className = 'glass p-6 rounded-xl text-center shadow hover:scale-105 transition duration-300';
+        card.innerHTML = `
+          <h4 class="text-xl font-semibold text-yellow-400">${servicio.nombre}</h4>
+          <p class="text-gray-300 mt-2">${servicio.descripcion}</p>
+          <p class="text-yellow-500 mt-4 font-bold">$${parseFloat(servicio.precio).toFixed(0)}</p>
+        `;
+        container.appendChild(card);
+      });
+    } catch (error) {
+      console.error('Error al cargar los servicios:', error);
+    }
+  });
+   document.addEventListener('DOMContentLoaded', async () => {
+    try {
+      const response = await fetch('api/productos/');
+      const productos = await response.json();
+      const container = document.getElementById('productos-container');
+
+      // Mezcla aleatoria (algoritmo de Fisher–Yates)
+      for (let i = productos.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [productos[i], productos[j]] = [productos[j], productos[i]];
+      }
+
+      // Toma solo los primeros 16
+      const productosRandom = productos.slice(0, 16);
+
+      productosRandom.forEach(prod => {
+        const card = document.createElement('div');
+        card.className = 'glass p-4 rounded-xl text-center shadow hover:scale-105 transition duration-300 bg-[#111]';
+
+        const imagen = prod.imagen 
+            ? `/media/${prod.imagen}` 
+            : 'https://via.placeholder.com/300x300?text=Sin+Imagen';
+
+        card.innerHTML = `
+          <img src="${imagen}" alt="${prod.nombre}" class="rounded-lg mb-4 w-full h-48 object-cover">
+          <h4 class="text-lg font-semibold text-yellow-400">${prod.nombre}</h4>
+          <p class="text-yellow-500 mt-2 font-bold">$${parseFloat(prod.precio).toFixed(0)}</p>
+        `;
+
+        container.appendChild(card);
+      });
+    } catch (error) {
+      console.error('Error al cargar los productos:', error);
+    }
+  });
+</script>
+<script>
+let serviciosSeleccionados = [];
+
+const modal = document.getElementById('modalTurno');
+const btnReservar = document.getElementById('btnReservar');
+const btnCerrar = document.getElementById('cerrarModal');
+const btnCancelar = document.getElementById('btnCancelarTurno');
+
+btnReservar.addEventListener('click', () => {
+    // Chequear si el usuario está logueado
+    const estaLogueado = "{{ user.is_authenticated|yesno:'true,false'}}" === "true";
+  
+    if(!estaLogueado){
+        // Redirige al login y luego vuelve a la página actual
+        window.location.href = "{% url 'login' %}?next={{ request.path }}";
+        return;
+    }
+
+    modal.classList.remove('hidden');
+    cargarServicios();
+    cargarBarberos();
+});
+
+// Cerrar modal
+btnCerrar.addEventListener('click', () => modal.classList.add('hidden'));
+btnCancelar.addEventListener('click', () => modal.classList.add('hidden'));
+
+// Acordeón
+document.querySelectorAll('.accordion-btn').forEach((btn, idx) => {
+  btn.addEventListener('click', () => {
+    const content = btn.nextElementSibling;
+    const icon = btn.querySelector('span');
+    content.classList.toggle('hidden');
+    icon.textContent = content.classList.contains('hidden') ? '+' : '−';
+  });
+});
+
+// Paso 1: Cargar servicios
+function cargarServicios() {
+  fetch('{% url "get_servicios" %}')
+    .then(r => r.json())
+    .then(servicios => {
+      const cont = document.getElementById('servicios-list');
+      cont.innerHTML = servicios.map(s => `
+        <div class="flex items-center gap-2">
+          <input type="checkbox" value="${s.id}" id="serv-${s.id}" class="accent-yellow-500">
+          <label for="serv-${s.id}" class="text-white">${s.nombre} - $${s.precio} (${s.duracion} min)</label>
+        </div>
+      `).join('');
+
+      servicios.forEach(s => {
+        document.getElementById(`serv-${s.id}`).addEventListener('change', (e) => {
+          if(e.target.checked){
+            serviciosSeleccionados.push(s.id);
+          } else {
+            serviciosSeleccionados = serviciosSeleccionados.filter(id => id !== s.id);
+          }
+        });
+      });
+    });
+}
+
+// Paso 2: Cargar barberos
+function cargarBarberos() {
+  fetch('{% url "get_barberos" %}')
+    .then(r => r.json())
+    .then(barberos => {
+      const sel = document.getElementById('selectBarbero');
+      sel.innerHTML = '<option value="">-- Selecciona --</option>';
+      barberos.forEach(b => {
+        const opt = document.createElement('option');
+        opt.value = b.id;
+        opt.textContent = b.nombre;
+        sel.appendChild(opt);
+      });
+    });
+}
+
+// Paso 3: Al cambiar fecha, cargar horarios
+document.getElementById('inputFecha').addEventListener('change', function() {
+  const empleadoId = document.getElementById('selectBarbero').value;
+  const fecha = this.value;
+  if(empleadoId && fecha){
+    fetch(`{% url "get_horarios_disponibles" %}?empleado_id=${empleadoId}&fecha=${fecha}`)
+      .then(r => r.json())
+      .then(horarios => {
+        const cont = document.getElementById('horarios-disponibles');
+        if(horarios.length === 0){
+          cont.innerHTML = '<p class="text-yellow-400">No hay horarios disponibles.</p>';
+        } else {
+          cont.innerHTML = horarios.map(h => `
+            <button class="px-3 py-1 border border-yellow-400 text-yellow-400 rounded horario-btn" data-id="${h.id}">
+              ${h.hora}
+            </button>
+          `).join('');
+          document.querySelectorAll('.horario-btn').forEach(btn => {
+            btn.addEventListener('click', function() {
+                document.querySelectorAll('.horario-btn').forEach(b => {
+                b.classList.remove('bg-yellow-400','text-black');
+                b.classList.add('border','border-yellow-400','text-yellow-400');
+                });
+                this.classList.add('bg-yellow-400','text-black');
+                this.classList.remove('border','border-yellow-400','text-yellow-400');
+                });
+            });
+        }
+      });
+  }
+});
+
+// Recalcular horarios si cambia barbero
+document.getElementById('selectBarbero').addEventListener('change', function() {
+  const fecha = document.getElementById('inputFecha').value;
+  if(fecha){
+    document.getElementById('inputFecha').dispatchEvent(new Event('change'));
+  }
+});
+
+// Confirmar turno
+document.getElementById('btnConfirmarTurno').addEventListener('click', function(){
+  const empleadoId = document.getElementById('selectBarbero').value;
+  const fecha = document.getElementById('inputFecha').value;
+  const horarioBtn = document.querySelector('.horario-btn.bg-yellow-400');
+
+  if(!serviciosSeleccionados.length){ alert('Selecciona al menos un servicio'); return; }
+  if(!empleadoId){ alert('Selecciona un barbero'); return; }
+  if(!fecha){ alert('Selecciona una fecha'); return; }
+  if(!horarioBtn){ alert('Selecciona un horario'); return; }
+
+  const horarioId = horarioBtn.dataset.id;
+
+  fetch('{% url "crear_turno" %}', {
+    method: 'POST',
+    headers: { 'Content-Type':'application/json','X-CSRFToken':'{{ csrf_token }}' },
+    body: JSON.stringify({ servicios: serviciosSeleccionados, empleado_id: empleadoId, fecha: fecha, horario_id: horarioId })
+  })
+  .then(r => r.json())
+  .then(data => {
+    if(data.success){
+      alert('¡Turno solicitado con éxito!');
+      modal.classList.add('hidden');
+      serviciosSeleccionados = [];
+    } else {
+      alert('Error: ' + (data.error || 'No se pudo crear el turno'));
+    }
+  });
+});
+
+// Fecha mínima
+document.getElementById('inputFecha').min = new Date().toISOString().split('T')[0];
+</script>
 {% endblock %}

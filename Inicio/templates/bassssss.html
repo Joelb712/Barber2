@@ -1,0 +1,256 @@
+{% load static %}
+<!-- templates/base.html -->
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>{% block title %}Fede BarberShop{% endblock %}</title>
+
+  <!-- Tailwind CSS CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+
+  <!-- Google Fonts -->
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;500;700&display=swap" rel="stylesheet">
+
+  <!--Bootstrap 5 -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+
+  <link rel="stylesheet" href="{% static 'css/base.css' %}"> 
+
+</head>
+<body class="min-h-screen flex flex-col justify-between">
+  <!-- Header fijo -->
+  <header class="fixed top-0 left-0 w-full z-50 glass px-6 py-4 flex justify-between items-center shadow">
+    <h1 class="text-2xl font-bold text-white"><a href="{% url 'Inicio' %}">Fede BarberShop</a></h1>
+    <nav>
+      <ul class="flex space-x-6 text-sm font-medium {% if user.is_authenticated %} justify-center w-full {% endif %}">
+        <li><a href="#servicios" class="hover:text-yellow-500">Servicios</a></li>
+        <li><a href="#galeria" class="hover:text-yellow-500">Galería</a></li>
+        <li><a href="#nosotros" class="hover:text-yellow-500">Nosotros</a></li>
+        <li><a href="#reserva" class="hover:text-yellow-500">Reserva</a></li>
+        <li><a id="divContacto" href="#" class="hover:text-yellow-500">Contacto</a></li>
+        <li><a id="divStore" href="#" class="hover:text-yellow-500">Tienda</a></li>
+        <!-- <li><a href="{% url 'contacto' %}" class="hover:text-yellow-500">Contacto</a></li>
+        <li><a href="{% url 'tienda' %}" class="hover:text-yellow-500">Tienda</a></li> -->
+        {% if user.is_authenticated %}
+          <li><a href="{% url 'dash' %}" class="hover:text-yellow-500">Dash</a></li>
+          {% if request.user.is_superuser %} 
+            <li><a class="nav-link" href="{% url 'admin:index' %}">Administrador</a></li> 
+          {% endif %} 
+          <li class="ml-auto flex items-center space-x-4">
+            <span class="text-yellow-400 font-semibold">Hola, {{ user.first_name|default:user.username }} bienvenido</span>
+            <form method="post" action="{% url 'logout' %}">
+              {% csrf_token %}
+              <button type="submit" class="bg-red-600 hover:bg-red-700 text-white px-3 py-1 rounded text-sm transition">Cerrar sesión</button>
+            </form>
+          </li>
+        {% else %}
+          <a href="{% url 'login' %}" class="ml-4 bg-yellow-500 hover:bg-yellow-600 text-black px-4 py-1.5 rounded font-semibold text-sm transition">Iniciar sesión</a>
+        {% endif %}
+      </ul>
+    </nav>
+  </header>
+
+  <!-- Contenido principal -->
+  <main class="flex-grow">
+    <div class="content-area" id="main-content">
+      {% block content %}{% endblock %}
+    </div>
+    
+  </main>
+
+  <!-- Footer global opcional -->
+  {% block footer %}{% endblock %}
+
+  <!-- Scripts comunes (opcional) -->
+  {% block scripts %}{% endblock %}
+  <script src="https://code.jquery.com/jquery-3.7.0.min.js"></script>
+  <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mdb-ui-kit/6.4.0/mdb.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/bootbox.js/6.0.4/bootbox.all.min.js"></script>
+  <script>
+    function cargarContenido(url) {
+      $.ajax({
+          url: url,
+          method: 'GET',
+          headers: { 'X-Requested-With': 'XMLHttpRequest' },
+          xhrFields: { withCredentials: true },
+          success: function(respuesta, status, jqXHR) {
+          // Si devolvió página completa, redirigimos
+          if (typeof respuesta === 'string' && (respuesta.includes('<html') || respuesta.includes('<head'))) {
+              window.location.href = url;
+              return;
+          }
+
+          // Si devolvió login
+          if (respuesta.includes('name="username"') && respuesta.includes('name="password"')) {
+              window.location.href = "{% url 'login' %}";
+              return;
+          }
+
+          // Caso normal: inyectar contenido
+          $('#main-content').html(respuesta);
+          
+          },
+          error: function(error) {
+              console.error('Error:', error);
+          }
+      });
+      }
+
+    $(document).ready(function() {
+      $('#divContacto').on('click', function(e) {
+        e.preventDefault();
+        cargarContenido("{% url 'contacto' %}");
+        return false;
+      });
+      $('#divStore').on('click', function(e) {
+        e.preventDefault();
+        cargarContenido("{% url 'tienda' %}");
+        return false;
+      });
+      });
+      
+  </script>
+<!-- <script>
+let seleccion = {
+    servicios: [],
+    barbero: null,
+    fecha: null,
+    horario: null
+};
+
+function abrirModal(contentHtml, title, footerHtml) {
+    // Eliminar cualquier backdrop existente
+    $('.modal-backdrop').remove();
+
+    // Cerrar el modal si ya estaba abierto
+    const modalEl = document.getElementById('reservaModal');
+    const modalInst = bootstrap.Modal.getInstance(modalEl);
+    if(modalInst) modalInst.hide();
+
+    // Configurar contenido
+    $('#reservaModalTitle').text(title);
+    $('#reservaModalBody').html(contentHtml);
+    $('#reservaModalFooter').html(footerHtml);
+
+    // Abrir modal
+    const nuevoModal = new bootstrap.Modal(modalEl);
+    nuevoModal.show();
+}
+
+function pasoServicios() {
+    $.get('reserva/servicios', function(data){
+        abrirModal(data, "Selecciona Servicios", `
+            <button class="btn btn-secondary" onclick="cerrarModal()">Cancelar</button>
+            <button class="btn btn-success" onclick="guardarServicios()">Siguiente</button>
+        `);
+    });
+}
+
+function guardarServicios(){
+    seleccion.servicios = $("input[name='servicios']:checked").map(function(){return $(this).val();}).get();
+    if(seleccion.servicios.length==0){ alert("Debes seleccionar al menos un servicio"); return; }
+    pasoBarbero();
+}
+
+function pasoBarbero(){
+    $.get('reserva/empleados', function(data){
+        abrirModal(data, "Selecciona Barbero", `
+            <button class="btn btn-secondary" onclick="pasoServicios()">Atrás</button>
+            <button class="btn btn-success" onclick="guardarBarbero()">Siguiente</button>
+        `);
+    });
+}
+
+function guardarBarbero(){
+    seleccion.barbero = $("input[name='empleado']:checked").val();
+    if(!seleccion.barbero){ alert("Debes seleccionar un barbero"); return; }
+    pasoFecha();
+}
+
+function pasoFecha(){
+    $.get('reserva/fechas', function(data){
+        abrirModal(data, "Selecciona Fecha", `
+            <button class="btn btn-secondary" onclick="pasoBarbero()">Atrás</button>
+            <button class="btn btn-success" onclick="guardarFecha()">Siguiente</button>
+        `);
+    });
+}
+
+function guardarFecha(){
+    seleccion.fecha = $("#fecha").val();
+    if(!seleccion.fecha){ alert("Debes seleccionar una fecha"); return; }
+    cargarHorariosDisponibles();
+}
+
+function cargarHorariosDisponibles(){
+    $.get('reserva/horarios-disponibles/', { empleado_id: seleccion.barbero, fecha: seleccion.fecha }, function(data){
+        if(data.length == 0){
+            alert("No hay horarios disponibles para este barbero en la fecha seleccionada.");
+            pasoFecha();
+            return;
+        }
+        let html = '<label>Horario:</label><select id="horario" class="form-control">';
+        data.forEach(h => html += `<option value="${h.id}">${h.hora}</option>`);
+        html += '</select>';
+        abrirModal(html, "Selecciona Horario", `
+            <button class="btn btn-secondary" onclick="pasoFecha()">Atrás</button>
+            <button class="btn btn-success" onclick="guardarHorario()">Siguiente</button>
+        `);
+    }).fail(function(){
+        alert("Error al cargar horarios disponibles. Intenta nuevamente.");
+        pasoFecha();
+    });
+}
+
+function guardarHorario(){
+    seleccion.horario = $("#horario").val();
+    if(!seleccion.horario){ alert("Debes seleccionar un horario"); return; }
+    pasoConfirmar();
+}
+
+function pasoConfirmar(){
+    let serviciosHtml = seleccion.servicios.join(", ");
+    let barberoHtml = $("input[name='empleado']:checked").parent().text();
+    let fechaHtml = seleccion.fecha;
+    let horarioHtml = $("#horario option:selected").text();
+
+    let html = `<ul>
+        <li>Servicios: ${serviciosHtml} <button class="btn btn-link btn-sm" onclick="pasoServicios()">Editar</button></li>
+        <li>Barbero: ${barberoHtml} <button class="btn btn-link btn-sm" onclick="pasoBarbero()">Editar</button></li>
+        <li>Fecha: ${fechaHtml} <button class="btn btn-link btn-sm" onclick="pasoFecha()">Editar</button></li>
+        <li>Horario: ${horarioHtml} <button class="btn btn-link btn-sm" onclick="cargarHorariosDisponibles()">Editar</button></li>
+    </ul>`;
+
+    abrirModal(html, "Confirma tu Turno", `
+        <button class="btn btn-secondary" onclick="cerrarModal()">Cancelar</button>
+        <button class="btn btn-primary" onclick="confirmarTurno()">Confirmar</button>
+    `);
+}
+
+function confirmarTurno(){
+    $.post("reserva/confirmar/", {
+        servicios: seleccion.servicios,
+        empleado: seleccion.barbero,
+        fecha: seleccion.fecha,
+        horario: seleccion.horario,
+        csrfmiddlewaretoken: '{{ csrf_token }}'
+    }, function(resp){
+        alert(resp.mensaje);
+        cerrarModal();
+    }).fail(function(){
+        alert("No se pudo reservar el turno. Verifica los datos e intenta nuevamente.");
+    });
+}
+
+function cerrarModal(){
+    const modalEl = document.getElementById('reservaModal');
+    const modal = bootstrap.Modal.getInstance(modalEl);
+    if(modal) modal.hide();
+    $('.modal-backdrop').remove(); // eliminar cualquier backdrop residual
+}
+
+$('#reservar-btn').on('click', pasoServicios);
+</script> -->

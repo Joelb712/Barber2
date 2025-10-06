@@ -6,4 +6,5 @@ urlpatterns = [
     path('productos/nuevo/', crear_producto, name='formp'),
     path('productos/editar/<int:pk>/', editar_producto, name='editar_producto'),
     path('productos/eliminar/<int:pk>/', eliminar_producto, name='eliminar_producto'),
+    path('api/productos/', get_productos, name='get_productos'),
 ]

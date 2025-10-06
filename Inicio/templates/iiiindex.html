@@ -1,0 +1,191 @@
+{% extends 'base.html' %}
+
+{% block title %}Inicio | La Barbería{% endblock %}
+
+{% block content %}
+
+
+<!-- Hero con carrusel Bootstrap + glass + full screen -->
+<section class="relative h-screen overflow-hidden">
+  <!-- Carrusel de fondo -->
+  <div id="heroCarousel" class="carousel slide carousel-fade h-full w-full" data-bs-ride="carousel" data-bs-interval="5000" data-bs-pause="false">
+    <div class="carousel-inner h-full w-full">
+      <div class="carousel-item active h-full">
+        <img src="/static/imgs/c1.jpg" class="d-block w-100 h-full object-cover" alt="Imagen 1">
+      </div>
+      <div class="carousel-item h-full">
+        <img src="/static/imgs/c2.jpg" class="d-block w-100 h-full object-cover" alt="Imagen 2">
+      </div>
+      <div class="carousel-item h-full">
+        <img src="/static/imgs/c3.jpg" class="d-block w-100 h-full object-cover" alt="Imagen 3">
+      </div>
+       <div class="carousel-item h-full">
+        <img src="/static/imgs/c4.jpg" class="d-block w-100 h-full object-cover" alt="Imagen 4">
+      </div>
+       <div class="carousel-item h-full">
+        <img src="/static/imgs/c5.jpg" class="d-block w-100 h-full object-cover" alt="Imagen 5">
+      </div>
+       <div class="carousel-item h-full">
+        <img src="/static/imgs/c6.jpg" class="d-block w-100 h-full object-cover" alt="Imagen 6">
+      </div>
+       <div class="carousel-item h-full">
+        <img src="/static/imgs/c7.jpg" class="d-block w-100 h-full object-cover" alt="Imagen 7">
+      </div>
+       <div class="carousel-item h-full">
+        <img src="/static/imgs/c8.jpg" class="d-block w-100 h-full object-cover" alt="Imagen 8">
+      </div>
+    </div>
+
+    <!-- Controles del carrusel -->
+    <button class="carousel-control-prev" type="button" data-bs-target="#heroCarousel" data-bs-slide="prev">
+      <span class="carousel-control-prev-icon" aria-hidden="true"></span>
+      <span class="visually-hidden">Anterior</span>
+    </button>
+    <button class="carousel-control-next" type="button" data-bs-target="#heroCarousel" data-bs-slide="next">
+      <span class="carousel-control-next-icon" aria-hidden="true"></span>
+      <span class="visually-hidden">Siguiente</span>
+    </button>
+  </div>
+
+  <!-- Capa oscura y contenido glass encima -->
+  <div class="absolute inset-0 bg-black bg-opacity-60 flex items-center justify-center">
+    <div class="glass text-center p-5 rounded-4 z-10">
+      <h2 class="text-white text-4xl font-bold mb-3">Cortes de precisión y estilo único</h2>
+      <p class="text-gray-300 mb-4">Transformamos tu look con arte y actitud</p>
+      <!-- <a href="#reserva" class="btn btn-warning fw-semibold px-4 py-2">Reservar Turno</a> -->
+    </div>
+  </div>
+</section>
+<!-- Hero
+<section class="h-screen bg-cover bg-center flex items-center justify-center relative" style="background-image: url('https://images.unsplash.com/photo-1600185365081-0496b4b6c011?auto=format&fit=crop&w=1920&q=80');">
+  <div class="absolute inset-0 bg-black bg-opacity-60"></div>
+  <div class="relative glass p-10 rounded-xl text-center max-w-xl z-10">
+    <h2 class="text-4xl font-bold mb-4">Cortes de precisión y estilo único</h2>
+    <p class="mb-6 text-gray-300">Transformamos tu look con arte y actitud</p>
+    <a href="#reserva" class="bg-yellow-500 hover:bg-yellow-600 text-black px-6 py-2 rounded font-semibold">Reservar Turno</a>
+  </div>
+</section> -->
+
+<!-- Servicios (Todavia le falta reemplazar con los servicios cargados)-->
+<section id="servicios" class="py-20 px-6 bg-[#111]">
+  <div class="text-center mb-12">
+    <h3 class="text-3xl font-bold">Nuestros Servicios</h3>
+    <p class="text-gray-400">Lo mejor para tu estilo</p>
+  </div>
+  <div class="grid grid-cols-1 md:grid-cols-3 gap-8 max-w-6xl mx-auto">
+    <div class="glass p-6 rounded-xl text-center shadow hover:scale-105 transition">
+      <h4 class="text-xl font-semibold text-yellow-400">Corte Clásico</h4>
+      <p class="text-gray-300 mt-2">Estilo limpio y tradicional con terminación profesional.</p>
+      <p class="text-yellow-500 mt-4 font-bold">$2500</p>
+    </div>
+    <div class="glass p-6 rounded-xl text-center shadow hover:scale-105 transition">
+      <h4 class="text-xl font-semibold text-yellow-400">Barba & Perfilado</h4>
+      <p class="text-gray-300 mt-2">Afeitado y definición con navaja y vapor.</p>
+      <p class="text-yellow-500 mt-4 font-bold">$1800</p>
+    </div>
+    <div class="glass p-6 rounded-xl text-center shadow hover:scale-105 transition">
+      <h4 class="text-xl font-semibold text-yellow-400">Combo Full</h4>
+      <p class="text-gray-300 mt-2">Corte + barba + tratamiento capilar.</p>
+      <p class="text-yellow-500 mt-4 font-bold">$4000</p>
+    </div>
+  </div>
+</section>
+
+<!-- Galería -->
+<section id="galeria" class="py-20 bg-black px-6">
+  <div class="text-center mb-12">
+    <h3 class="text-3xl font-bold">Galería de Estilos</h3>
+    <p class="text-gray-400">Conocé nuestro trabajo</p>
+  </div>
+  <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6 max-w-6xl mx-auto">
+    <img src="https://images.unsplash.com/photo-1598294381372-208f7f09c0d1?auto=format&fit=crop&w=600&q=80" class="rounded-xl hover:scale-105 transition duration-300" />
+    <img src="https://images.unsplash.com/photo-1612969308442-9028ce1e3a35?auto=format&fit=crop&w=600&q=80" class="rounded-xl hover:scale-105 transition duration-300" />
+    <img src="https://images.unsplash.com/photo-1595433562696-c241a75ec6cb?auto=format&fit=crop&w=600&q=80" class="rounded-xl hover:scale-105 transition duration-300" />
+  </div>
+</section>
+
+<!-- Nosotros -->
+<section id="nosotros" class="py-20 px-6 bg-[#111] text-gray-200">
+  <div class="max-w-6xl mx-auto glass p-10 rounded-xl shadow-lg">
+    <h2 class="text-4xl font-bold text-center text-white mb-10">Nosotros</h2>
+
+    <div class="grid md:grid-cols-2 gap-10">
+      <!-- Info institucional -->
+      <div>
+        <p class="text-lg mb-4">
+          En <span class="text-yellow-400 font-semibold">Fede BarberShop</span> combinamos tradición y estilo moderno para ofrecerte un servicio personalizado en cada visita. Somos más que un lugar de cortes: somos un espacio donde cada cliente se siente como en casa.
+        </p>
+        <h3 class="text-2xl font-semibold text-yellow-400 mt-6 mb-2">Nuestra Misión</h3>
+        <p class="text-lg">
+          Crear una experiencia única en barbería, cuidando cada detalle, respetando el estilo de cada persona y manteniendo un ambiente relajado, profesional y amigable.
+        </p>
+      </div>
+
+      <!-- Mapa y dirección -->
+      <div>
+        <h3 class="text-2xl font-semibold text-yellow-400 mb-2">¿Dónde estamos?</h3>
+        <p class="text-lg mb-4">📍 Manuela Martínez Cangas de Tineo 140, Salta Capital, Argentina</p>
+        <div class="w-full h-64 rounded-xl overflow-hidden shadow-lg border border-yellow-500">
+          <iframe 
+            src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3621.3878965303807!2d-65.43357622387666!3d-24.816405008898556!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x941bc2e2d91de521%3A0x2f378a4b237f6d05!2sManuela%20Mart%C3%ADnez%20Cangas%20de%20Tineo%20140%2C%20A4400%20Salta!5e0!3m2!1ses!2sar!4v1752116968690!5m2!1ses!2sar"
+            width="100%" 
+            height="100%" 
+            style="border:0;" 
+            allowfullscreen="" 
+            loading="lazy"
+            referrerpolicy="no-referrer-when-downgrade">
+          </iframe>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- Reserva CTA -->
+<section id="reserva" class="py-20 bg-gradient-to-br from-black via-gray-900 to-black text-center">
+  <div class="glass max-w-xl mx-auto p-10 rounded-xl">
+    <h3 class="text-2xl font-bold mb-4">¿Listo para cambiar tu estilo?</h3>
+    <p class="text-gray-300 mb-6">Reservá tu turno online en segundos</p>
+    <!-- <a href="#" class="bg-yellow-500 text-black px-6 py-2 rounded hover:bg-yellow-600 font-semibold">Reservar Ahora</a> -->
+    <!-- <button id="reservar-btn" class="btn btn-primary mt-3">Reservar Turno</button> -->
+     <a href="{% url 'solicitar_turno' %}">Reservar</a>
+  </div>
+</section>
+<!-- Modal general de reserva -->
+<div id="reservaModal" class="modal fade" tabindex="-1">
+  <div class="modal-dialog">
+    <div class="modal-content bg-black text-white">
+      <div class="modal-header">
+        <h5 class="modal-title" id="reservaModalTitle">Reservar Turno</h5>
+        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+      </div>
+      <div class="modal-body" id="reservaModalBody">
+        <!-- Contenido dinámico -->
+      </div>
+      <div class="modal-footer" id="reservaModalFooter">
+        <!-- Botones dinámicos -->
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}
+
+{% block footer %}
+<!-- Footer inspirado en Estética en Línea -->
+<footer class="bg-[#111] text-center py-10 text-gray-400 text-sm">
+  <div class="max-w-5xl mx-auto px-4">
+    <div class="flex flex-col sm:flex-row justify-between items-center space-y-4 sm:space-y-0">
+      <p>&copy; 2025 La Barbería. Todos los derechos reservados.</p>
+      <div class="flex space-x-4">
+        <a href="#" class="hover:text-yellow-500 transition">Política de Privacidad</a>
+        <a href="#" class="hover:text-yellow-500 transition">Términos y Condiciones</a>
+        <a href="#contacto" class="hover:text-yellow-500 transition">Contacto</a>
+      </div>
+    </div>
+  </div>
+</footer>
+{% endblock %}
+
+{% block scripts %}
+
+{% endblock %}

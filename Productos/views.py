@@ -4,6 +4,7 @@ from .forms import ProductoForm
 from django.contrib import messages
 from django.contrib.auth.decorators import user_passes_test,login_required
 from django.views.decorators.clickjacking import xframe_options_exempt
+from django.http import JsonResponse
 
 
 def es_gerente(user):
@@ -61,3 +62,8 @@ def eliminar_producto(request, pk):
             "<script>window.parent.postMessage({action: 'closeBootbox'}, '*');</script>"
         )
     return render(request, 'confirmar_eliminacion.html', {'objeto': producto, 'tipo': 'Producto'})
+
+
+def get_productos(request):
+    productos = Producto.objects.filter(activo=True).values('id', 'nombre', 'precio', 'imagen')
+    return JsonResponse(list(productos), safe=False)

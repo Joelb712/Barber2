@@ -1,4 +1,6 @@
 {% load static %}
+
+<!-- Estilos específicos -->
 <style>
   .card-img-top {
     height: 150px;
@@ -6,176 +8,155 @@
   }
 </style>
 
-<div class="card">
-  <div class="card-header">
-    <h2 class="text-center">Gestión de Empleados</h2>
-  </div>
-  <div class="card-body p-6">
-    <div class="bg-white/30 backdrop-blur-md shadow-lg rounded-2xl p-4 mb-6">
-      <h2 class="text-2xl font-bold flex items-center gap-2">
-        <i class="fas fa-users"></i> Lista de Empleados
-      </h2>
-      <p>Aquí puedes ver todos los empleados de la Barbería y sus respectivos roles</p>
-      <div class="flex justify-between mt-4">        
-        <button id="btnAgregarEmpleado" class="btn btn-primary me-2">Nuevo Empleado</button>
-      </div>
+<!-- Contenedor principal -->
+<div class="p-4">
+  <div class="bg-gray-900/30 backdrop-blur-md shadow-lg rounded-2xl p-6">
+
+    <!-- Título -->
+    <div class="mb-6">
+      <h2 class="text-3xl font-bold text-center text-white">Gestión de Empleados</h2>
     </div>
 
-    <div class="bg-white/30 backdrop-blur-md shadow-lg rounded-2xl p-4">
-      <table id="listaemp" class="table table-hover display">
-        <thead>
+    <!-- Sección Lista de Empleados -->
+    <div class="bg-white/10 backdrop-blur-md rounded-2xl p-4 mb-6 shadow-md">
+      <div class="flex items-center justify-between mb-4">
+        <h2 class="text-2xl font-bold text-white flex items-center gap-2">
+          <i class="fas fa-users"></i> Lista de Empleados
+        </h2>
+        <button id="btnAgregarEmpleado" class="bg-yellow-500 text-black font-semibold px-4 py-2 rounded hover:bg-yellow-600">
+          Nuevo Empleado
+        </button>
+      </div>
+      <p class="text-gray-300">Aquí puedes ver todos los empleados de la Barbería y sus respectivos roles</p>
+    </div>
+
+    <!-- Tabla -->
+    <div class="overflow-x-auto bg-white/10 backdrop-blur-md rounded-2xl p-4 shadow-md">
+      <table id="listaemp" class="min-w-full divide-y divide-gray-700 text-white">
+        <thead class="bg-gray-800">
           <tr>
-            <th>Usuario</th>
-            <th>DNI</th>
-            <th>Nombre</th>
-            <th>Apellido</th>
-            <th>Teléfono</th>
-            <th>Especialidad</th>
-            <th>Estado</th>
-            <th>Acciones</th>
+            <th class="px-4 py-2 text-left">Usuario</th>
+            <th class="px-4 py-2 text-left">DNI</th>
+            <th class="px-4 py-2 text-left">Nombre</th>
+            <th class="px-4 py-2 text-left">Apellido</th>
+            <th class="px-4 py-2 text-left">Teléfono</th>
+            <th class="px-4 py-2 text-left">Especialidad</th>
+            <th class="px-4 py-2 text-left">Estado</th>
+            <th class="px-4 py-2 text-left">Acciones</th>
           </tr>
         </thead>
-        <tbody>
+        <tbody class="divide-y divide-gray-700">
           {% for e in empleados %}
-          <tr data-pk="{{ e.pk }}">
-            <td>{{ e.user.username }}</td>
-            <td>{{ e.dni }}</td>
-            <td>{{ e.user.first_name }}</td>
-            <td>{{ e.user.last_name }}</td>
-            <td>{{ e.telefono }}</td>
-            <td>{{ e.get_especialidad_display }}</td>
-            <td>{{ e.activo|yesno:"Activo,Inactivo" }}</td>
-            <td>
-              <!-- <button class="btn btn-sm btn-info"><i class="fas fa-eye"></i></button> -->
-              <button class="btnEditar btn btn-sm btn-warning"><i class="fas fa-edit"></i></button>
-              <button class="btnEliminar btn btn-sm btn-danger"><i class="fas fa-trash"></i></button>
+          <tr data-pk="{{ e.pk }}" class="hover:bg-gray-700">
+            <td class="px-4 py-2">{{ e.user.username }}</td>
+            <td class="px-4 py-2">{{ e.dni }}</td>
+            <td class="px-4 py-2">{{ e.user.first_name }}</td>
+            <td class="px-4 py-2">{{ e.user.last_name }}</td>
+            <td class="px-4 py-2">{{ e.telefono }}</td>
+            <td class="px-4 py-2">{{ e.get_especialidad_display }}</td>
+            <td class="px-4 py-2">{{ e.activo|yesno:"Activo,Inactivo" }}</td>
+            <td class="px-4 py-2 flex gap-2">
+              <button class="btnEditar bg-yellow-500 text-black px-2 py-1 rounded hover:bg-yellow-600">
+                <i class="fas fa-edit"></i>
+              </button>
+              <button class="btnEliminar bg-red-600 text-white px-2 py-1 rounded hover:bg-red-700">
+                <i class="fas fa-trash"></i>
+              </button>
             </td>
           </tr>
           {% endfor %}
         </tbody>
       </table>
     </div>
+
   </div>
 </div>
 
-<script type="text/javascript">
+<!-- Modal Tailwind -->
+<div id="modalEmpleado" class="fixed inset-0 bg-black bg-opacity-50 hidden items-center justify-center z-50">
+  <div class="bg-gray-900/90 backdrop-blur-md rounded-2xl w-11/12 md:w-3/4 lg:w-1/2 max-h-[90vh] overflow-auto p-4 relative">
+    <button id="cerrarModalEmpleado" class="absolute top-2 right-2 text-white text-xl font-bold">&times;</button>
+    <iframe id="iframeEmpleado" src="" class="w-full h-[500px]" frameborder="0"></iframe>
+  </div>
+</div>
+
+<!-- Scripts -->
+<script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+<script src="https://cdn.datatables.net/1.13.6/js/jquery.dataTables.min.js"></script>
+<script src="https://cdn.datatables.net/buttons/2.4.1/js/dataTables.buttons.min.js"></script>
+<script src="https://cdn.datatables.net/buttons/2.4.1/js/buttons.html5.min.js"></script>
+<script src="https://cdn.datatables.net/buttons/2.4.1/js/buttons.print.min.js"></script>
+<link rel="stylesheet" href="https://cdn.datatables.net/1.13.6/css/jquery.dataTables.min.css">
+<link rel="stylesheet" href="https://cdn.datatables.net/buttons/2.4.1/css/buttons.dataTables.min.css">
+
+<script>
 $(document).ready(function () {
-    if ( $.fn.DataTable.isDataTable('#listaemp') ) {
-      $('#listaemp').DataTable().destroy();
+    // Inicializar DataTable
+    if ($.fn.DataTable.isDataTable('#listaemp')) {
+        $('#listaemp').DataTable().destroy();
     }
-    
     $('#listaemp').DataTable({
         language: {
-            //se pone en español crack
-            "sProcessing": "Procesando...",
             "sLengthMenu": "Mostrar _MENU_ registros",
             "sZeroRecords": "No se encontraron resultados",
-            "sEmptyTable": "Ningún dato disponible en esta tabla",
+            "sEmptyTable": "Ningún dato disponible",
             "sInfo": "Mostrando registros del _START_ al _END_ de un total de _TOTAL_ registros",
             "sInfoEmpty": "Mostrando registros del 0 al 0 de un total de 0 registros",
             "sInfoFiltered": "(filtrado de un total de _MAX_ registros)",
-            "sInfoPostFix": "",
             "sSearch": "Buscar:",
-            "sUrl": "",
-            "sInfoThousands": ",",
-            "sLoadingRecords": "Cargando...",
             "oPaginate": {
                 "sFirst": "Primero",
                 "sLast": "Último",
                 "sNext": "Siguiente",
                 "sPrevious": "Anterior"
-            },
-            "oAria": {
-                "sSortAscending": ": Activar para ordenar la columna de manera ascendente",
-                "sSortDescending": ": Activar para ordenar la columna de manera descendente"
             }
         },
-              dom: 'Bfrtip',
+        dom: 'Bfrtip',
         buttons: [
-            {// Botón de Copiar
-                extend: 'copyHtml5',
-                className: 'btn btn-primary'
-            },
-            {// Botón de Excel
-                extend: 'excelHtml5',
-                className: 'btn btn-success'
-            },
-            {// Botón de PDF
-                extend: 'pdfHtml5',
-                className: 'btn btn-danger'
-            },
-            {// Botón de Imprimir
-                extend: 'print',
-                className: 'btn btn-info'
-            }
+            { extend: 'copyHtml5', text: 'Copiar', className: 'bg-blue-500 text-white px-3 py-1 rounded' },
+            { extend: 'excelHtml5', text: 'Excel', className: 'bg-green-500 text-white px-3 py-1 rounded' },
+            { extend: 'pdfHtml5', text: 'PDF', className: 'bg-red-500 text-white px-3 py-1 rounded' },
+            { extend: 'print', text: 'Imprimir', className: 'bg-gray-500 text-white px-3 py-1 rounded' }
         ]
     });
+
+    // Modal
+    const modal = $('#modalEmpleado');
+    const iframe = $('#iframeEmpleado');
+
+    function abrirModal(url) {
+        iframe.attr('src', url);
+        modal.removeClass('hidden').addClass('flex');
+    }
+    function cerrarModal() {
+        iframe.attr('src', '');
+        modal.addClass('hidden').removeClass('flex');
+        if(typeof cargarContenido === 'function'){
+            cargarContenido("{% url 'lista_empleados' %}");
+        } else {
+            location.reload();
+        }
+    }
+    $('#cerrarModalEmpleado').on('click', cerrarModal);
+
+    // Delegación de eventos
+    $(document).on('click', '#btnAgregarEmpleado', function() {
+        abrirModal("{% url 'formemp' %}");
+    });
+    $(document).on('click', '.btnEditar', function() {
+        const pk = $(this).closest('tr').data('pk');
+        abrirModal(`/empleados/editar/${pk}/`);
+    });
+    $(document).on('click', '.btnEliminar', function() {
+        const pk = $(this).closest('tr').data('pk');
+        abrirModal(`/empleados/eliminar/${pk}/`);
+    });
+
+    // Mensaje desde iframe
+    window.addEventListener('message', function(event) {
+        if(event.data && event.data.action === 'closeBootbox'){
+            cerrarModal();
+        }
+    });
 });
-    
-    $(document).ready(function() {
-        $('#btnAgregarEmpleado').off('click').on('click', function() {
-            const url = "{% url 'formemp' %}";
-            bootbox.dialog({
-                title: 'Formulario',
-                message: "<iframe id='formIframe' src='" + url + "' scrolling='yes' frameborder='0' width='100%' height='500'></iframe>",
-                buttons: {
-                    cancel: {
-                        label: 'Cerrar',
-                        className: 'btn-secondary',
-                        callback: function () {
-                            cargarContenido("{% url 'lista_empleados' %}");
-                        }
-                    }
-                }
-            });
-            window.addEventListener('message', function(event) {
-                if (event.data && event.data.action === 'closeBootbox') {
-                    bootbox.hideAll();
-                    cargarContenido("{% url 'lista_empleados' %}");
-                }},{ once: true });
-            });
-            });
-        $(document).off('click').on('click','.btnEditar', function() {
-            const pk = $(this).closest('tr').data('pk');
-            const url = '/empleados/editar/' + pk + '/';
-            bootbox.dialog({
-                title: 'Formulario Editar',
-                message: "<iframe id='formIframe' src='" + url + "' scrolling='yes' frameborder='0' width='100%' height='500'></iframe>",
-                buttons: {
-                    cancel: {
-                        label: 'Cerrar',
-                        className: 'btn-secondary',
-                        callback: function () {
-                            cargarContenido("{% url 'lista_empleados' %}");
-                        }
-                    }
-                }
-            });
-            window.addEventListener('message', function(event) {
-                if (event.data && event.data.action === 'closeBootbox') {
-                    bootbox.hideAll();
-                    cargarContenido("{% url 'lista_empleados' %}");
-                }},{ once: true });
-            });
-        $('#listaemp').off('click').on('click','.btnEliminar', function() {
-            const pk = $(this).closest('tr').data('pk');
-            const url = '/empleados/eliminar/' + pk + '/';
-            bootbox.dialog({
-                title: 'Eliminar',
-                message: "<iframe id='formIframe' src='" + url + "' scrolling='yes' frameborder='0' width='100%' height='500'></iframe>",
-                buttons: {
-                    cancel: {
-                        label: 'Cerrar',
-                        className: 'btn-secondary',
-                        callback: function () {
-                            cargarContenido("{% url 'lista_empleados' %}");
-                        }
-                    }
-                }
-            });
-            window.addEventListener('message', function(event) {
-                if (event.data && event.data.action === 'closeBootbox') {
-                    bootbox.hideAll();
-                    cargarContenido("{% url 'lista_empleados' %}");
-                }},{ once: true });
-            });
+</script>
