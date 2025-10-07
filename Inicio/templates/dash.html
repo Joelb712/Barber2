@@ -6,20 +6,23 @@
     <meta name="viewport" content="width=device-width,initial-scale=1" />
     <title>{% block title %}Dashboard{% endblock %}</title>
 
-    <!-- CAMBIO: Quité Bootstrap / MDB y uso Tailwind CDN -->
+    <!-- Tailwind -->
     <script src="https://cdn.tailwindcss.com"></script>
 
-    <!-- Font Awesome (iconos) -->
+    <!-- Font Awesome -->
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
 
-    <!-- jQuery + DataTables (igual que antes, mantengo para tus tablas y botones export) -->
+    <!-- jQuery -->
     <script src="https://code.jquery.com/jquery-3.7.0.min.js"></script>
 
+    <!-- DataTables CSS -->
     <link rel="stylesheet" href="https://cdn.datatables.net/1.13.6/css/jquery.dataTables.min.css">
     <link rel="stylesheet" href="https://cdn.datatables.net/buttons/2.4.1/css/buttons.dataTables.min.css">
+
+    <!-- Tu CSS -->
     <link rel="stylesheet" href="{% static 'css/dashboard.css' %}">
 
-
+    <!-- DataTables JS -->
     <script src="https://cdn.datatables.net/1.13.6/js/jquery.dataTables.min.js"></script>
     <script src="https://cdn.datatables.net/buttons/2.4.1/js/dataTables.buttons.min.js"></script>
     <script src="https://cdn.datatables.net/buttons/2.4.1/js/buttons.html5.min.js"></script>
@@ -174,6 +177,21 @@
       {% endblock %}
     </div>
   </main>
+  <!-- Modal genérico (fuera del content-area, persistente) -->
+    <div id="tailwindModal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 hidden">
+    <div class="bg-white rounded-lg shadow-xl w-full max-w-2xl max-h-[90vh] flex flex-col">
+        <div class="p-4 border-b border-gray-200 flex justify-between items-center">
+        <h3 id="modalTitle" class="text-lg font-semibold text-gray-800">Formulario</h3>
+        <button id="closeModalBtn" class="text-gray-500 hover:text-gray-800">
+            <i class="fas fa-times"></i>
+        </button>
+        </div>
+        <div class="flex-1 overflow-hidden">
+        <iframe id="modalIframe" src="" frameborder="0" class="w-full h-full min-h-[500px]"></iframe>
+        </div>
+    </div>
+    </div>
+
 
   <!-- CAMBIO: scripts JS (todo en el mismo archivo para debug) -->
   <script>
@@ -367,6 +385,37 @@
       });
     });
 
+    // Cerrar modal desde botón o fondo
+        document.getElementById('closeModalBtn')?.addEventListener('click', function() {
+            const modal = document.getElementById('tailwindModal');
+            const iframe = document.getElementById('modalIframe');
+            if (modal) modal.classList.add('hidden');
+            if (iframe) iframe.src = '';
+        });
+
+        document.getElementById('tailwindModal')?.addEventListener('click', function(e) {
+            if (e.target === this) {
+            e.target.classList.add('hidden');
+            document.getElementById('modalIframe').src = '';
+            }
+        });
+
+    // Escuchar mensajes del iframe para cerrar el modal (global)
+    window.addEventListener('message', function(event) {
+    if (event.data && event.data.action === 'closeBootbox') {
+        const modal = document.getElementById('tailwindModal');
+        const iframe = document.getElementById('modalIframe');
+        if (modal) modal.classList.add('hidden');
+        if (iframe) iframe.src = '';
+
+        // Recargar la vista actual (por ejemplo, lista_empleados)
+        const currentUrl = window.location.pathname;
+        if (currentUrl.includes('/empleados/')) {
+        cargarContenido("{% url 'lista_empleados' %}", "Empleados", "fa-users");
+        }
+        // Puedes extender esto para otras secciones si lo necesitas
+    }
+    });
     // ========================
     // AJAX loader (cargarContenido) casi idéntico al original
     // ========================
@@ -390,7 +439,19 @@
           }
 
           // Caso normal: inyectar contenido
-          document.getElementById('content-area').innerHTML = respuesta;
+            const contentArea = document.getElementById('content-area');
+            contentArea.innerHTML = respuesta;
+
+            // 👇 Ejecutar scripts manualmente
+            contentArea.querySelectorAll('script').forEach(oldScript => {
+            const newScript = document.createElement('script');
+            if (oldScript.src) {
+                newScript.src = oldScript.src;
+            } else {
+                newScript.textContent = oldScript.textContent;
+            }
+            oldScript.parentNode.replaceChild(newScript, oldScript);
+            });
 
           // actualizamos breadcrumb con lo que pasamos
           if (nombre) updateBreadcrumb(nombre, icono);
