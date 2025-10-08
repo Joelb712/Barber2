@@ -20,7 +20,7 @@ body {
     top: 0; left: 0; bottom: 0;
     width: var(--sidebar-w);
     background: #0b1320;
-    color: #e6eef8;
+    color: #f6f8e6;
     overflow-y: auto;
     transition: width .22s ease, transform .22s ease;
     z-index: 1100;
@@ -44,7 +44,7 @@ body {
 .menu-item { position:relative; }
 .menu-link, .submenu-link {
     display:flex; align-items:center; gap:12px;
-    padding:10px 18px; color: rgba(230,238,248,0.9); text-decoration:none;
+    padding:10px 18px; color: #f6e05e ; text-decoration:none;
     transition: background .18s ease, color .12s ease;
     background: none; border: none; width:100%; text-align:left;
 }

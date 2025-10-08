@@ -9,7 +9,7 @@ from Usuarios.forms import EmpleadoCreateForm,EmpleadoEditarForm
 
 
 def es_gerente(user):
-    return user.groups.filter(name="Gerente").exists() or user.is_superuser
+    return user.groups.filter(name="Gerente").exists() or user.groups.filter(name="Recepcionista").exists() or user.is_superuser
 
 @login_required
 @user_passes_test(es_gerente)

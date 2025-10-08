@@ -148,30 +148,30 @@
   </nav>
 
   <!-- Main -->
-  <main id="mainContent" class="min-h-screen bg-gray-50">
+  <main id="mainContent" class="min-h-screen bg-gray-700">
     <!-- Top Navigation -->
-    <div class="top-nav flex items-center justify-between px-4 py-3">
+    <div class="top-nav flex items-center justify-between px-4 py-3 ">
       <div class="flex items-center gap-3">
         <!-- CAMBIO: único botón para mobile (abre overlay) y desktop (colapsa) según width -->
         <button class="menu-toggle p-2 rounded" id="btnToggleSidebar" aria-label="toggle sidebar">
           <i class="fas fa-bars"></i>
         </button>
 
-        <nav aria-label="breadcrumb" class="text-sm text-gray-700 flex items-center gap-2">
+        <nav aria-label="breadcrumb" class="text-sm text-gray-50 flex items-center gap-2">
           <a href="#"><i id="breadcrumb-icon"></i></a>
           <span id="breadcrumb-text" class="font-medium">Inicio</span>
         </nav>
       </div>
 
       <div class="nav-right flex items-center gap-3">
-        <div class="user-info text-sm text-gray-700">
+        <div class="user-info text-sm text-gray-50">
           <span>USUARIO</span>
           <div class="inline-flex items-center justify-center bg-white text-indigo-600 rounded-full w-8 h-8 ml-2 font-bold">US</div>
         </div>
       </div>
     </div>
 
-    <div id="content-area" class="p-4">
+    <div id="content-area" class="p-4 bg-gray-700">
       {% block content %}
       <!-- Contenido AJAX -->
       {% endblock %}
