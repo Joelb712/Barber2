@@ -1,7 +1,7 @@
 :root{
     --sidebar-w: 280px;
     --sidebar-collapsed-w: 70px;
-    --primary-blue: #4c63d2;
+    --primary-blue: #1a1a1a;
     --dark-bg: #0f172a;
     --dark-2: #111827;
 }
@@ -19,7 +19,7 @@ body {
     position: fixed;
     top: 0; left: 0; bottom: 0;
     width: var(--sidebar-w);
-    background: #0b1320;
+    background: #1a1a1a;
     color: #f6f8e6;
     overflow-y: auto;
     transition: width .22s ease, transform .22s ease;
@@ -31,7 +31,7 @@ body {
 
 .sidebar-header {
     padding: 16px;
-    background: #071029;
+    background: #1a1a1a;
     border-bottom: 1px solid rgba(255,255,255,0.03);
     display:flex; align-items:center; gap:12px;
 }
@@ -44,7 +44,7 @@ body {
 .menu-item { position:relative; }
 .menu-link, .submenu-link {
     display:flex; align-items:center; gap:12px;
-    padding:10px 18px; color: #f6e05e ; text-decoration:none;
+    padding:10px 18px; color: oklch(85.2% 0.199 91.936); text-decoration:none;
     transition: background .18s ease, color .12s ease;
     background: none; border: none; width:100%; text-align:left;
 }

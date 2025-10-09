@@ -148,12 +148,12 @@
   </nav>
 
   <!-- Main -->
-  <main id="mainContent" class="min-h-screen bg-gray-700">
+  <main id="mainContent" class="min-h-screen bg-neutral-900">
     <!-- Top Navigation -->
     <div class="top-nav flex items-center justify-between px-4 py-3 ">
       <div class="flex items-center gap-3">
         <!-- CAMBIO: único botón para mobile (abre overlay) y desktop (colapsa) según width -->
-        <button class="menu-toggle p-2 rounded" id="btnToggleSidebar" aria-label="toggle sidebar">
+        <button class="menu-toggle text-gray-50  rounded" id="btnToggleSidebar" aria-label="toggle sidebar">
           <i class="fas fa-bars"></i>
         </button>
 
@@ -171,7 +171,7 @@
       </div>
     </div>
 
-    <div id="content-area" class="p-4 bg-gray-700">
+    <div id="content-area" class="p-4 bg-neutral-900">
       {% block content %}
       <!-- Contenido AJAX -->
       {% endblock %}
