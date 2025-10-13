@@ -73,7 +73,7 @@
       </li>
 
       <li class="menu-item">
-        <a href="#" class="menu-link" data-name="Ventas" data-icon="fa-dollar-sign">
+        <a href="{% url 'lista_ventas' %}" class="menu-link" data-name="Ventas" data-icon="fa-dollar-sign">
           <i class="fas fa-dollar-sign"></i><span class="menu-text">Ventas</span>
         </a>
       </li>
@@ -153,11 +153,11 @@
     <div class="top-nav flex items-center justify-between px-4 py-3 ">
       <div class="flex items-center gap-3">
         <!-- CAMBIO: único botón para mobile (abre overlay) y desktop (colapsa) según width -->
-        <button class="menu-toggle text-gray-50  rounded" id="btnToggleSidebar" aria-label="toggle sidebar">
+        <button class="menu-toggle text-yellow-400  rounded" id="btnToggleSidebar" aria-label="toggle sidebar">
           <i class="fas fa-bars"></i>
         </button>
 
-        <nav aria-label="breadcrumb" class="text-sm text-gray-50 flex items-center gap-2">
+        <nav aria-label="breadcrumb" class="text-sm text-yellow-400 flex items-center gap-2">
           <a href="#"><i id="breadcrumb-icon"></i></a>
           <span id="breadcrumb-text" class="font-medium">Inicio</span>
         </nav>
@@ -381,7 +381,7 @@
           url: '//cdn.datatables.net/plug-ins/1.13.6/i18n/es-ES.json'
         },
         dom: 'Bfrtip',
-        buttons: ['copy', 'excel', 'pdf', 'print']
+        buttons: ['excel', 'pdf', 'print']
       });
     });
 
@@ -411,11 +411,71 @@
         // Recargar la vista actual (por ejemplo, lista_empleados)
         const currentUrl = window.location.pathname;
         if (currentUrl.includes('/empleados/')) {
-        cargarContenido("{% url 'lista_empleados' %}", "Empleados", "fa-users");
+          cargarContenido("{% url 'lista_empleados' %}", "Empleados", "fa-users");
+        }
+        else if (currentUrl.includes('/clientes/')) {
+          cargarContenido("{% url 'lista_clientes' %}", "Clientes", "fa-user");
+        }
+        else if (currentUrl.includes('/productos/')) {
+          cargarContenido("{% url 'lista_productos' %}", "Productos", "fa-box");
+        }
+        else if (currentUrl.includes('/servicios/')) {
+          cargarContenido("{% url 'lista_servicios' %}", "Servicios", "fa-scissors");
+        }
+        else if (currentUrl.includes('/turnos/')) {
+          cargarContenido("{% url 'turnos' %}", "Turnos", "fa-calendar-check");
+        }
+        else if (currentUrl.includes('ventas')) {
+          cargarContenido("{% url 'lista_ventas' %}", "Ventas", "fa-cash-register");
         }
         // Puedes extender esto para otras secciones si lo necesitas
     }
     });
+
+    window.addEventListener('message', function(event) {
+      if (event.data && event.data.action === 'showMessage') {
+        const { message, type } = event.data;
+
+        // Mostrar el mensaje (puede ser un alert o algo más bonito)
+        if (type === 'success') {
+          alert("✅ " + message);
+        } else if (type === 'error') {
+          alert("❌ " + message);
+        } else {
+          alert(message);
+        }
+
+        // Esperar un poco y cerrar el modal
+        setTimeout(() => {
+          const modal = document.getElementById('tailwindModal');
+          const iframe = document.getElementById('modalIframe');
+          if (modal) modal.classList.add('hidden');
+          if (iframe) iframe.src = '';
+
+          // Recargar la vista actual (como ya hacés)
+          const currentUrl = window.location.pathname;
+          if (currentUrl.includes('/empleados/')) {
+            cargarContenido("{% url 'lista_empleados' %}", "Empleados", "fa-users");
+          }
+          else if (currentUrl.includes('/clientes/')) {
+            cargarContenido("{% url 'lista_clientes' %}", "Clientes", "fa-user");
+          }
+          else if (currentUrl.includes('/productos/')) {
+            cargarContenido("{% url 'lista_productos' %}", "Productos", "fa-box");
+          }
+          else if (currentUrl.includes('/servicios/')) {
+            cargarContenido("{% url 'lista_servicios' %}", "Servicios", "fa-scissors");
+          }
+          else if (currentUrl.includes('/turnos/')) {
+            cargarContenido("{% url 'turnos' %}", "Turnos", "fa-calendar-check");
+          }
+          else if (currentUrl.includes('ventas')) {
+            cargarContenido("{% url 'lista_ventas' %}", "Ventas", "fa-cash-register");
+          }
+        }, 800);
+      }
+    });
+
     // ========================
     // AJAX loader (cargarContenido) casi idéntico al original
     // ========================

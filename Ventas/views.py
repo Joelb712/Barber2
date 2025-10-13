@@ -1,9 +1,9 @@
-from django.shortcuts import render,redirect,get_object_or_404
+from django.shortcuts import render,redirect,get_object_or_404,HttpResponse
 from django.http import JsonResponse
 from django.contrib import messages
 from django.views.decorators.csrf import csrf_exempt
 from django.views.decorators.clickjacking import xframe_options_exempt
-from django.contrib.auth.decorators import login_required
+from django.contrib.auth.decorators import login_required,user_passes_test
 from django.db import transaction
 import json
 from Otros.models import Venta,Cliente,Servicio, DetalleVenta, Pago, MovimientoStock, MovimientoCaja, MetodoPago,Producto,Caja
@@ -84,15 +84,21 @@ from Otros.models import Venta,Cliente,Servicio, DetalleVenta, Pago, MovimientoS
 #     }
 #     return render(request, 'crear_venta.html', context)
 
+def es_gerente(user):
+    return user.groups.filter(name="Gerente").exists() or user.groups.filter(name="Recepcionista").exists() or user.is_superuser
+
 
 @login_required
 @transaction.atomic
+@xframe_options_exempt
 def crear_venta(request):
     try:
         caja = Caja.objects.get(estado=True)
     except Caja.DoesNotExist:
         messages.error(request, "No hay una caja abierta. Debe abrir caja primero.")
-        return redirect("apertura_caja")
+        return HttpResponse(
+            "<script>window.parent.postMessage({action: 'closeBootbox'}, '*');</script>"
+        )
 
     if request.method == 'POST':
         cliente_id = request.POST.get('cliente')
@@ -147,7 +153,9 @@ def crear_venta(request):
         venta.save()
 
         # Mandamos a registrar pago
-        return redirect("registrar_pago", venta_id=venta.id)
+        return HttpResponse(
+            f"<script>window.location.href='pago/{venta.id}/';</script>"
+        )
 
     context = {
         'productos': Producto.objects.filter(stock_actual__gt=0),
@@ -195,6 +203,7 @@ def crear_venta(request):
 
 @login_required
 @transaction.atomic
+@xframe_options_exempt
 def registrar_pago(request, venta_id):
     venta = get_object_or_404(Venta, id=venta_id)
 
@@ -221,7 +230,9 @@ def registrar_pago(request, venta_id):
                 )
 
         messages.success(request, f"Venta #{venta.id} cobrada correctamente.")
-        return redirect("lista_ventas")
+        return HttpResponse(
+            f"<script>window.parent.postMessage({{action: 'showMessage', message: 'Venta #{venta.id} cobrada correctamente.', type: 'success'}}, '*');</script>"
+        )
 
     context = {
         'venta': venta,
@@ -231,7 +242,60 @@ def registrar_pago(request, venta_id):
 
 
 @login_required
+@user_passes_test(es_gerente)
 @xframe_options_exempt
 def lista_ventas(request):
     ventas = Venta.objects.all()
-    return render(request, 'ventas.html', {'ventas': ventas})
+    total=0
+    for v in ventas:
+        if v.activo:
+            total += v.total
+    return render(request, 'ventas.html', {'ventas': ventas, 'total': total})
+
+
+@login_required
+@transaction.atomic
+@xframe_options_exempt
+def cancelar_venta(request, venta_id):
+    venta = get_object_or_404(Venta, id=venta_id)
+    if request.method== 'POST':
+        if not venta.activo:
+            return HttpResponse(
+                f"<script>window.parent.postMessage({{action: 'showMessage', message: 'La Venta #{venta.id} ya está cancelada.', type: 'warning'}}, '*');</script>"
+            )
+
+        # Revertir stock
+        detalles = DetalleVenta.objects.filter(venta=venta)
+        for detalle in detalles:
+            producto = detalle.producto
+            producto.stock_actual += detalle.cantidad
+            producto.save()
+
+            MovimientoStock.objects.create(
+                producto=producto,
+                tipo='ENTRADA',
+                cantidad=detalle.cantidad,
+                motivo=f"Cancelación de venta #{venta.id}",
+                empleado=request.user.empleado,
+            )
+            detalle.activo=False
+            detalle.save()
+
+        # Movimiento en caja
+        MovimientoCaja.objects.create(
+            caja=venta.caja,
+            tipo='EGRESO',
+            monto=venta.total,
+            descripcion=f"Cancelación de venta #{venta.id}",
+            empleado=request.user.empleado,
+        )
+
+        # Marcar venta como inactiva
+        venta.activo = False
+        venta.save()
+
+        messages.success(request, f"La venta #{venta.id} fue cancelada correctamente.")
+        return HttpResponse(
+            f"<script>window.parent.postMessage({{action: 'showMessage', message: 'Venta #{venta.id} cancelada correctamente.', type: 'success'}}, '*');</script>"
+        )
+    return render(request, 'cancelar_venta.html')

@@ -15,8 +15,6 @@ class Cliente(models.Model):
     fecha_registro = models.DateTimeField(auto_now_add=True)
 
     def __str__(self):
-        if self.user:
-            return f"Cliente: {self.user.username} - {self.user.first_name} {self.user.last_name}"
         return f"{self.first_name} {self.last_name}"
 
 # --- EMPLEADOS ---
@@ -32,7 +30,7 @@ class Empleado(models.Model):
     activo = models.BooleanField(default=True)
 
     def __str__(self):
-        return f"Empleado: {self.user.username} ({self.get_especialidad_display()})"
+        return f"{self.user.username} ({self.get_especialidad_display()})"
 
 # --- PRODUCTOS ---
 class Producto(models.Model):
@@ -61,6 +59,7 @@ class Servicio(models.Model):
 class Horario(models.Model):
     hora_inicio = models.TimeField(unique=True)
     hora_fin = models.TimeField()
+    activo = models.BooleanField(default=True)
 
     def __str__(self):
         return f"{self.hora_inicio.strftime('%H:%M')} - {self.hora_fin.strftime('%H:%M')}"
@@ -71,7 +70,7 @@ class Turno(models.Model):
     empleado = models.ForeignKey("Empleado", on_delete=models.SET_NULL, null=True)
     fecha = models.DateField()
     horario = models.ForeignKey("Horario", on_delete=models.CASCADE)
-    estado = models.ForeignKey("EstadoTurno", on_delete=models.CASCADE)
+    estado = models.ForeignKey("EstadoTurno", on_delete=models.CASCADE, default=1)
 
     duracion_real = models.PositiveIntegerField(default=30, help_text="En minutos")
     created_at = models.DateTimeField(auto_now_add=True)
@@ -86,6 +85,7 @@ class Turno(models.Model):
 class ServiciosXTurno(models.Model):
     turno = models.ForeignKey("Turno", on_delete=models.CASCADE, related_name="servicios_turno")
     servicio = models.ForeignKey("Servicio", on_delete=models.CASCADE)
+    activo = models.BooleanField(default=True)
 
     def __str__(self):
         return f"{self.turno} - {self.servicio.nombre}"
@@ -100,6 +100,7 @@ class EstadoTurno(models.Model):
     ]
     nombre = models.CharField(max_length=50,choices=choices  , unique=True)
     descripcion = models.TextField(blank=True, null=True)
+    activo = models.BooleanField(default=True)
 
     def __str__(self):
         return self.nombre
@@ -128,6 +129,7 @@ class MovimientoCaja(models.Model):
     monto = models.DecimalField(max_digits=10, decimal_places=2)
     descripcion = models.TextField(blank=True, null=True)
     empleado = models.ForeignKey("Empleado", on_delete=models.SET_NULL, null=True)
+    activo = models.BooleanField(default=True)
 
     def __str__(self):
         return f"{self.tipo} - {self.monto} ({self.fecha})"
@@ -139,9 +141,11 @@ class Venta(models.Model):
     caja = models.ForeignKey("Caja", on_delete=models.CASCADE)  # debe estar abierta
     fecha = models.DateTimeField(auto_now_add=True)
     total = models.DecimalField(max_digits=10, decimal_places=2)
+    activo = models.BooleanField(default=True)
 
     def __str__(self):
-        return f"Venta {self.id} - {self.cliente.first_name}"
+        estado= "Activa" if self.activo else "Cancelada"
+        return f"Venta {self.id} - {self.cliente} ({estado})"
 
 # --- DETALLE DE VENTA ---
 class DetalleVenta(models.Model):
@@ -150,6 +154,7 @@ class DetalleVenta(models.Model):
     cantidad = models.PositiveIntegerField()
     precio_unitario = models.DecimalField(max_digits=10, decimal_places=2)
     subtotal = models.DecimalField(max_digits=10, decimal_places=2)
+    activo = models.BooleanField(default=True)
 
     def __str__(self):
         return f"{self.producto.nombre} x {self.cantidad}"
@@ -168,6 +173,7 @@ class MovimientoStock(models.Model):
     cantidad = models.PositiveIntegerField()
     motivo = models.CharField(max_length=100, blank=True, null=True)  # ejemplo: Venta, Reposición, Ajuste
     empleado = models.ForeignKey("Empleado", on_delete=models.SET_NULL, null=True)
+    activo = models.BooleanField(default=True)
 
     def __str__(self):
         return f"{self.tipo} {self.cantidad} {self.producto.nombre}"
@@ -175,6 +181,7 @@ class MovimientoStock(models.Model):
 # --- METODOS DE PAGO ---
 class MetodoPago(models.Model):
     nombre= models.CharField(max_length=50)
+    activo = models.BooleanField(default=True)
 
     def __str__(self):
         return f"{self.nombre}"
@@ -185,7 +192,7 @@ class Pago(models.Model):
     metodo_pago= models.ForeignKey("MetodoPago", on_delete=models.CASCADE)
     monto= models.DecimalField(max_digits=10 , decimal_places=2)
     fecha_pago= models.DateTimeField(auto_now_add=True)
-    estado= models.BooleanField(default=False)
+    estado= models.BooleanField(default=True)
 
     def __str__(self):
         return f"{self.metodo_pago.nombre} - {self.monto} -{self.estado}"

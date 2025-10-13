@@ -1,6 +1,6 @@
 from django.shortcuts import render, get_object_or_404, redirect, HttpResponse
 from Otros.models import Horario,Turno,Servicio,Empleado,EstadoTurno, ServiciosXTurno,Cliente
-from .forms import HorarioForm
+from .forms import HorarioForm, TurnoForm
 from django.contrib import messages
 from django.contrib.auth.decorators import user_passes_test,login_required
 from django.views.decorators.clickjacking import xframe_options_exempt
@@ -61,7 +61,9 @@ def editar_horario(request, pk):
 def eliminar_horario(request, pk):
     horario = get_object_or_404(Horario, pk=pk)
     if request.method == 'POST':
-        horario.delete()
+        horario.activo=False
+        horario.save()
+        # horario.delete()
         messages.success(request, 'Horario eliminado correctamente.')
         return HttpResponse(
             "<script>window.parent.postMessage({action: 'closeBootbox'}, '*');</script>"
@@ -114,73 +116,33 @@ def eliminar_horario(request, pk):
 #         return JsonResponse({"mensaje": "¡Turno reservado con éxito!"})
     
 
+# @login_required
+# @user_passes_test(es_gerente)
+# @xframe_options_exempt
+# def turnos_general(request):
+#     turnos = Turno.objects.select_related("cliente", "empleado", "estado", "horario")
+
+#     data = []
+#     for t in turnos:
+#         data.append({
+#             "id": t.id,
+#             "fecha": t.fecha.strftime("%d/%m/%Y"),
+#             "hora": t.horario.hora_inicio.strftime('%H:%M'),
+#             "cliente": t.cliente.first_name,
+#             "empleado": t.empleado.user.first_name if t.empleado else "No asignado",
+#             "estado": t.estado.nombre,
+#         })
+
+#     return render(request, "turnos_general.html", {"turnos": data})
+
+@xframe_options_exempt
 @login_required
 @user_passes_test(es_gerente)
-@xframe_options_exempt
 def turnos_general(request):
-    turnos = Turno.objects.select_related("cliente", "empleado", "estado", "horario")
+    turnos = Turno.objects.all()
+    horarios = Horario.objects.all()
+    return render(request, 'turnos_general.html', {'turnos': turnos, 'horarios': horarios})
 
-    data = []
-    for t in turnos:
-        data.append({
-            "fecha": t.fecha.strftime("%d/%m/%Y"),
-            "hora": t.horario.hora_inicio.strftime('%H:%M'),
-            "cliente": t.cliente.first_name,
-            "empleado": t.empleado.user.first_name if t.empleado else "No asignado",
-            "estado": t.estado.nombre,
-        })
-
-    return render(request, "turnos_general.html", {"turnos": data})
-
-
-# def horarios_disponibles(request):
-#     empleado_id = request.GET.get('empleado_id')
-#     fecha = request.GET.get('fecha')
-
-#     if not empleado_id or not fecha:
-#         return JsonResponse({"error": "Faltan parámetros"}, status=400)
-
-#     try:
-#         fecha_obj = datetime.strptime(fecha, "%Y-%m-%d").date()
-#     except ValueError:
-#         return JsonResponse({"error": "Formato de fecha inválido"}, status=400)
-
-#     horarios = Horario.objects.all()
-
-#     # Excluir horarios que ya estén ocupados por ese empleado en esa fecha
-#     ocupados = Turno.objects.filter(empleado_id=empleado_id, fecha=fecha_obj).values_list('horario_id', flat=True)
-#     disponibles = horarios.exclude(id__in=ocupados)
-
-#     data = [{"id": h.id, "hora": h.hora_inicio.strftime("%H:%M")} for h in disponibles]
-#     return JsonResponse(data, safe=False)
-
-# def horarios_disponibles(request):
-#     empleado_id = request.GET.get("empleado_id")
-#     fecha = request.GET.get("fecha")
-    
-#     if not empleado_id or not fecha:
-#         return JsonResponse({"error": "Faltan datos"}, status=400)
-    
-#     # Obtener todos los horarios
-#     todos = Horario.objects.all()
-    
-#     # Obtener horarios ocupados para ese empleado en esa fecha
-#     ocupados = Turno.objects.filter(
-#         empleado_id=empleado_id,
-#         fecha=fecha
-#     ).values_list("horario_id", flat=True)
-    
-#     # Filtrar los horarios disponibles
-#     disponibles = todos.exclude(id__in=ocupados)
-    
-#     # Preparar respuesta
-#     data = [{"id": h.id, "hora": h.hora_inicio.strftime("%H:%M")} for h in disponibles]
-#     return JsonResponse(data, safe=False)
-
-@login_required
-# def solicitar_turno(request):
-#     """Vista que renderiza la página desde donde se abre el modal"""
-#     return render(request, 'solicitar_turno.html')
 
 def get_servicios(request):
     servicios = Servicio.objects.filter(activo=True).values('id', 'nombre','descripcion', 'duracion', 'precio')
@@ -283,3 +245,49 @@ def crear_turno(request):
     
     except Exception as e:
         return JsonResponse({'error': str(e)}, status=500)
+    
+@xframe_options_exempt
+@login_required
+@user_passes_test(es_gerente)
+def dar_turno(request):
+    if request.method == 'POST':
+        form = TurnoForm(request.POST)
+        if form.is_valid():
+            form.save()
+            # Avisar al iframe que debe cerrarse:
+            return HttpResponse(
+                "<script>window.parent.postMessage({action: 'closeBootbox'}, '*');</script>"
+            )
+    else:
+        form = TurnoForm()
+
+    return render(request, 'formturno.html', {'form': form})
+
+@xframe_options_exempt
+@login_required
+@user_passes_test(es_gerente)
+def editar_turno(request, pk):
+    turno = get_object_or_404(Turno, pk=pk)
+    if request.method == 'POST':
+        form = TurnoForm(request.POST, instance=turno)
+        if form.is_valid():
+            form.save()
+             # Avisar al iframe que debe cerrarse:
+            return HttpResponse(
+                "<script>window.parent.postMessage({action: 'closeBootbox'}, '*');</script>"
+            )
+    else:
+        form = TurnoForm(instance=turno)
+    return render(request,('formturno.html'),{'form':form , 'turno':turno})
+
+@xframe_options_exempt
+@login_required
+@user_passes_test(es_gerente)
+def eliminar_turno(request, pk):
+    turno = get_object_or_404(Turno, pk=pk)
+    if request.method == 'POST':
+        turno.delete()       # opcional, solo si no se elimina con cascade
+        return HttpResponse(
+            "<script>window.parent.postMessage({action: 'closeBootbox'}, '*');</script>"
+        )
+    return render(request, 'eliminarturno.html', {'turno': turno})

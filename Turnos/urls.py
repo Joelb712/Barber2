@@ -17,4 +17,7 @@ urlpatterns = [
     path('api/barberos/', get_barberos, name='get_barberos'),
     path('api/horarios-disponibles/', get_horarios_disponibles, name='get_horarios_disponibles'),
     path('api/crear-turno/', crear_turno, name='crear_turno'),
+    path('darturno/', dar_turno, name='dar_turno'),
+    path('turnos/editar/<int:pk>/', editar_turno, name='editar_turno'),
+    path('turnos/eliminar/<int:pk>/', eliminar_turno, name='eliminar_turno'),
 ]

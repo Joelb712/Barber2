@@ -1,172 +1,81 @@
 {% load static %}
-<style>
-  .card-img-top {
-    height: 150px;
-    object-fit: cover;
-  }
-</style>
 
-<div class="card">
-  <div class="card-header">
-    <h2 class="text-center">Horarios</h2>
+
+<div class="rounded-xl shadow-lg overflow-hidden">
+  <div class="p-6 text-white text-center">
+    <h2 class="text-2xl font-bold text-yellow-400">Horarios</h2>
   </div>
-  <div class="card-body p-6">
-    <div class="bg-white/30 backdrop-blur-md shadow-lg rounded-2xl p-4 mb-6">
-      <h2 class="text-2xl font-bold flex items-center gap-2">
-        <i class="fas fa-users"></i> Lista de Horarios
-      </h2>
-      <p>Aquí puedes ver todos los horarios de la Barbería</p>
-      <div class="flex justify-between mt-4">        
-        <button id="btnAgregarHora" class="btn btn-primary me-2">Nuevo Horario</button>
+
+  <div class="p-6 space-y-6">
+    <div class="bg-zinc-800 backdrop-blur-sm rounded-xl p-5 shadow">
+      <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+        <div>
+          <h2 class="text-xl font-bold flex items-center gap-2 text-white">
+            <i class="fas fa-calendar-check"></i> Lista de Horarios
+          </h2>
+          <p class="text-white">Aquí puedes ver todos los Horarios de la Barberia</p>
+        </div>
+        <button id="btnAgregarHora" class="px-4 py-2 bg-yellow-500 hover:bg-blue-700 text-black font-medium rounded-lg transition">
+          <i class="fas fa-plus mr-2"></i> Nuevo Horarios
+        </button>
       </div>
     </div>
 
-    <div class="bg-white/30 backdrop-blur-md shadow-lg rounded-2xl p-4">
-      <table id="listahora" class="table table-hover display">
-        <thead>
+    <div class="bg-zinc-800 backdrop-blur-sm rounded-xl p-5 shadow overflow-x-auto">
+      <table id="listahora" class="min-w-full divide-y divide-gray-200">
+        <thead class="bg-slate-700">
           <tr>
-            <th>Hora Inicio</th>
-            <th>Hora Fin</th>
-            <th>Acciones</th>
+            <th class="px-4 py-3 text-left text-xs font-medium text-white uppercase tracking-wider">Hora Inicio</th>
+            <th class="px-4 py-3 text-left text-xs font-medium text-white uppercase tracking-wider">Hora Fin</th>
+            <!-- <th class="px-4 py-3 text-left text-xs font-medium text-white uppercase tracking-wider">Estado</th> -->
+            <th class="px-4 py-3 text-left text-xs font-medium text-white uppercase tracking-wider">Acciones</th>
           </tr>
         </thead>
-        <tbody>
+        <tbody class="bg-gray-300 divide-y divide-gray-200">
           {% for h in horarios %}
-            <tr data-pk="{{ h.pk }}">
-                <td>{{ h.hora_inicio }}</td>
-                <td>{{ h.hora_fin }}</td>
-                <td>
-                    <!-- <button class="btn btn-sm btn-info"><i class="fas fa-eye"></i></button> -->
-                    <button class="btnEditarHora btn btn-sm btn-warning"><i class="fas fa-edit"></i></button>
-                    <button class="btnEliminarHora btn btn-sm btn-danger"><i class="fas fa-trash"></i></button>
-                </td>
-            </tr>
-        {% endfor %}
+          <tr data-pk="{{ h.pk }}" class="hover:bg-amber-100">
+            <td class="px-4 py-3 whitespace-nowrap text-sm font-medium text-black">{{ h.hora_inicio }}</td>
+            <td class="px-4 py-3 whitespace-nowrap text-sm font-medium text-black">{{ h.hora_fin}}</td>
+            <td class="px-4 py-3 whitespace-nowrap text-m font-medium">
+              <button class="btnEditarHora text-yellow-600 hover:text-yellow-800 mr-2">
+                <i class="fas fa-edit"></i>
+              </button>
+              <button class="btnEliminarHora text-red-600 hover:text-red-800">
+                <i class="fas fa-trash"></i>
+              </button>
+            </td>
+          </tr>
+          {% endfor %}
         </tbody>
       </table>
     </div>
   </div>
 </div>
 
-<script type="text/javascript">
-$(document).ready(function () {
-    if ( $.fn.DataTable.isDataTable('#listahora') ) {
-      $('#listahora').DataTable().destroy();
-    }
 
-    $('#listaserv').DataTable({
-        language: {
-            //se pone en español crack
-            "sProcessing": "Procesando...",
-            "sLengthMenu": "Mostrar _MENU_ registros",
-            "sZeroRecords": "No se encontraron resultados",
-            "sEmptyTable": "Ningún dato disponible en esta tabla",
-            "sInfo": "Mostrando registros del _START_ al _END_ de un total de _TOTAL_ registros",
-            "sInfoEmpty": "Mostrando registros del 0 al 0 de un total de 0 registros",
-            "sInfoFiltered": "(filtrado de un total de _MAX_ registros)",
-            "sInfoPostFix": "",
-            "sSearch": "Buscar:",
-            "sUrl": "",
-            "sInfoThousands": ",",
-            "sLoadingRecords": "Cargando...",
-            "oPaginate": {
-                "sFirst": "Primero",
-                "sLast": "Último",
-                "sNext": "Siguiente",
-                "sPrevious": "Anterior"
-            },
-            "oAria": {
-                "sSortAscending": ": Activar para ordenar la columna de manera ascendente",
-                "sSortDescending": ": Activar para ordenar la columna de manera descendente"
-            }
-        },
-              dom: 'Bfrtip',
-        buttons: [
-            {// Botón de Copiar
-                extend: 'copyHtml5',
-                className: 'btn btn-primary'
-            },
-            {// Botón de Excel
-                extend: 'excelHtml5',
-                className: 'btn btn-success'
-            },
-            {// Botón de PDF
-                extend: 'pdfHtml5',
-                className: 'btn btn-danger'
-            },
-            {// Botón de Imprimir
-                extend: 'print',
-                className: 'btn btn-info'
-            }
-        ]
-    });
-});
-    
-    $(document).ready(function() {
-            $('#btnAgregarHora').off('click').on('click', function() {
-                    const url = "{% url 'formhora' %}";
-                    bootbox.dialog({
-                            title: 'Formulario',
-                            message: "<iframe id='formIframe' src='" + url + "' scrolling='yes' frameborder='0' width='100%' height='500'></iframe>",
-                            buttons: {
-                                    cancel: {
-                                            label: 'Cerrar',
-                                            className: 'btn-secondary',
-                                            callback: function () {
-                                                    cargarContenido("{% url 'lista_horarios' %}");
-                                            }
-                                    }
-                            }
-                    });
-                    window.addEventListener('message', function(event) {
-                            if (event.data && event.data.action === 'closeBootbox') {
-                                bootbox.hideAll();
-                                cargarContenido("{% url 'lista_horarios' %}");
-                            }},{ once: true });
-                    });
-                    });
-            $(document).off('click').on('click','.btnEditarHora', function() {
-                const pk = $(this).closest('tr').data('pk');
-                const url = '/horarios/editar/' + pk + '/';
-                bootbox.dialog({
-                    title: 'Formulario Editar',
-                    message: "<iframe id='formIframe' src='" + url + "' scrolling='yes' frameborder='0' width='100%' height='500'></iframe>",
-                    buttons: {
-                        cancel: {
-                            label: 'Cerrar',
-                            className: 'btn-secondary',
-                            callback: function () {
-                                cargarContenido("{% url 'lista_horarios' %}");
-                            }
-                        }
-                    }
-                });
-                window.addEventListener('message', function(event) {
-                    if (event.data && event.data.action === 'closeBootbox') {
-                        bootbox.hideAll();
-                        cargarContenido("{% url 'lista_horarios' %}");
-                    }},{ once: true });
-                });
-            $('#listahora').off('click').on('click','.btnEliminarHora', function() {
-                const pk = $(this).closest('tr').data('pk');
-                const url = '/horarios/eliminar/' + pk + '/';
-                bootbox.dialog({
-                    title: 'Eliminar',
-                    message: "<iframe id='formIframe' src='" + url + "' scrolling='yes' frameborder='0' width='100%' height='500'></iframe>",
-                    buttons: {
-                        cancel: {
-                            label: 'Cerrar',
-                            className: 'btn-secondary',
-                            callback: function () {
-                                cargarContenido("{% url 'lista_horarios' %}");
-                            }
-                        }
-                    }
-                });
-                window.addEventListener('message', function(event) {
-                    if (event.data && event.data.action === 'closeBootbox') {
-                        bootbox.hideAll();
-                        cargarContenido("{% url 'lista_horarios' %}");
-                    }},{ once: true });
-                });
+<script>
+  $(document).ready(function () {
+      if ( $.fn.DataTable.isDataTable('#listahora') ) {
+        $('#listahora').DataTable().destroy();
+      }
+
+      $('#listahora').DataTable({
+          language: { url: '//cdn.datatables.net/plug-ins/1.13.6/i18n/es-ES.json' },
+          dom: 'Bfrtip',
+          buttons: [
+              {// Botón de Excel
+                  extend: 'excelHtml5',
+                  className: 'btn btn-success'
+              },
+              {// Botón de PDF
+                  extend: 'pdfHtml5',
+                  className: 'btn btn-danger'
+              },
+              {// Botón de Imprimir
+                  extend: 'print',
+                  className: 'btn btn-info'
+              }
+          ]
+      });
+  });
 </script>

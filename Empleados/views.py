@@ -58,8 +58,9 @@ def editar_empleado(request, pk):
 def eliminar_empleado(request, pk):
     empleado = get_object_or_404(Empleado, pk=pk)
     if request.method == 'POST':
-        empleado.user.delete()  # elimina también el User relacionado
-        empleado.delete()       # opcional, solo si no se elimina con cascade
+        empleado.activo= False
+        empleado.save()
+        # empleado.user.delete()  # elimina también el User relacionado
         return HttpResponse(
             "<script>window.parent.postMessage({action: 'closeBootbox'}, '*');</script>"
         )

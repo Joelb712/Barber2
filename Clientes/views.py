@@ -55,7 +55,8 @@ def editar_cliente(request, pk):
 def eliminar_cliente(request, pk):
     cliente = get_object_or_404(Cliente, pk=pk)
     if request.method == 'POST':
-        cliente.delete()       # opcional, solo si no se elimina con cascade
+        cliente.activo= False
+        cliente.save()       # borrado logico
         return HttpResponse(
             "<script>window.parent.postMessage({action: 'closeBootbox'}, '*');</script>"
         )

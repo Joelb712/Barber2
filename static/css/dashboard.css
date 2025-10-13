@@ -9,7 +9,6 @@
 html, body { height: 100%; }
 body {
     font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
-    background: linear-gradient(135deg, var(--primary-blue), #6366f1);
     color: #0f172a;
     overflow-x: hidden;
 }
