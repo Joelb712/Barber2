@@ -1,0 +1,117 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Mi Perfil{% endblock %}
+
+{% block content %}
+<div class="flex justify-center mt-10">
+  <div class="glass w-full max-w-2xl p-6 rounded-2xl shadow-lg">
+    <h2 class="text-2xl font-semibold text-yellow-400 mb-4 text-center">Mi Perfil</h2>
+
+    <form method="post" enctype="multipart/form-data" class="space-y-4">
+      {% csrf_token %}
+
+      <!-- Imagen de perfil -->
+      <div class="flex flex-col items-center mb-4">
+        <img src="{% if cliente.foto %}{{ cliente.foto.url }}{% else %}https://cdn-icons-png.flaticon.com/512/1077/1077012.png{% endif %}"
+             alt="Foto de perfil"
+             class="w-24 h-24 rounded-full border-4 border-yellow-400 object-cover mb-2">
+        <input id="inputImagen" type="file" name="foto"
+               class="text-sm text-gray-300 hidden">
+      </div>
+
+      <!-- Datos del cliente -->
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <div>
+          <label class="block text-white font-medium">Nombre</label>
+          <input type="text" name="first_name" value="{{ cliente.first_name }}"
+                 class="campo w-full p-2 rounded bg-white/10 text-white border border-gray-500 focus:outline-none focus:ring-2 focus:ring-yellow-400"
+                 readonly>
+        </div>
+
+        <div>
+          <label class="block text-white font-medium">Apellido</label>
+          <input type="text" name="last_name" value="{{ cliente.last_name }}"
+                 class="campo w-full p-2 rounded bg-white/10 text-white border border-gray-500 focus:outline-none focus:ring-2 focus:ring-yellow-400"
+                 readonly>
+        </div>
+
+        <div>
+          <label class="block text-white font-medium">Dni</label>
+          <input type="text" name="dni" value="{{ cliente.dni }}"
+                 class="campo w-full p-2 rounded bg-white/10 text-white border border-gray-500 focus:outline-none focus:ring-2 focus:ring-yellow-400"
+                 readonly>
+        </div>
+
+        <div>
+          <label class="block text-white font-medium">Teléfono</label>
+          <input type="text" name="telefono" value="{{ cliente.telefono }}"
+                 class="campo w-full p-2 rounded bg-white/10 text-white border border-gray-500 focus:outline-none focus:ring-2 focus:ring-yellow-400"
+                 readonly>
+        </div>
+
+        <div>
+          <label class="block text-white font-medium">Email</label>
+          <input type="email" name="email" value="{{ user.email }}"
+                 class="campo w-full p-2 rounded bg-white/10 text-white border border-gray-500 focus:outline-none focus:ring-2 focus:ring-yellow-400"
+                 readonly>
+        </div>
+
+        <div class="md:col-span-2">
+          <label class="block text-white font-medium">Notas (opcional)</label>
+          <textarea name="notas" rows="3"
+                    class="campo w-full p-2 rounded bg-white/10 text-white border border-gray-500 focus:outline-none focus:ring-2 focus:ring-yellow-400"
+                    readonly>{{ cliente.notas }}</textarea>
+        </div>
+      </div>
+
+      <!-- Botones -->
+      <div class="text-center mt-6 space-x-3">
+        <button type="button" id="btnEditar"
+                class="bg-yellow-500 hover:bg-yellow-600 text-black font-semibold px-6 py-2 rounded-xl transition">
+          Editar perfil
+        </button>
+        <button type="submit" id="btnGuardar"
+                class="bg-green-500 hover:bg-green-600 text-black font-semibold px-6 py-2 rounded-xl transition hidden">
+          Guardar cambios
+        </button>
+        <button type="button" id="btnCancelar"
+                class="bg-gray-600 hover:bg-gray-700 text-white font-semibold px-6 py-2 rounded-xl transition hidden">
+          Cancelar
+        </button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<script>
+  const campos = document.querySelectorAll('.campo');
+  const btnEditar = document.getElementById('btnEditar');
+  const btnGuardar = document.getElementById('btnGuardar');
+  const btnCancelar = document.getElementById('btnCancelar');
+  const inputImagen = document.getElementById('inputImagen');
+
+  // Guardamos los valores originales
+  const valoresOriginales = {};
+  campos.forEach(campo => valoresOriginales[campo.name] = campo.value);
+
+  btnEditar.addEventListener('click', () => {
+    campos.forEach(campo => campo.removeAttribute('readonly'));
+    btnEditar.classList.add('hidden');
+    btnGuardar.classList.remove('hidden');
+    btnCancelar.classList.remove('hidden');
+    inputImagen.classList.remove('hidden');
+  });
+
+  btnCancelar.addEventListener('click', () => {
+    campos.forEach(campo => {
+      campo.value = valoresOriginales[campo.name];
+      campo.setAttribute('readonly', true);
+    });
+    btnEditar.classList.remove('hidden');
+    btnGuardar.classList.add('hidden');
+    btnCancelar.classList.add('hidden');
+    inputImagen.classList.add('hidden');
+  });
+</script>
+{% endblock %}

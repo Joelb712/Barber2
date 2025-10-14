@@ -1,0 +1,96 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Mis Turnos{% endblock %}
+
+{% block content %}
+<div class="flex flex-col items-center mt-10 px-4">
+    <h2 class="text-2xl font-semibold text-yellow-400 mb-6">Mis Turnos</h2>
+
+    <!-- Turnos activos -->
+    <div class="w-full max-w-4xl mb-8">
+        <h3 class="text-xl font-semibold text-white mb-4">Turnos Activos</h3>
+        {% if turnos_activos %}
+            <div class="space-y-4">
+                {% for turno in turnos_activos %}
+                    <div class="glass p-4 rounded-xl shadow-md flex justify-between items-center">
+                        <div>
+                            <p><strong>Fecha:</strong> {{ turno.fecha }}</p>
+                            <p><strong>Horario:</strong> {{ turno.horario }}</p>
+                            <p><strong>Empleado:</strong> {{ turno.empleado }}</p>
+                            <p><strong>Servicios:</strong>
+                                {% for sxt in turno.servicios_turno.all %}
+                                    {{ sxt.servicio.nombre }}{% if not forloop.last %}, {% endif %}
+                                {% endfor %}
+                            </p>
+                            <p><strong>Estado:</strong> {{ turno.estado.nombre }}</p>
+                        </div>
+                        <div class="flex gap-2">
+                            <!-- Botón cancelar -->
+                            <button onclick="abrirModal('{{ turno.id }}')" class="bg-red-600 hover:bg-red-700 text-white px-3 py-1 rounded">
+                                Cancelar
+                            </button>
+                            <!-- Botón modificar -->
+                            <a href="#" class="bg-yellow-500 hover:bg-yellow-600 text-black px-4 py-1.5 rounded">
+                                Modificar
+                            </a>
+                        </div>
+                    </div>
+                {% endfor %}
+            </div>
+        {% else %}
+            <p class="text-white/70">No tienes turnos activos.</p>
+        {% endif %}
+    </div>
+
+    <!-- Historial de turnos -->
+    <div class="w-full max-w-4xl">
+        <h3 class="text-xl font-semibold text-white mb-4">Historial de Turnos</h3>
+        {% if turnos_historial %}
+            <div class="space-y-4">
+                {% for turno in turnos_historial %}
+                    <div class="glass p-4 rounded-xl shadow-md">
+                        <p><strong>Fecha:</strong> {{ turno.fecha }}</p>
+                        <p><strong>Horario:</strong> {{ turno.horario }}</p>
+                        <p><strong>Empleado:</strong> {{ turno.empleado }}</p>
+                        <p><strong>Servicios:</strong>
+                            {% for sxt in turno.servicios_turno.all %}
+                                {{ sxt.servicio.nombre }}{% if not forloop.last %}, {% endif %}
+                            {% endfor %}
+                        </p>
+                        <p><strong>Estado:</strong> {{ turno.estado.nombre }}</p>
+                    </div>
+                {% endfor %}
+            </div>
+        {% else %}
+            <p class="text-white/70">No hay turnos en tu historial.</p>
+        {% endif %}
+    </div>
+</div>
+
+<!-- Modal -->
+<div id="modalCancelar" class="hidden fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center">
+  <div class="bg-white rounded-xl p-6 w-96 text-center">
+    <h3 class="text-xl font-semibold mb-4">¿Desea cancelar el turno?</h3>
+    <div class="flex justify-around">
+      <form id="formCancelar" method="post">
+        {% csrf_token %}
+        <button type="submit" class="bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded">Sí, cancelar</button>
+      </form>
+      <button onclick="cerrarModal()" class="bg-gray-300 hover:bg-gray-400 px-4 py-2 rounded">No</button>
+    </div>
+  </div>
+</div>
+
+<script>
+    function abrirModal(turnoId) {
+        const form = document.getElementById('formCancelar');
+        form.action = `/turnos/cancelar/${turnoId}/`; // se asigna dinámicamente
+        document.getElementById('modalCancelar').classList.remove('hidden');
+    }
+
+    function cerrarModal() {
+        document.getElementById('modalCancelar').classList.add('hidden');
+    }
+</script>
+{% endblock %}
