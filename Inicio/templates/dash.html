@@ -117,33 +117,44 @@
         </ul>
       </li>
 
-      <!-- Informes -->
-      <li class="menu-item">
-        <button class="menu-link" type="button" onclick="toggleSubmenu(this)">
-          <i class="fas fa-chart-bar"></i>
-          <span class="menu-text">Informes/Estadísticas</span>
-          <i class="fas fa-chevron-down menu-arrow"></i>
-        </button>
-        <ul class="submenu">
-          <li><a href="#" class="submenu-link">Reportes generales</a></li>
-          <li><a href="#" class="submenu-link">Estadísticas</a></li>
-        </ul>
-      </li>
-
-      <!-- Ayuda -->
-      <li class="menu-item">
-        <button class="menu-link" type="button" onclick="toggleSubmenu(this)">
-          <i class="fas fa-question-circle"></i>
-          <span class="menu-text">Ayuda</span>
-          <i class="fas fa-chevron-down menu-arrow"></i>
-        </button>
-        <ul class="submenu">
-          <li><a href="#" class="submenu-link">Manual de usuario</a></li>
-          <li><a href="#" class="submenu-link">Soporte técnico</a></li>
-          <li><a href="#" class="submenu-link">Contacto</a></li>
-        </ul>
-      </li>
     </ul>
+    <!-- Sección Perfil Usuario/Empleado -->
+    <div class="absolute bottom-0 left-0 w-full border-t border-neutral-700 bg-[#1a1a1a] p-4 text-center text-neutral-200">
+      <!-- Foto de perfil -->
+      <div class="w-16 h-16 mx-auto mb-3 rounded-full overflow-hidden border-2 border-yellow-400">
+        {% if user.empleado.foto %}
+          <img src="{{ user.empleado.foto.url }}" alt="Foto de perfil" class="w-full h-full object-cover">
+        {% else %}
+          <img src="{% static 'imgs/default-profile.png' %}" alt="Foto de perfil" class="w-full h-full object-cover">
+        {% endif %}
+      </div>
+
+      <!-- Nombre y correo -->
+      <p class="text-sm font-semibold text-yellow-400 truncate">{{ user.username }}</p>
+      <p class="text-xs text-neutral-400 mb-3 truncate">{{ user.email }}</p>
+
+      <!-- Botones -->
+      <div class="flex flex-col gap-2 pb-5">
+        <a href="{% url 'Inicio' %}" 
+       class="text-gray-400 hover:text-yellow-400 text-xs mt-1">
+       <i class="fa fa-home mr-1"></i>Volver al inicio
+      </a>
+      </div>
+      <div class="flex flex-col gap-2">
+        <a href="#" 
+          class="text-xs bg-yellow-500 hover:bg-yellow-600 text-neutral-900 font-semibold py-1.5 rounded transition">
+          Ver perfil
+        </a>
+        <form method="POST" action="{% url 'logout' %}">
+          {% csrf_token %}
+          <button type="submit"
+            class="w-full text-xs bg-neutral-700 hover:bg-red-700 text-neutral-200 py-1.5 rounded transition">
+            Cerrar sesión
+          </button>
+        </form>
+      </div>
+    </div>
+
   </nav>
 
   <!-- Main -->
@@ -160,13 +171,6 @@
           <a href="#"><i id="breadcrumb-icon"></i></a>
           <span id="breadcrumb-text" class="font-medium">Inicio</span>
         </nav>
-      </div>
-
-      <div class="nav-right flex items-center gap-3">
-        <div class="user-info text-sm text-gray-50">
-          <span>USUARIO</span>
-          <div class="inline-flex items-center justify-center bg-white text-indigo-600 rounded-full w-8 h-8 ml-2 font-bold">US</div>
-        </div>
       </div>
     </div>
 

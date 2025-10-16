@@ -57,8 +57,14 @@ def perfil_cliente(request):
         cliente.telefono = request.POST.get("telefono", "")
         cliente.dni = request.POST.get("dni", "")
         cliente.notas = request.POST.get("notas", "")
+        
         if 'foto' in request.FILES:
             cliente.foto = request.FILES['foto']
+
+        email = request.POST.get('email')
+        if email and email != request.user.email:
+            request.user.email = email
+            request.user.save()
 
         cliente.save()
 

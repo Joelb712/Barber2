@@ -81,19 +81,23 @@ class RegistroClienteForm(UserCreationForm):
         return email
 
     def save(self, commit=True):
-        user = super().save(commit)
+
+        user = super().save(commit=False)
+        user.email= self.cleaned_data.get('email')
         # Crear cliente vinculado al user
-        Cliente.objects.create(
-            user=user,
-            first_name=self.cleaned_data.get('first_name') ,
-            last_name=self.cleaned_data.get('last_name') ,
-            telefono=self.cleaned_data.get('telefono'),
-            dni=self.cleaned_data.get('dni')
-        )
-        # Asignar grupo Cliente automáticamente
-        grupo_cliente, created = Group.objects.get_or_create(name='Cliente')
-        user.groups.add(grupo_cliente)
-        return user
+        if commit:
+            user.save()
+            Cliente.objects.create(
+                user=user,
+                first_name=self.cleaned_data.get('first_name') ,
+                last_name=self.cleaned_data.get('last_name') ,
+                telefono=self.cleaned_data.get('telefono'),
+                dni=self.cleaned_data.get('dni')
+            )
+            # Asignar grupo Cliente automáticamente
+            grupo_cliente, created = Group.objects.get_or_create(name='Cliente')
+            user.groups.add(grupo_cliente)
+            return user
 
 
 
