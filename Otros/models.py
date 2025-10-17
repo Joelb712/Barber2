@@ -6,8 +6,8 @@ from django.conf import settings
 # --- CLIENTES ---
 class Cliente(models.Model):
     user = models.OneToOneField(settings.AUTH_USER_MODEL, on_delete=models.SET_NULL, null=True, blank=True)
-    first_name = models.CharField(max_length=50, blank=True)
-    last_name = models.CharField(max_length=50, blank=True)
+    first_name = models.CharField(max_length=50)
+    last_name = models.CharField(max_length=50)
     telefono = models.CharField(max_length=20, blank=True, null=True)
     dni = models.CharField(max_length=20, blank=True, null=True)
     notas = models.TextField(blank=True, null=True)

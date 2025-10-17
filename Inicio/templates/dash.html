@@ -180,23 +180,23 @@
       {% endblock %}
     </div>
   </main>
-  <!-- Modal genérico (fuera del content-area, persistente) -->
-    <div id="tailwindModal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 hidden">
+  <!-- Modal genérico AJAX -->
+  <div id="tailwindModal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 hidden">
     <div class="bg-white rounded-lg shadow-xl w-full max-w-2xl max-h-[90vh] flex flex-col">
         <div class="p-4 border-b border-gray-200 flex justify-between items-center">
-        <h3 id="modalTitle" class="text-lg font-semibold text-gray-800">Formulario</h3>
-        <button id="closeModalBtn" class="text-gray-500 hover:text-gray-800">
-            <i class="fas fa-times"></i>
-        </button>
+            <h3 id="modalTitle" class="text-lg font-semibold text-gray-800">Formulario</h3>
+            <button id="closeModalBtn" class="text-gray-500 hover:text-gray-800">
+                <i class="fas fa-times"></i>
+            </button>
         </div>
-        <div class="flex-1 overflow-hidden">
-        <iframe id="modalIframe" src="" frameborder="0" class="w-full h-full min-h-[500px]"></iframe>
+        <div id="modalBody" class="flex-1 overflow-y-auto p-4">
+            <!-- Aquí se inyectará el formulario por AJAX -->
         </div>
     </div>
-    </div>
+  </div>
 
 
-  <!-- CAMBIO: scripts JS (todo en el mismo archivo para debug) -->
+  <!-- SCRIPTS -->
   <script>
     // Referencias
     const sidebar = document.getElementById('sidebar');
@@ -388,102 +388,8 @@
       });
     });
 
-    // Cerrar modal desde botón o fondo
-        document.getElementById('closeModalBtn')?.addEventListener('click', function() {
-            const modal = document.getElementById('tailwindModal');
-            const iframe = document.getElementById('modalIframe');
-            if (modal) modal.classList.add('hidden');
-            if (iframe) iframe.src = '';
-        });
-
-        document.getElementById('tailwindModal')?.addEventListener('click', function(e) {
-            if (e.target === this) {
-            e.target.classList.add('hidden');
-            document.getElementById('modalIframe').src = '';
-            }
-        });
-
-    // Escuchar mensajes del iframe para cerrar el modal (global)
-    window.addEventListener('message', function(event) {
-    if (event.data && event.data.action === 'closeBootbox') {
-        const modal = document.getElementById('tailwindModal');
-        const iframe = document.getElementById('modalIframe');
-        if (modal) modal.classList.add('hidden');
-        if (iframe) iframe.src = '';
-
-        // Recargar la vista actual (por ejemplo, lista_empleados)
-        const currentUrl = window.location.pathname;
-        if (currentUrl.includes('/empleados/')) {
-          cargarContenido("{% url 'lista_empleados' %}", "Empleados", "fa-users");
-        }
-        else if (currentUrl.includes('/clientes/')) {
-          cargarContenido("{% url 'lista_clientes' %}", "Clientes", "fa-user");
-        }
-        else if (currentUrl.includes('/productos/')) {
-          cargarContenido("{% url 'lista_productos' %}", "Productos", "fa-box");
-        }
-        else if (currentUrl.includes('/servicios/')) {
-          cargarContenido("{% url 'lista_servicios' %}", "Servicios", "fa-scissors");
-        }
-        else if (currentUrl.includes('/turnos/')) {
-          cargarContenido("{% url 'turnos' %}", "Turnos", "fa-calendar-check");
-        }
-        else if (currentUrl.includes('ventas')) {
-          cargarContenido("{% url 'lista_ventas' %}", "Ventas", "fa-dollar-sign");
-        }
-        else if (currentUrl.includes('cajas')) {
-          cargarContenido("{% url 'cajas' %}", "Cajas", "fa-cash_register");
-        }
-        // Puedes extender esto para otras secciones si lo necesitas
-    }
-    });
-
-    window.addEventListener('message', function(event) {
-      if (event.data && event.data.action === 'showMessage') {
-        const { message, type } = event.data;
-
-        // Mostrar el mensaje (puede ser un alert o algo más bonito)
-        if (type === 'success') {
-          alert("✅ " + message);
-        } else if (type === 'error') {
-          alert("❌ " + message);
-        } else {
-          alert(message);
-        }
-
-        // Esperar un poco y cerrar el modal
-        setTimeout(() => {
-          const modal = document.getElementById('tailwindModal');
-          const iframe = document.getElementById('modalIframe');
-          if (modal) modal.classList.add('hidden');
-          if (iframe) iframe.src = '';
-
-          // Recargar la vista actual (como ya hacés)
-          const currentUrl = window.location.pathname;
-          if (currentUrl.includes('/empleados/')) {
-            cargarContenido("{% url 'lista_empleados' %}", "Empleados", "fa-users");
-          }
-          else if (currentUrl.includes('/clientes/')) {
-            cargarContenido("{% url 'lista_clientes' %}", "Clientes", "fa-user");
-          }
-          else if (currentUrl.includes('/productos/')) {
-            cargarContenido("{% url 'lista_productos' %}", "Productos", "fa-box");
-          }
-          else if (currentUrl.includes('/servicios/')) {
-            cargarContenido("{% url 'lista_servicios' %}", "Servicios", "fa-scissors");
-          }
-          else if (currentUrl.includes('/turnos/')) {
-            cargarContenido("{% url 'turnos' %}", "Turnos", "fa-calendar-check");
-          }
-          else if (currentUrl.includes('ventas')) {
-            cargarContenido("{% url 'lista_ventas' %}", "Ventas", "fa-cash-register");
-          }
-        }, 800);
-      }
-    });
-
     // ========================
-    // AJAX loader (cargarContenido) casi idéntico al original
+    // AJAX de CargarContenido que actualiza el contenido de principal
     // ========================
     function cargarContenido(url, nombre = "", icono = "fa-folder") {
       $.ajax({
@@ -522,13 +428,16 @@
           // actualizamos breadcrumb con lo que pasamos
           if (nombre) updateBreadcrumb(nombre, icono);
         },
+        // Opcional mostrar mensaje al usuario
         error: function(error) {
           console.error('Error al cargar contenido:', error);
-          // Opcional mostrar mensaje al usuario
         }
       });
     }
 
+    //============================
+    //  EVENTOS DEL SIDEBAR
+    //============================
     // también habilito que al clickear links del menú principal que tienen href (no '#'),
     // use la misma lógica AJAX (como en tu plantilla original).
     document.querySelectorAll('.menu-link[href]').forEach(link => {
@@ -559,6 +468,71 @@
       closeAllSubmenus();
       updateMain();
     });
+
+  // ===============================================================
+  // SISTEMA DE MODALES AJAX
+  // ===============================================================
+
+  // Abre el modal y carga contenido AJAX (formulario, confirmación, etc.)
+  function abrirModalAjax(url, titulo = "Formulario") {
+    $.ajax({
+      url: url,
+      method: 'GET',
+      headers: { 'X-Requested-With': 'XMLHttpRequest' },
+      success: function (respuesta) {
+        const modal = $('#tailwindModal');
+        modal.find('#modalTitle').text(titulo);
+        modal.find('#modalBody').html(respuesta);
+        modal.removeClass('hidden').addClass('flex');
+      },
+      error: function () {
+        alert('Error al cargar el formulario.');
+      }
+    });
+  }
+
+  // Cierra el modal limpiando su contenido
+  function cerrarModalAjax() {
+    const modal = $('#tailwindModal');
+    modal.addClass('hidden').removeClass('flex');
+    modal.find('#modalBody').empty();
+  }
+
+  // Envía formulario AJAX y actualiza tabla sin recargar todo el dashboard
+  $(document).on('submit', '.ajax-form', function (e) {
+    e.preventDefault();
+    const form = $(this);
+    $.ajax({
+      url: form.attr('action'),
+      method: form.attr('method'),
+      data: form.serialize(),
+      success: function (respuesta) {
+        // Si devuelve "OK" o éxito, cerramos modal y actualizamos tabla
+        cerrarModalAjax();
+        actualizarTablaActual();
+      },
+      error: function (xhr) {
+        // Si hay errores de validación, recargamos el formulario con errores
+        $('#modalBody').html(xhr.responseText);
+      }
+    });
+  });
+
+  // Refresca la tabla de la vista actual (sin recargar toda la página)
+  function actualizarTablaActual() {
+    const tabla = document.querySelector('#content-area table');
+    if (!tabla) return;
+
+    const urlActual = window.location.pathname;
+    $.ajax({
+      url: urlActual,
+      headers: { 'X-Requested-With': 'XMLHttpRequest' },
+      success: function (data) {
+        const newTable = $(data).find('table').html();
+        $(tabla).html(newTable);
+      }
+    });
+  }
   </script>
 
   {% block extra_js %}

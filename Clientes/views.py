@@ -1,6 +1,5 @@
-from django.http import HttpResponse
-from django.shortcuts import render, redirect,get_object_or_404
-from django.views.decorators.clickjacking import xframe_options_exempt
+from django.http import JsonResponse
+from django.shortcuts import render,get_object_or_404
 from django.contrib.auth.decorators import user_passes_test,login_required
 from Otros.models import Cliente
 from .forms import ClienteAltaForm,ClienteEditarForm
@@ -16,48 +15,56 @@ def es_recepcionista(user):
 @user_passes_test(lambda u: es_recepcionista(u))
 def lista_clientes(request):
     clientes = Cliente.objects.all()
+    # Siempre render completo para la primera carga
     return render(request, 'clientes.html', {'clientes': clientes})
 
 @login_required
 @user_passes_test(lambda u: es_recepcionista(u))
-@xframe_options_exempt
+def tabla_clientes(request):
+    clientes = Cliente.objects.all()
+    return render(request, 'clientes_tabla.html', {'clientes': clientes})
+
+
+
+@login_required
+@user_passes_test(lambda u: es_recepcionista(u))
 def crear_cliente(request):
     if request.method == 'POST':
         form = ClienteAltaForm(request.POST)
         if form.is_valid():
             form.save()
-            # Avisar al iframe que debe cerrarse:
-            return HttpResponse(
-                "<script>window.parent.postMessage({action: 'closeBootbox'}, '*');</script>"
-            )
+            # Enviamos éxito para que el modal se cierre y la tabla se recargue
+            return JsonResponse({'success': True})
+        else:
+            # Enviamos el formulario con errores de validación
+            return render(request, 'formcli.html', {'form': form})     
     else:
         form = ClienteAltaForm()
-    
-    return render(request, 'formcli.html', {'form': form})
+        return render(request, 'formcli.html', {'form': form})
+
 
 @login_required
 @user_passes_test(es_gerente)
-@xframe_options_exempt
 def editar_cliente(request, pk):
     cliente = get_object_or_404(Cliente, pk=pk)
     if request.method == 'POST':
         form = ClienteEditarForm(request.POST, instance=cliente)
         if form.is_valid():
             form.save()
-            return HttpResponse("<script>window.parent.postMessage({action: 'closeBootbox'}, '*');</script>")
+            return JsonResponse({'success': True})
+        else:
+            return render(request, 'formcli.html', {'form': form, 'cliente': cliente})
     else:
         form = ClienteEditarForm(instance=cliente)
-    return render(request, 'formcli.html', {'form': form, 'cliente': cliente})
+        return render(request, 'formcli.html', {'form': form, 'cliente': cliente})
+
 
 @login_required
 @user_passes_test(es_gerente)
-@xframe_options_exempt
 def eliminar_cliente(request, pk):
     cliente = get_object_or_404(Cliente, pk=pk)
     if request.method == 'POST':
-        cliente.activo= False
-        cliente.save()       # borrado logico
-        return HttpResponse(
-            "<script>window.parent.postMessage({action: 'closeBootbox'}, '*');</script>"
-        )
+        cliente.activo= False   # borrado logico
+        cliente.save()       
+        return JsonResponse({'success': True})
     return render(request, 'eliminarcli.html', {'cliente': cliente})

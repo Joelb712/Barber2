@@ -24,7 +24,7 @@ def apertura_caja(request):
                 monto_inicial=monto_inicial,
                 estado=True
             )
-            return redirect("vista")  # donde quieras redirigir
+            return redirect("cajas")  # donde quieras redirigir
     else:
         form = AperturaCajaForm()
 
@@ -47,12 +47,10 @@ def cierre_caja(request):
         caja.save()
 
         messages.success(request, f"Caja cerrada. Total final: ${caja.monto_final}")
-        return redirect("vista")
+        return redirect("cajas")
 
     return render(request, "cierre.html", {"caja": caja})
 
-def vista(request):
-    return render(request,"vista.html")
 
 def lista_cajas(request):
     cajas= Caja.objects.all()

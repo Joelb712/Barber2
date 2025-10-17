@@ -4,8 +4,8 @@
     color: white;
   }
   .inactivo {
-  display: none;  /* Oculta las filas inactivas */
-}
+    display: none;  /* Oculta las filas inactivas */
+  }
 </style>
 
 <div class="card">
@@ -31,82 +31,58 @@
       </div>
     </div>
 
-    <div class="bg-zinc-800 backdrop-blur-sm rounded-xl p-5 shadow overflow-x-auto">
-      <table id="listacli" class="min-w-full divide-y divide-gray-200">
-        <thead class="bg-slate-700">
-          <tr>
-            <th class="px-4 py-3 text-left text-xs font-medium text-white uppercase tracking-wider">Nombre</th>
-            <th class="px-4 py-3 text-left text-xs font-medium text-white uppercase tracking-wider">Apellido</th>
-            <th class="px-4 py-3 text-left text-xs font-medium text-white uppercase tracking-wider">DNI</th>
-            <th class="px-4 py-3 text-left text-xs font-medium text-white uppercase tracking-wider">Teléfono</th>
-            <th class="px-4 py-3 text-left text-xs font-medium text-white uppercase tracking-wider">Notas</th>
-            <th class="px-4 py-3 text-left text-xs font-medium text-white uppercase tracking-wider">Estado</th>
-            <th class="px-4 py-3 text-left text-xs font-medium text-white uppercase tracking-wider">Acciones</th>
-          </tr>
-        </thead>
-        <tbody class="bg-gray-300 divide-y divide-gray-200">
-          {% for c in clientes %}
-          <tr data-pk="{{ c.pk }}" class="{% if not c.activo %}inactivo{% endif %}   hover:bg-amber-100">
-            <td class="px-4 py-3 whitespace-nowrap text-sm font-medium text-black">{{ c.first_name }}</td>
-            <td class="px-4 py-3 whitespace-nowrap text-sm font-medium text-black">{{ c.last_name }}</td>
-            <td class="px-4 py-3 whitespace-nowrap text-sm font-medium text-black">{{ c.dni }}</td>
-            <td class="px-4 py-3 whitespace-nowrap text-sm font-medium text-black">{{ c.telefono }}</td>
-            <td class="px-4 py-3 whitespace-nowrap text-sm font-medium text-black">{{ c.notas }}</td>
-            <td class="px-4 py-3 whitespace-nowrap">
-              <span class="px-2 inline-flex text-sm leading-5 font-semibold rounded-full 
-                {% if c.activo %}bg-green-100 text-green-800{% else %}bg-red-100 text-red-800{% endif %}">
-                {{ c.activo|yesno:"Activo,Inactivo" }}
-              </span>
-            </td>
-            <td class="px-4 py-3 whitespace-nowrap text-m font-medium">
-              <button class="btnEditar text-yellow-600 hover:text-yellow-800 mr-2">
-                <i class="fas fa-edit"></i>
-              </button>
-              <button class="btnEliminar text-red-600 hover:text-red-800">
-                <i class="fas fa-trash"></i>
-              </button>
-            </td>
-          </tr>
-          {% endfor %}
-        </tbody>
-      </table>
+    <div id="tablaClientes" class="bg-zinc-800 backdrop-blur-sm rounded-xl p-5 shadow overflow-x-auto">
+      {% include 'clientes_tabla.html' %}
     </div>
+
   </div>
 </div>
 
+<!-- MODAL -->
+<div id="ajaxModal" class="fixed inset-0 bg-black bg-opacity-60 hidden items-center justify-center z-50">
+  <div class="bg-zinc-900 rounded-xl shadow-lg p-6 w-full max-w-2xl relative">
+    <button id="btnCerrarModal" class="absolute top-3 right-4 text-gray-400 hover:text-white">
+      <i class="fas fa-times text-lg"></i>
+    </button>
+    <div id="modalContent"></div>
+  </div>
+</div>
 
 <script>
-  function openModal(url, title = 'Formulario') {
-    const modal = document.getElementById('tailwindModal');
-    const iframe = document.getElementById('modalIframe');
-    const titleEl = document.getElementById('modalTitle');
-
-    if (modal && iframe && titleEl) {
-      titleEl.textContent = title;
-      iframe.src = url;
-      modal.classList.remove('hidden');
-    }
+  // Abrir modal y cargar HTML desde servidor
+  function abrirModalAjax(url) {
+    fetch(url, { headers: { 'X-Requested-With': 'XMLHttpRequest' } })
+      .then(response => response.text())
+      .then(html => {
+        const modal = document.getElementById('ajaxModal');
+        document.getElementById('modalContent').innerHTML = html;
+        modal.classList.remove('hidden');
+        modal.classList.add('flex');
+      })
+      .catch(err => console.error(err));
   }
 
-  // Eventos delegados (funcionan incluso tras AJAX)
-  document.addEventListener('click', function(e) {
-    const row = e.target.closest('tr[data-pk]');
-    let pk;
+  // Cerrar modal
+  function cerrarModal() {
+    const modal = document.getElementById('ajaxModal');
+    modal.classList.add('hidden');
+    modal.classList.remove('flex');
+    document.getElementById('modalContent').innerHTML = '';
+  }
 
-    if (e.target.closest('#btnAgregarCliente')) {
-      openModal("{% url 'formcli' %}", "Nuevo Cliente");
-    }
-    else if (e.target.closest('.btnEditar')) {
-      pk = row?.dataset.pk;
-      if (pk) openModal(`/clientes/editar/${pk}/`, "Editar Cliente");
-    }
-    else if (e.target.closest('.btnEliminar')) {
-      pk = row?.dataset.pk;
-      if (pk) openModal(`/clientes/eliminar/${pk}/`, "Eliminar Cliente");
-    }
-  });
+  // Recargar tabla de clientes
+  function recargarTablaClientes() {
+    fetch("{% url 'tabla_clientes' %}", { headers: { 'X-Requested-With': 'XMLHttpRequest' } })
+      .then(response => response.text())
+      .then(html => {
+        document.getElementById('tablaClientes').innerHTML = html;
+        inicializarTabla();
+      })
+      .catch(err => console.error(err));
+  }
 
-  $(document).ready(function () {
+  // Inicializar DataTable
+  function inicializarTabla() {
     if ($.fn.DataTable.isDataTable('#listacli')) {
       $('#listacli').DataTable().destroy();
     }
@@ -114,19 +90,68 @@
       language: { url: '//cdn.datatables.net/plug-ins/1.13.6/i18n/es-ES.json' },
       dom: 'Bfrtip',
       buttons: [
-        {// Botón de Excel
-          extend: 'excelHtml5',
-        },
-        {// Botón de PDF
-          extend: 'pdfHtml5',
-        },
-        {// Botón de Imprimir
-          extend: 'print',
-        }
+        { extend: 'excelHtml5' },
+        { extend: 'pdfHtml5' },
+        { extend: 'print' }
       ]
     });
+  }
+
+  // Manejar envío de formularios dentro del modal
+  document.addEventListener('submit', function(e) {
+    if (e.target.closest('#ajaxModal form')) {
+      e.preventDefault();
+      const form = e.target;
+      const formData = new FormData(form);
+
+      fetch(form.action, {
+        method: form.method,
+        body: formData,
+        headers: { 'X-Requested-With': 'XMLHttpRequest' }
+      })
+      .then(response => {
+        const contentType = response.headers.get('content-type');
+        if (contentType && contentType.includes('application/json')) {
+          return response.json().then(data => ({ type: 'json', data }));
+        } else {
+          return response.text().then(data => ({ type: 'html', data }));
+        }
+      })
+      .then(res => {
+        if (res.type === 'json' && res.data.success) {
+          cerrarModal();
+          recargarTablaClientes();
+        } else if (res.type === 'html') {
+          document.getElementById('modalContent').innerHTML = res.data;
+        }
+      })
+      .catch(err => console.error(err));
+    }
   });
-  $('#btnMostrarInactivos').click(function() {
-    $('.inactivo').toggle(); // Muestra u oculta filas inactivas
-});
+
+  // Manejar clicks en botones
+  document.addEventListener('click', function(e) {
+    const row = e.target.closest('tr[data-pk]');
+    let pk;
+
+    if (e.target.closest('#btnAgregarCliente')) {
+      abrirModalAjax("{% url 'formcli' %}");
+    } else if (e.target.closest('.btnEditar')) {
+      pk = row?.dataset.pk;
+      if (pk) abrirModalAjax(`/clientes/editar/${pk}/`);
+    } else if (e.target.closest('.btnEliminar')) {
+      pk = row?.dataset.pk;
+      if (pk) abrirModalAjax(`/clientes/eliminar/${pk}/`);
+    } else if (e.target.closest('#btnCerrarModal')) {
+      cerrarModal();
+    }
+  });
+
+  // Mostrar/Ocultar inactivos
+  $(document).ready(function () {
+    inicializarTabla();
+    $('#btnMostrarInactivos').click(function() {
+      $('.inactivo').toggle();
+    });
+  });
 </script>
