@@ -53,3 +53,7 @@ def cierre_caja(request):
 
 def vista(request):
     return render(request,"vista.html")
+
+def lista_cajas(request):
+    cajas= Caja.objects.all()
+    return render(request, 'cajas.html', {'cajas': cajas})

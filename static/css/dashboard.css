@@ -23,7 +23,6 @@ body {
     overflow-y: auto;
     transition: width .22s ease, transform .22s ease;
     z-index: 1100;
-    position: relative;
 }
 
 /* CAMBIO: collapsed desktop */

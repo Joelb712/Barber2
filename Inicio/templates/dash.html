@@ -99,7 +99,7 @@
           <i class="fas fa-chevron-down menu-arrow"></i>
         </button>
         <ul class="submenu">
-          <li><a href="{% url 'vista' %}" class="submenu-link" data-nombre="Cajas" data-icono="fa-cash-register">Ver Cajas</a></li>
+          <li><a href="{% url 'cajas' %}" class="submenu-link" data-nombre="Cajas" data-icono="fa-cash-register">Ver Cajas</a></li>
           <li><a href="#" class="submenu-link">Métodos de Pago</a></li>
         </ul>
       </li>
@@ -429,7 +429,10 @@
           cargarContenido("{% url 'turnos' %}", "Turnos", "fa-calendar-check");
         }
         else if (currentUrl.includes('ventas')) {
-          cargarContenido("{% url 'lista_ventas' %}", "Ventas", "fa-cash-register");
+          cargarContenido("{% url 'lista_ventas' %}", "Ventas", "fa-dollar-sign");
+        }
+        else if (currentUrl.includes('cajas')) {
+          cargarContenido("{% url 'cajas' %}", "Cajas", "fa-cash_register");
         }
         // Puedes extender esto para otras secciones si lo necesitas
     }

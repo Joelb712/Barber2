@@ -28,6 +28,7 @@ class Empleado(models.Model):
         choices=[('barbero', 'Barbero'), ('recepcionista', 'Recepcionista'), ('gerente', 'Gerente')]
     )
     fecha_registro = models.DateTimeField(auto_now_add=True)
+    foto = models.ImageField(upload_to='empleados/', blank=True, null=True)
     activo = models.BooleanField(default=True)
 
     def __str__(self):
