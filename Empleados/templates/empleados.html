@@ -1,11 +1,16 @@
 {% load static %}
 <style>
-  label{color: white;}
+  label {
+    color: white;
+  }
+  .inactivo {
+    display: none;  /* Oculta las filas inactivas */
+  }
 </style>
 
-<div class="rounded-xl shadow-lg overflow-hidden">
+<div class="card">
   <div class="p-6 text-white text-center">
-    <h2 class="text-2xl font-bold text-yellow-400">Gestión de Empleados</h2>
+      <h2 class="text-2xl font-bold text-yellow-400">Gestión de Empleados</h2>
   </div>
 
   <div class="p-6 space-y-6">
@@ -15,100 +20,42 @@
           <h2 class="text-xl font-bold flex items-center gap-2 text-white">
             <i class="fas fa-users"></i> Lista de Empleados
           </h2>
-          <p class="text-white">Aquí puedes ver todos los empleados de la Barbería y sus respectivos roles</p>
+          <p class="text-white">Aquí puedes ver todos los empleados de la Barbería</p>
         </div>
-        <button id="btnAgregarEmpleado" class="px-4 py-2 bg-yellow-500 hover:bg-blue-700 text-black font-medium rounded-lg transition">
+        <button data-url="{% url 'formemp' %}" data-titulo="Nuevo Empleado" class="btn-ajax-form px-4 py-2 bg-yellow-500 hover:bg-blue-700 text-black font-medium rounded-lg transition">
           <i class="fas fa-plus mr-2"></i> Nuevo Empleado
+        </button>
+        <button id="btnMostrarInactivos" class="px-4 py-2 bg-indigo-500 hover:bg-blue-700 text-black font-medium rounded-lg transition">
+          Mostrar Inactivos
         </button>
       </div>
     </div>
 
-    <div class="bg-zinc-800 backdrop-blur-sm rounded-xl p-5 shadow overflow-x-auto">
-      <table id="listaemp" class="min-w-full divide-y divide-gray-200">
-        <thead class="bg-slate-700">
-          <tr>
-            <th class="px-4 py-3 text-left text-xs font-medium text-white uppercase tracking-wider">Usuario</th>
-            <th class="px-4 py-3 text-left text-xs font-medium text-white uppercase tracking-wider">DNI</th>
-            <th class="px-4 py-3 text-left text-xs font-medium text-white uppercase tracking-wider">Nombre</th>
-            <th class="px-4 py-3 text-left text-xs font-medium text-white uppercase tracking-wider">Apellido</th>
-            <th class="px-4 py-3 text-left text-xs font-medium text-white uppercase tracking-wider">Teléfono</th>
-            <th class="px-4 py-3 text-left text-xs font-medium text-white uppercase tracking-wider">Especialidad</th>
-            <th class="px-4 py-3 text-left text-xs font-medium text-white uppercase tracking-wider">Estado</th>
-            <th class="px-4 py-3 text-left text-xs font-medium text-white uppercase tracking-wider">Acciones</th>
-          </tr>
-        </thead>
-        <tbody class="bg-gray-300 divide-y divide-gray-200">
-          {% for e in empleados %}
-          <tr data-pk="{{ e.pk }}" class="{% if not e.activo %}inactivo{% endif %} hover:bg-amber-100">
-            <td class="px-4 py-3 whitespace-nowrap text-sm font-medium text-black">{{ e.user.username }}</td>
-            <td class="px-4 py-3 whitespace-nowrap text-sm font-medium text-black">{{ e.dni }}</td>
-            <td class="px-4 py-3 whitespace-nowrap text-sm font-medium text-black">{{ e.user.first_name }}</td>
-            <td class="px-4 py-3 whitespace-nowrap text-sm font-medium text-black">{{ e.user.last_name }}</td>
-            <td class="px-4 py-3 whitespace-nowrap text-sm font-medium text-black">{{ e.telefono }}</td>
-            <td class="px-4 py-3 whitespace-nowrap text-sm font-medium text-black">{{ e.get_especialidad_display }}</td>
-            <td class="px-4 py-3 whitespace-nowrap">
-              <span class="px-2 inline-flex text-sm leading-5 font-semibold rounded-full 
-                {% if e.activo %}bg-green-100 text-green-800{% else %}bg-red-100 text-red-800{% endif %}">
-                {{ e.activo|yesno:"Activo,Inactivo" }}
-              </span>
-            </td>
-            <td class="px-4 py-3 whitespace-nowrap text-m font-medium">
-              <button class="btnEditar text-yellow-600 hover:text-yellow-800 mr-2">
-                <i class="fas fa-edit"></i>
-              </button>
-              <button class="btnEliminar text-red-600 hover:text-red-800">
-                <i class="fas fa-trash"></i>
-              </button>
-            </td>
-          </tr>
-          {% endfor %}
-        </tbody>
-      </table>
+    <div id="tablaEmpleados" class="bg-zinc-800 backdrop-blur-sm rounded-xl p-5 shadow overflow-x-auto" data-url="{% url 'tabla_empleados' %}">
+      {% include 'empleados_tabla.html' %}
     </div>
+
   </div>
 </div>
 
 <script>
-  // Solo abre el modal; el cierre lo maneja base.html
-  function openModal(url, title = 'Formulario') {
-    const modal = document.getElementById('tailwindModal');
-    const iframe = document.getElementById('modalIframe');
-    const titleEl = document.getElementById('modalTitle');
-
-    if (modal && iframe && titleEl) {
-      titleEl.textContent = title;
-      iframe.src = url;
-      modal.classList.remove('hidden');
-    }
-  }
-
-  // Eventos delegados (funcionan incluso tras AJAX)
-  document.addEventListener('click', function(e) {
-    const row = e.target.closest('tr[data-pk]');
-    let pk;
-
-    if (e.target.closest('#btnAgregarEmpleado')) {
-      openModal("{% url 'formemp' %}", "Nuevo Empleado");
-    }
-    else if (e.target.closest('.btnEditar')) {
-      pk = row?.dataset.pk;
-      if (pk) openModal(`/empleados/editar/${pk}/`, "Editar Empleado");
-    }
-    else if (e.target.closest('.btnEliminar')) {
-      pk = row?.dataset.pk;
-      if (pk) openModal(`/empleados/eliminar/${pk}/`, "Eliminar Empleado");
-    }
+  // Delegación de botones Editar/Eliminar usando el modal global
+  $('#tablaEmpleados').on('click', '.btnEditar', function() {
+    const id = $(this).closest('tr').data('pk');
+    abrirModalAjax(`/empleados/editar/${id}/`, 'Editar Empleado');
+    console.log("Editar ID:", id);
   });
 
-  // Inicializar DataTables (solo si no existe)
-  $(document).ready(function() {
-    if ($.fn.DataTable.isDataTable('#listaemp')) {
-      $('#listaemp').DataTable().destroy();
-    }
-    $('#listaemp').DataTable({
-      language: { url: '//cdn.datatables.net/plug-ins/1.13.6/i18n/es-ES.json' },
-      dom: 'Bfrtip',
-      buttons: ['excel', 'pdf', 'print']
+  $('#tablaEmpleados').on('click', '.btnEliminar', function() {
+    const id = $(this).closest('tr').data('pk');
+    abrirModalAjax(`/empleados/eliminar/${id}/`, 'Eliminar Empleado');
+    console.log("Eliminar ID:", id);
+  });
+ 
+  // Mostrar/Ocultar inactivos
+  $(document).ready(function () {
+    $('#btnMostrarInactivos').click(function() {
+      $('.inactivo').toggle();
     });
   });
 </script>

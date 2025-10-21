@@ -1,9 +1,8 @@
-from django.shortcuts import render, get_object_or_404, redirect, HttpResponse
+from django.shortcuts import render, get_object_or_404,HttpResponse
 from Otros.models import Horario,Turno,Servicio,Empleado,EstadoTurno, ServiciosXTurno,Cliente
 from .forms import HorarioForm, TurnoForm
 from django.contrib import messages
 from django.contrib.auth.decorators import user_passes_test,login_required
-from django.views.decorators.clickjacking import xframe_options_exempt
 from django.http import JsonResponse
 from datetime import datetime
 from django.db.models import Q
@@ -17,131 +16,56 @@ def es_gerente(user):
 
 @login_required
 @user_passes_test(es_gerente)
-@xframe_options_exempt
 def lista_horarios(request):
     horarios = Horario.objects.all()
     return render(request, 'horarios.html', {'horarios': horarios})
 
 @login_required
 @user_passes_test(es_gerente)
-@xframe_options_exempt
+def tabla_horarios(request):
+    horarios = Horario.objects.all()
+    return render(request, 'horarios_tabla.html', {'horarios': horarios})
+
+@login_required
+@user_passes_test(es_gerente)
 def crear_horario(request):
     if request.method == 'POST':
         form = HorarioForm(request.POST)
         if form.is_valid():
             form.save()
-            # Avisar al iframe que debe cerrarse:
-            return HttpResponse(
-                "<script>window.parent.postMessage({action: 'closeBootbox'}, '*');</script>"
-            )
+            return JsonResponse({'success': True})
+        else:
+            # Enviamos el formulario con errores de validación
+            return render(request, 'formhora.html', {'form': form})  
     else:
         form = HorarioForm()
-    return render(request, 'formhora.html', {'form': form})
+        return render(request, 'formhora.html', {'form': form})
 
 @login_required
 @user_passes_test(es_gerente)
-@xframe_options_exempt
 def editar_horario(request, pk):
     horario = get_object_or_404(Horario, pk=pk)
     if request.method == 'POST':
         form = HorarioForm(request.POST, instance=horario)
         if form.is_valid():
             form.save()
-            messages.success(request, 'Horario actualizado correctamente.')
-            return HttpResponse(
-                "<script>window.parent.postMessage({action: 'closeBootbox'}, '*');</script>"
-            )
-    else:
+            return JsonResponse({'success': True})
+        else:
+            return render(request, 'formhora.html', {'form': form, 'horarios': horario})
+    else:  
         form = HorarioForm(instance=horario)
-    return render(request, 'formhora.html', {'form': form, 'titulo': 'Editar Horario'})
+        return render(request, 'formhora.html', {'form': form, 'horarios': horario})
 
 @login_required
 @user_passes_test(es_gerente)
-@xframe_options_exempt
 def eliminar_horario(request, pk):
     horario = get_object_or_404(Horario, pk=pk)
     if request.method == 'POST':
         horario.activo=False
         horario.save()
         # horario.delete()
-        messages.success(request, 'Horario eliminado correctamente.')
-        return HttpResponse(
-            "<script>window.parent.postMessage({action: 'closeBootbox'}, '*');</script>"
-        )
-    return render(request, 'eliminarhora.html', {'objeto': horario, 'tipo': 'Horario'})
-
-
-# def servicios_view(request):
-#     servicios = Servicio.objects.filter(activo=True)
-#     return render(request, "reservaserv.html", {"servicios": servicios})
-
-# def fechas_view(request):
-#     horarios = Horario.objects.all().order_by("hora_inicio")
-#     return render(request, "reservafechas.html", {"horarios": horarios})
-
-# def empleados_view(request):
-#     empleados = Empleado.objects.filter(activo=True, especialidad="barbero")
-#     return render(request, "reservaemp.html", {"empleados": empleados})
-
-# @csrf_exempt
-# def confirmar_turno(request):
-#     if request.method == "POST":
-#         cliente = request.user.cliente
-#         servicios_ids = request.POST.getlist("servicios[]")
-#         fecha = request.POST.get("fecha")
-#         horario_id = request.POST.get("horario")
-#         empleado_id = request.POST.get("empleado")
-
-#         # Crear turno
-#         estado_pendiente = EstadoTurno.objects.get(nombre="Pendiente")
-#         turno = Turno.objects.create(
-#             cliente=cliente,
-#             empleado_id=empleado_id,
-#             fecha=fecha,
-#             horario_id=horario_id,
-#             estado=estado_pendiente
-#         )
-
-#         # Relacionar servicios
-#         servicios = Servicio.objects.filter(id__in=servicios_ids)
-#         duracion_total = 0
-#         for s in servicios:
-#             ServiciosXTurno.objects.create(turno=turno, servicio=s)
-#             duracion_total += s.duracion
-
-#         # Guardar duración real
-#         turno.duracion_real = duracion_total if duracion_total > 0 else 30
-#         turno.save()
-
-#         return JsonResponse({"mensaje": "¡Turno reservado con éxito!"})
-    
-
-# @login_required
-# @user_passes_test(es_gerente)
-# @xframe_options_exempt
-# def turnos_general(request):
-#     turnos = Turno.objects.select_related("cliente", "empleado", "estado", "horario")
-
-#     data = []
-#     for t in turnos:
-#         data.append({
-#             "id": t.id,
-#             "fecha": t.fecha.strftime("%d/%m/%Y"),
-#             "hora": t.horario.hora_inicio.strftime('%H:%M'),
-#             "cliente": t.cliente.first_name,
-#             "empleado": t.empleado.user.first_name if t.empleado else "No asignado",
-#             "estado": t.estado.nombre,
-#         })
-
-#     return render(request, "turnos_general.html", {"turnos": data})
-
-@xframe_options_exempt
-@login_required
-@user_passes_test(es_gerente)
-def turnos_general(request):
-    turnos = Turno.objects.all()
-    horarios = Horario.objects.all()
-    return render(request, 'turnos_general.html', {'turnos': turnos, 'horarios': horarios})
+        return JsonResponse({'success': True})
+    return render(request, 'eliminarhora.html', {'horario':horario})
 
 
 def get_servicios(request):
@@ -246,7 +170,20 @@ def crear_turno(request):
     except Exception as e:
         return JsonResponse({'error': str(e)}, status=500)
     
-@xframe_options_exempt
+
+@login_required
+@user_passes_test(es_gerente)
+def turnos_general(request):
+    turnos = Turno.objects.all()
+    return render(request, 'turnos_general.html', {'turnos': turnos})
+
+@login_required
+@user_passes_test(es_gerente)
+def tabla_turnos(request):
+    turnos = Turno.objects.all()
+    return render(request, 'turnos_tabla.html', {'turnos': turnos})
+
+
 @login_required
 @user_passes_test(es_gerente)
 def dar_turno(request):
@@ -254,16 +191,15 @@ def dar_turno(request):
         form = TurnoForm(request.POST)
         if form.is_valid():
             form.save()
-            # Avisar al iframe que debe cerrarse:
-            return HttpResponse(
-                "<script>window.parent.postMessage({action: 'closeBootbox'}, '*');</script>"
-            )
+            return JsonResponse({'success': True})
+        else:
+            # Enviamos el formulario con errores de validación
+            return render(request, 'formturno.html', {'form': form})  
     else:
-        form = TurnoForm()
+        form= TurnoForm()
+        return render(request, 'formturno.html', {'form': form})
 
-    return render(request, 'formturno.html', {'form': form})
 
-@xframe_options_exempt
 @login_required
 @user_passes_test(es_gerente)
 def editar_turno(request, pk):
@@ -272,22 +208,20 @@ def editar_turno(request, pk):
         form = TurnoForm(request.POST, instance=turno)
         if form.is_valid():
             form.save()
-             # Avisar al iframe que debe cerrarse:
-            return HttpResponse(
-                "<script>window.parent.postMessage({action: 'closeBootbox'}, '*');</script>"
-            )
+            return JsonResponse({'success': True})
+        else:
+            return render(request, 'formturno.html', {'form': form, 'turno': turno})
     else:
         form = TurnoForm(instance=turno)
-    return render(request,('formturno.html'),{'form':form , 'turno':turno})
+        return render(request,('formturno.html'),{'form':form , 'turno':turno})
 
-@xframe_options_exempt
+
 @login_required
 @user_passes_test(es_gerente)
 def eliminar_turno(request, pk):
     turno = get_object_or_404(Turno, pk=pk)
     if request.method == 'POST':
-        turno.delete()       # opcional, solo si no se elimina con cascade
-        return HttpResponse(
-            "<script>window.parent.postMessage({action: 'closeBootbox'}, '*');</script>"
-        )
+        turno.estado = 'cancelado'
+        turno.save()
+        return JsonResponse({'success': True})
     return render(request, 'eliminarturno.html', {'turno': turno})

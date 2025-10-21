@@ -22,7 +22,7 @@
           </h2>
           <p class="text-white">Aquí puedes ver todos los clientes de la Barbería</p>
         </div>
-        <button id="btnAgregarCliente" class="px-4 py-2 bg-yellow-500 hover:bg-blue-700 text-black font-medium rounded-lg transition">
+        <button data-url="{% url 'formcli' %}" data-titulo="Nuevo Cliente" class="btn-ajax-form px-4 py-2 bg-yellow-500 hover:bg-blue-700 text-black font-medium rounded-lg transition">
           <i class="fas fa-plus mr-2"></i> Nuevo Cliente
         </button>
         <button id="btnMostrarInactivos" class="px-4 py-2 bg-indigo-500 hover:bg-blue-700 text-black font-medium rounded-lg transition">
@@ -31,127 +31,30 @@
       </div>
     </div>
 
-    <div id="tablaClientes" class="bg-zinc-800 backdrop-blur-sm rounded-xl p-5 shadow overflow-x-auto">
+    <div id="tablaClientes" class="bg-zinc-800 backdrop-blur-sm rounded-xl p-5 shadow overflow-x-auto" data-url="{% url 'tabla_clientes' %}">
       {% include 'clientes_tabla.html' %}
     </div>
 
   </div>
 </div>
 
-<!-- MODAL -->
-<div id="ajaxModal" class="fixed inset-0 bg-black bg-opacity-60 hidden items-center justify-center z-50">
-  <div class="bg-zinc-900 rounded-xl shadow-lg p-6 w-full max-w-2xl relative">
-    <button id="btnCerrarModal" class="absolute top-3 right-4 text-gray-400 hover:text-white">
-      <i class="fas fa-times text-lg"></i>
-    </button>
-    <div id="modalContent"></div>
-  </div>
-</div>
-
 <script>
-  // Abrir modal y cargar HTML desde servidor
-  function abrirModalAjax(url) {
-    fetch(url, { headers: { 'X-Requested-With': 'XMLHttpRequest' } })
-      .then(response => response.text())
-      .then(html => {
-        const modal = document.getElementById('ajaxModal');
-        document.getElementById('modalContent').innerHTML = html;
-        modal.classList.remove('hidden');
-        modal.classList.add('flex');
-      })
-      .catch(err => console.error(err));
-  }
-
-  // Cerrar modal
-  function cerrarModal() {
-    const modal = document.getElementById('ajaxModal');
-    modal.classList.add('hidden');
-    modal.classList.remove('flex');
-    document.getElementById('modalContent').innerHTML = '';
-  }
-
-  // Recargar tabla de clientes
-  function recargarTablaClientes() {
-    fetch("{% url 'tabla_clientes' %}", { headers: { 'X-Requested-With': 'XMLHttpRequest' } })
-      .then(response => response.text())
-      .then(html => {
-        document.getElementById('tablaClientes').innerHTML = html;
-        inicializarTabla();
-      })
-      .catch(err => console.error(err));
-  }
-
-  // Inicializar DataTable
-  function inicializarTabla() {
-    if ($.fn.DataTable.isDataTable('#listacli')) {
-      $('#listacli').DataTable().destroy();
-    }
-    $('#listacli').DataTable({
-      language: { url: '//cdn.datatables.net/plug-ins/1.13.6/i18n/es-ES.json' },
-      dom: 'Bfrtip',
-      buttons: [
-        { extend: 'excelHtml5' },
-        { extend: 'pdfHtml5' },
-        { extend: 'print' }
-      ]
-    });
-  }
-
-  // Manejar envío de formularios dentro del modal
-  document.addEventListener('submit', function(e) {
-    if (e.target.closest('#ajaxModal form')) {
-      e.preventDefault();
-      const form = e.target;
-      const formData = new FormData(form);
-
-      fetch(form.action, {
-        method: form.method,
-        body: formData,
-        headers: { 'X-Requested-With': 'XMLHttpRequest' }
-      })
-      .then(response => {
-        const contentType = response.headers.get('content-type');
-        if (contentType && contentType.includes('application/json')) {
-          return response.json().then(data => ({ type: 'json', data }));
-        } else {
-          return response.text().then(data => ({ type: 'html', data }));
-        }
-      })
-      .then(res => {
-        if (res.type === 'json' && res.data.success) {
-          cerrarModal();
-          recargarTablaClientes();
-        } else if (res.type === 'html') {
-          document.getElementById('modalContent').innerHTML = res.data;
-        }
-      })
-      .catch(err => console.error(err));
-    }
+  // Delegación de botones Editar/Eliminar usando el modal global
+  $('#tablaClientes').on('click', '.btnEditar', function() {
+    const id = $(this).closest('tr').data('pk');
+    abrirModalAjax(`/clientes/editar/${id}/`, 'Editar Cliente');
   });
 
-  // Manejar clicks en botones
-  document.addEventListener('click', function(e) {
-    const row = e.target.closest('tr[data-pk]');
-    let pk;
-
-    if (e.target.closest('#btnAgregarCliente')) {
-      abrirModalAjax("{% url 'formcli' %}");
-    } else if (e.target.closest('.btnEditar')) {
-      pk = row?.dataset.pk;
-      if (pk) abrirModalAjax(`/clientes/editar/${pk}/`);
-    } else if (e.target.closest('.btnEliminar')) {
-      pk = row?.dataset.pk;
-      if (pk) abrirModalAjax(`/clientes/eliminar/${pk}/`);
-    } else if (e.target.closest('#btnCerrarModal')) {
-      cerrarModal();
-    }
+  $('#tablaClientes').on('click', '.btnEliminar', function() {
+    const id = $(this).closest('tr').data('pk');
+    abrirModalAjax(`/clientes/eliminar/${id}/`, 'Eliminar Cliente');
   });
 
   // Mostrar/Ocultar inactivos
   $(document).ready(function () {
-    inicializarTabla();
     $('#btnMostrarInactivos').click(function() {
       $('.inactivo').toggle();
     });
   });
+
 </script>

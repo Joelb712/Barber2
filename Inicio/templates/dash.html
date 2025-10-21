@@ -78,17 +78,16 @@
         </a>
       </li>
 
-      <!-- Turnos (submenu) - uso button para evitar que el click cargue AJAX -->
       <li class="menu-item">
-        <button class="menu-link" type="button" onclick="toggleSubmenu(this)">
-          <i class="fas fa-calendar-check"></i>
-          <span class="menu-text">Turnos</span>
-          <i class="fas fa-chevron-down menu-arrow"></i>
-        </button>
-        <ul class="submenu">
-          <li><a href="{% url 'lista_horarios' %}" class="submenu-link" data-nombre="Horarios" data-icono="fa-clock">Horarios</a></li>
-          <li><a href="{% url 'turnos' %}" class="submenu-link" data-nombre="Turnos" data-icono="fa-calendar-check">Turnos</a></li>
-        </ul>
+        <a href="{% url 'turnos' %}" class="menu-link" data-name="Turnos" data-icon="fa-calendar-check">
+          <i class="fas fa-calendar-check"></i><span class="menu-text">Turnos</span>
+        </a>
+      </li>
+
+      <li class="menu-item">
+        <a href="{% url 'lista_horarios' %}" class="menu-link" data-name="Horarios" data-icon="fa-clock">
+          <i class="fas fa-clock"></i><span class="menu-text">Horarios</span>
+        </a>
       </li>
 
       <!-- Cajas - submenu -->
@@ -198,12 +197,21 @@
 
   <!-- SCRIPTS -->
   <script>
-    // Referencias
     const sidebar = document.getElementById('sidebar');
     const mainContent = document.getElementById('mainContent');
     const overlay = document.getElementById('overlay');
     const btnToggle = document.getElementById('btnToggleSidebar');
 
+    // ========================
+    // RESET CONTEXTO
+    // ========================
+    function resetContexto() {
+      const content = document.getElementById('content-area');
+      $(content).find('table.dataTable').each(function() {
+        if ($.fn.DataTable.isDataTable(this)) $(this).DataTable().destroy(true);
+      });
+      content.innerHTML = '';
+    }
     // ========================
     // Utility: actualizar margen del main
     // ========================
@@ -212,26 +220,19 @@
         mainContent.style.marginLeft = '0';
         return;
       }
-      if (sidebar.classList.contains('collapsed')) {
-        mainContent.style.marginLeft = getComputedStyle(document.documentElement).getPropertyValue('--sidebar-collapsed-w') || '70px';
-      } else {
-        mainContent.style.marginLeft = getComputedStyle(document.documentElement).getPropertyValue('--sidebar-w') || '280px';
-      }
+      mainContent.style.marginLeft = sidebar.classList.contains('collapsed') ? '70px' : '280px';
     }
 
     // ========================
-    // Toggle principal (mobile open / desktop collapse)
+    // Toggle sidebar
     // ========================
     btnToggle.addEventListener('click', function() {
       if (window.innerWidth <= 768) {
-        // mobile: open/close sidebar overlay
         const opened = sidebar.classList.toggle('show');
         overlay.classList.toggle('show', opened);
         document.body.style.overflow = opened ? 'hidden' : '';
       } else {
-        // desktop: collapse / expand
         sidebar.classList.toggle('collapsed');
-        // CAMBIO: al colapsar cierro submenus para evitar "restos" visibles
         if (sidebar.classList.contains('collapsed')) closeAllSubmenus();
         updateMain();
       }
@@ -243,52 +244,42 @@
       overlay.classList.remove('show');
       document.body.style.overflow = '';
     });
-
+    
     // on resize: limpiar estados mobile/desktop y forzar recálculo
-    function onResize() {
+    window.addEventListener('resize', () => {
       if (window.innerWidth > 768) {
         sidebar.classList.remove('show');
         overlay.classList.remove('show');
         document.body.style.overflow = '';
       }
       updateMain();
-    }
-    window.addEventListener('resize', onResize);
+    });
 
     // ========================
-    // Submenus robustos (abren/cerran sin quedarse pegados)
+    // Submenus
     // ========================
     function toggleSubmenu(button) {
       const li = button.parentElement;
       const submenu = li.querySelector('.submenu');
       if (!submenu) return;
-
-      // UX: si sidebar colapsado en desktop no abrir submenu
-      if (sidebar.classList.contains('collapsed') && window.innerWidth > 768) {
-        return;
-      }
+      if (sidebar.classList.contains('collapsed') && window.innerWidth > 768) return;
 
       const isOpen = li.classList.contains('expanded');
-
-      // cerrar otros submenus
       document.querySelectorAll('.menu-item.expanded').forEach(other => {
         if (other !== li) closeSubmenu(other);
       });
 
-      if (isOpen) closeSubmenu(li);
-      else openSubmenu(li);
+      isOpen ? closeSubmenu(li) : openSubmenu(li);
     }
 
     function openSubmenu(li) {
       const submenu = li.querySelector('.submenu');
       if (!submenu) return;
-      // show block para calcular scrollHeight
       submenu.style.display = 'block';
       const h = submenu.scrollHeight;
       submenu.style.maxHeight = '0px';
       requestAnimationFrame(() => { submenu.style.maxHeight = h + 'px'; });
       li.classList.add('expanded');
-      // limpiar inline after transition
       submenu.addEventListener('transitionend', function handler() {
         if (li.classList.contains('expanded')) submenu.style.maxHeight = 'none';
         submenu.removeEventListener('transitionend', handler);
@@ -298,14 +289,10 @@
     function closeSubmenu(li) {
       const submenu = li.querySelector('.submenu');
       if (!submenu) return;
-      // if maxHeight none => set to current height to animate
-      if (getComputedStyle(submenu).maxHeight === 'none') {
-        submenu.style.maxHeight = submenu.scrollHeight + 'px';
-      }
+      if (getComputedStyle(submenu).maxHeight === 'none') submenu.style.maxHeight = submenu.scrollHeight + 'px';
       requestAnimationFrame(() => { submenu.style.maxHeight = '0px'; });
       li.classList.remove('expanded');
       submenu.addEventListener('transitionend', function handler() {
-        // limpiar
         submenu.style.display = '';
         submenu.style.maxHeight = '';
         submenu.removeEventListener('transitionend', handler);
@@ -317,7 +304,7 @@
     }
 
     // ========================
-    // Manejo visual de links (active) y breadcrumb
+    // Breadcrumb
     // ========================
     function updateBreadcrumb(name, iconClass) {
       const iconEl = document.getElementById('breadcrumb-icon');
@@ -327,66 +314,6 @@
         textEl.textContent = name;
       }
     }
-
-    // activar links del menu principal (excluyendo botones de submenu)
-    document.querySelectorAll('.menu-link').forEach(link => {
-      // Si el link es un button (submenu toggle) lo dejamos (tiene onclick)
-      if (link.tagName.toLowerCase() === 'button') return;
-      link.addEventListener('click', function(e) {
-        // Evitar navegación por defecto si href="#" o manejo AJAX
-        // e.preventDefault(); // NO prevenir si es una url real a cargar via AJAX - lo maneja cargarContenido
-        // visual active
-        document.querySelectorAll('.menu-link').forEach(l => l.classList.remove('active'));
-        this.classList.add('active');
-
-        // Actualizar breadcrumb (si data-name/data-icon están presentes)
-        const name = this.dataset.name || this.querySelector('.menu-text')?.textContent?.trim() || 'Inicio';
-        const icon = this.dataset.icon || 'fa-house';
-        updateBreadcrumb(name, icon);
-      });
-    });
-
-    // submenu-links (estas van a llamar a AJAX)
-    document.querySelectorAll('.submenu-link').forEach(link => {
-      link.addEventListener('click', function(e) {
-        e.preventDefault();
-        // visual
-        document.querySelectorAll('.submenu-link').forEach(s => s.classList.remove('active'));
-        this.classList.add('active');
-
-        // cargar por AJAX si tiene href != '#'
-        const url = this.getAttribute('href');
-        const nombre = this.dataset.nombre || this.textContent.trim();
-        const icono = this.dataset.icono || 'fa-folder';
-
-        if (url && url !== '#') {
-          cargarContenido(url, nombre, icono);
-        }
-        // cerrar sidebar en mobile
-        if (window.innerWidth <= 768) {
-          sidebar.classList.remove('show');
-          overlay.classList.remove('show');
-          document.body.style.overflow = '';
-        }
-      });
-    });
-
-    // ========================
-    // DataTables init (igual que antes)
-    // ========================
-    $(document).ready(function() {
-      // Inicializa TODAS las tablas con DataTables
-      // CAMBIO: mantuve tu configuración original de DataTables y botones
-      $('table').DataTable({
-        responsive: true,
-        autoWidth:false,
-        language: {
-          url: '//cdn.datatables.net/plug-ins/1.13.6/i18n/es-ES.json'
-        },
-        dom: 'Bfrtip',
-        buttons: ['excel', 'pdf', 'print']
-      });
-    });
 
     // ========================
     // AJAX de CargarContenido que actualiza el contenido de principal
@@ -435,8 +362,54 @@
       });
     }
 
+    //=============================
+    // SIN ESTO LOS SUBMENUS REDIRIGEN EN VEZ DE CARGARSE EN EL CONTENT-AREA
+    //=============================
+    // activar links del menu principal (excluyendo botones de submenu)
+    document.querySelectorAll('.menu-link').forEach(link => {
+      // Si el link es un button (submenu toggle) lo dejamos (tiene onclick)
+      if (link.tagName.toLowerCase() === 'button') return;
+      link.addEventListener('click', function(e) {
+        // Evitar navegación por defecto si href="#" o manejo AJAX
+        // e.preventDefault(); // NO prevenir si es una url real a cargar via AJAX - lo maneja cargarContenido
+        // visual active
+        document.querySelectorAll('.menu-link').forEach(l => l.classList.remove('active'));
+        this.classList.add('active');
+
+        // Actualizar breadcrumb (si data-name/data-icon están presentes)
+        const name = this.dataset.name || this.querySelector('.menu-text')?.textContent?.trim() || 'Inicio';
+        const icon = this.dataset.icon || 'fa-house';
+        updateBreadcrumb(name, icon);
+      });
+    });
+
+    // submenu-links (estas van a llamar a AJAX)
+    document.querySelectorAll('.submenu-link').forEach(link => {
+      link.addEventListener('click', function(e) {
+        e.preventDefault();
+        // visual
+        document.querySelectorAll('.submenu-link').forEach(s => s.classList.remove('active'));
+        this.classList.add('active');
+
+        // cargar por AJAX si tiene href != '#'
+        const url = this.getAttribute('href');
+        const nombre = this.dataset.nombre || this.textContent.trim();
+        const icono = this.dataset.icono || 'fa-folder';
+
+        if (url && url !== '#') {
+          cargarContenido(url, nombre, icono);
+        }
+        // cerrar sidebar en mobile
+        if (window.innerWidth <= 768) {
+          sidebar.classList.remove('show');
+          overlay.classList.remove('show');
+          document.body.style.overflow = '';
+        }
+      });
+    });
+
     //============================
-    //  EVENTOS DEL SIDEBAR
+    //  EVENTOS DEL SIDEBAR         
     //============================
     // también habilito que al clickear links del menú principal que tienen href (no '#'),
     // use la misma lógica AJAX (como en tu plantilla original).
@@ -469,70 +442,90 @@
       updateMain();
     });
 
-  // ===============================================================
-  // SISTEMA DE MODALES AJAX
-  // ===============================================================
-
-  // Abre el modal y carga contenido AJAX (formulario, confirmación, etc.)
-  function abrirModalAjax(url, titulo = "Formulario") {
-    $.ajax({
-      url: url,
-      method: 'GET',
-      headers: { 'X-Requested-With': 'XMLHttpRequest' },
-      success: function (respuesta) {
-        const modal = $('#tailwindModal');
-        modal.find('#modalTitle').text(titulo);
-        modal.find('#modalBody').html(respuesta);
-        modal.removeClass('hidden').addClass('flex');
-      },
-      error: function () {
-        alert('Error al cargar el formulario.');
-      }
+    // ========================
+    // Delegación botones editar/eliminar
+    // ========================
+    $('#content-area').off('click').on('click', '.btnEditar', function() {
+      const id = $(this).data('id');
+      // Aquí abrís modal si querés
     });
-  }
 
-  // Cierra el modal limpiando su contenido
-  function cerrarModalAjax() {
-    const modal = $('#tailwindModal');
-    modal.addClass('hidden').removeClass('flex');
-    modal.find('#modalBody').empty();
-  }
-
-  // Envía formulario AJAX y actualiza tabla sin recargar todo el dashboard
-  $(document).on('submit', '.ajax-form', function (e) {
-    e.preventDefault();
-    const form = $(this);
-    $.ajax({
-      url: form.attr('action'),
-      method: form.attr('method'),
-      data: form.serialize(),
-      success: function (respuesta) {
-        // Si devuelve "OK" o éxito, cerramos modal y actualizamos tabla
-        cerrarModalAjax();
-        actualizarTablaActual();
-      },
-      error: function (xhr) {
-        // Si hay errores de validación, recargamos el formulario con errores
-        $('#modalBody').html(xhr.responseText);
-      }
+    $('#content-area').on('click', '.btnEliminar', function() {
+      const id = $(this).data('id');
+      // Confirmar y eliminar
     });
-  });
 
-  // Refresca la tabla de la vista actual (sin recargar toda la página)
-  function actualizarTablaActual() {
-    const tabla = document.querySelector('#content-area table');
-    if (!tabla) return;
-
-    const urlActual = window.location.pathname;
-    $.ajax({
-      url: urlActual,
-      headers: { 'X-Requested-With': 'XMLHttpRequest' },
-      success: function (data) {
-        const newTable = $(data).find('table').html();
-        $(tabla).html(newTable);
-      }
+    // Delegación global para botones que abren formularios en modal
+    $(document).on('click', '.btn-ajax-form', function() {
+        const url = $(this).data('url');
+        const titulo = $(this).data('titulo') || 'Formulario';
+        abrirModalAjax(url, titulo);
     });
-  }
+
+    // ========================
+    // Modal AJAX
+    // ========================
+    function abrirModalAjax(url, titulo = "Formulario") {
+      $.ajax({
+        url: url,
+        method: 'GET',
+        headers: { 'X-Requested-With': 'XMLHttpRequest' },
+        success: function(respuesta) {
+          const modal = $('#tailwindModal');
+          modal.find('#modalTitle').text(titulo);
+          modal.find('#modalBody').html(respuesta);
+          modal.removeClass('hidden').addClass('flex');
+        },
+        error: function() { alert('Error al cargar el formulario.'); }
+      });
+    }
+
+    $('#closeModalBtn').on('click', cerrarModalAjax);
+    
+    function cerrarModalAjax() {
+      const modal = $('#tailwindModal');
+      modal.addClass('hidden').removeClass('flex');
+      modal.find('#modalBody').empty();
+
+      // 👇 Recargar tabla del módulo específico
+      recargarTabla('#tablaClientes');  // para clientes
+      recargarTabla('#tablaEmpleados'); // para empleados
+      recargarTabla('#tablaHorarios');
+      recargarTabla('#tablaTurnos');
+      recargarTabla('tablaCajas');
+    }
+    function recargarTabla(divSelector) {
+      const div = $(divSelector);
+      const url = div.data('url'); // URL donde se genera la tabla
+      if (!url) return;
+
+      $.ajax({
+          url: url,
+          method: 'GET',
+          success: function(html) {
+              div.html(html);
+          },
+          error: function(err) {
+              console.error('Error recargando tabla:', err);
+          }
+      });
+    }
+
+    $(document).on('submit', '.ajax-form', function(e) {
+      e.preventDefault();
+      const form = $(this);
+      $.ajax({
+        url: form.attr('action'),
+        method: form.attr('method'),
+        data: form.serialize(),
+        success: function() {
+          cerrarModalAjax();
+
+        },
+        error: function(xhr) { $('#modalBody').html(xhr.responseText); }
+      });
+    });
+
   </script>
 
   {% block extra_js %}

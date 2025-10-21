@@ -1,5 +1,5 @@
 from django.contrib import admin
-from Otros.models import Cliente, Empleado, Producto, Servicio, Horario, Turno, EstadoTurno, ServiciosXTurno
+from Otros.models import Cliente, Empleado, Producto, Servicio, Horario, Turno, EstadoTurno, ServiciosXTurno, MetodoPago
 
 # Register your models here.
 
@@ -53,3 +53,9 @@ class ServiciosXTurnoAdmin(admin.ModelAdmin):
     list_display = ('turno', 'servicio')
     search_fields = ('turno__cliente__user__username', 'servicio__nombre')
     ordering = ('turno', 'servicio')
+
+@admin.register(MetodoPago)
+class MetodoPagoAdmin(admin.ModelAdmin):
+    list_display = ('nombre','activo')
+    search_fields = ('nombre',)
+    ordering = ('nombre',)

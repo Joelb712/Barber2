@@ -1,5 +1,5 @@
-from django.shortcuts import render,redirect
-from django.contrib.auth.decorators import login_required
+from django.shortcuts import render,redirect,get_object_or_404
+from django.contrib.auth.decorators import login_required, user_passes_test
 from django.utils import timezone
 from Otros.models import Caja, MovimientoCaja, Venta
 from .forms import AperturaCajaForm
@@ -7,6 +7,25 @@ from django.contrib import messages
 from django.db import models
 
 # Create your views here.
+def es_gerente(user):
+    return user.groups.filter(name='Gerente').exists() or user.is_superuser
+
+def es_recepcionista(user):
+    return user.groups.filter(name='Recepcionista').exists() or es_gerente(user)
+
+@login_required
+@user_passes_test(es_gerente)
+def lista_cajas(request):
+    cajas= Caja.objects.all()
+    return render(request, 'cajas.html', {'cajas': cajas})
+
+@login_required
+@user_passes_test(es_gerente)
+def tabla_cajas(request):
+    cajas = Caja.objects.all()
+    return render(request, 'cajas_tabla.html', {'cajas': cajas})
+
+
 @login_required
 def apertura_caja(request):
     if Caja.objects.filter(estado=True).exists():
@@ -51,7 +70,3 @@ def cierre_caja(request):
 
     return render(request, "cierre.html", {"caja": caja})
 
-
-def lista_cajas(request):
-    cajas= Caja.objects.all()
-    return render(request, 'cajas.html', {'cajas': cajas})
