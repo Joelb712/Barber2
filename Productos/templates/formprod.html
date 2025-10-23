@@ -1,0 +1,21 @@
+{% load static %}
+
+<div class="form-container">
+    <form id="form-producto" class="ajax-form-prod" action="{% if producto %}{% url 'editar_producto' producto.pk %}{% else %}{% url 'formprod' %}{% endif %}" method="post" enctype="multipart/form-data">
+        {% csrf_token %}
+        {% for field in form %}
+            <div class="mb-3">
+                <label for="{{ field.id_for_label }}" class="form-label">{{ field.label }}</label>
+                {{ field }}
+                {% if field.errors %}
+                <div class="text-danger small mt-1">
+                    {% for error in field.errors %}{{ error }}{% endfor %}
+                </div>
+                {% endif %}
+            </div>
+        {% endfor %}
+        <div class="d-flex justify-content-center">
+            <button type="submit" class="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded">Guardar</button>
+        </div>
+    </form>
+</div>

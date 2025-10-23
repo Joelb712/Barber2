@@ -103,7 +103,7 @@
       </li>
 
       <li class="menu-item">
-        <a href="#" class="menu-link" data-name="Productos" data-icon="fa-archive">
+        <a href="{% url 'lista_productos' %}" class="menu-link" data-name="Productos" data-icon="fa-archive">
           <i class="fas fa-archive"></i><span class="menu-text">Productos</span>
         </a>
       </li>
@@ -559,6 +559,27 @@
             },
             error: function() { alert('Error al cargar el modal de cierre de caja.'); }
         });
+    });
+
+    $(document).on('submit', '.ajax-form-prod', function(e) {
+      e.preventDefault();
+
+      const form = $(this)[0];  // referencia al formulario nativo (no jQuery)
+      const formData = new FormData(form);  // recoge todos los campos, incluido el archivo
+
+      $.ajax({
+        url: $(form).attr('action'),
+        method: $(form).attr('method'),
+        data: formData,
+        processData: false,   // ⚠️ necesario para FormData
+        contentType: false,   // ⚠️ necesario para FormData
+        success: function() {
+          cerrarModalAjax();
+        },
+        error: function(xhr) {
+          $('#modalBody').html(xhr.responseText);
+        }
+      });
     });
 
   </script>

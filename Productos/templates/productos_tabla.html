@@ -1,0 +1,165 @@
+<div class="container mx-auto p-6">
+    
+    <!-- 🧭 ENCABEZADO SUPERIOR -->
+    <div class="flex justify-between items-center mb-6">
+        <!-- Botón para cambiar vista entre tarjetas 🧱 y tabla 📋 -->
+        <button id="btnCambiarVista" class="bg-blue-400 hover:bg-blue-500 text-gray-900 px-4 py-2 rounded-lg shadow">
+            📋 Ver como tabla
+        </button>
+    </div>
+
+    <!-- 🔍 CAMPO DE BÚSQUEDA -->
+    <!-- Permite filtrar por nombre, precio o stock tanto en la tabla como en las tarjetas -->
+    <div class="mb-4 flex justify-end">
+        <input id="buscarNombre" type="text" placeholder="🔍 Buscar producto..." 
+            class="border border-yellow-400 bg-gray-800 text-white rounded-lg px-3 py-2 w-1/3 focus:ring focus:ring-yellow-300">
+    </div>
+
+    <!-- 🧱 SECCIÓN PRINCIPAL: LISTA DE PRODUCTOS -->
+    {% if productos %}
+    
+    <!-- 🟨 Vista tipo TARJETAS -->
+    <div id="vistaTarjetas">
+        <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
+            {% for producto in productos %}
+            <div class="bg-gray-800 border-2 border-yellow-400 p-4 rounded-xl shadow-md hover:shadow-yellow-300 hover:scale-105 transition-transform duration-200" data-pk="{{ producto.pk }}">
+                <!-- Imagen del producto (si no hay, muestra "Sin imagen") -->
+                {% if producto.imagen %}
+                    <img src="{{ producto.imagen.url }}" alt="{{ producto.nombre }}" class="w-full h-48 object-cover rounded-lg mb-3 border border-yellow-400">
+                {% else %}
+                    <div class="w-full h-48 bg-gray-700 flex items-center justify-center rounded-lg mb-3 border border-yellow-400">
+                        <span class="text-gray-400">Sin imagen</span>
+                    </div>
+                {% endif %}
+
+                <!-- Datos del producto -->
+                <h2 class="text-lg font-semibold text-white">{{ producto.nombre }}</h2>
+                <p class="text-yellow-300 mt-1">💲 {{ producto.precio }}</p>
+                <p class="text-gray-300">Stock: {{ producto.stock }}</p>
+
+                <!-- Botones Editar / Eliminar -->
+                <div class="mt-4 flex justify-between">
+                    <button class="btnEditar bg-yellow-400 hover:bg-yellow-500 text-gray-900 px-3 py-1 rounded-md text-sm">Editar</button> 
+                    <button class="btnEliminar bg-red-500 hover:bg-red-600 text-white px-3 py-1 rounded-md text-sm">Eliminar</button>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+
+    <!-- 📋 Vista tipo TABLA -->
+    <div id="vistaTabla" class="hidden">
+        <table id="listaprod" class="min-w-full bg-gray-800 rounded-lg shadow-md border border-yellow-400">
+            <!-- Encabezado con íconos dinámicos de ordenamiento -->
+            <thead class="bg-gray-700 text-yellow-300">
+                <tr>
+                    <!-- Cada th tiene un ícono SVG que gira al ordenar -->
+                    <th class="py-2 px-4 text-left cursor-pointer" data-sort="id">
+                        <div class="flex items-center">
+                            ID
+                            <svg class="ml-1 w-4 h-4 inline-block sort-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 11l5-5 5 5M7 13l5 5 5-5" />
+                            </svg>
+                        </div>
+                    </th>
+                    <th class="py-2 px-4 text-left cursor-pointer" data-sort="nombre">
+                        <div class="flex items-center">
+                            Nombre
+                            <svg class="ml-1 w-4 h-4 inline-block sort-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 11l5-5 5 5M7 13l5 5 5-5" />
+                            </svg>
+                        </div>
+                    </th>
+                    <th class="py-2 px-4 text-left cursor-pointer" data-sort="descripcion">
+                        <div class="flex items-center">
+                            Descripción
+                            <svg class="ml-1 w-4 h-4 inline-block sort-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 11l5-5 5 5M7 13l5 5 5-5" />
+                            </svg>
+                        </div>
+                    </th>
+                    <th class="py-2 px-4 text-left cursor-pointer" data-sort="precio">
+                        <div class="flex items-center">
+                            Precio
+                            <svg class="ml-1 w-4 h-4 inline-block sort-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 11l5-5 5 5M7 13l5 5 5-5" />
+                            </svg>
+                        </div>
+                    </th>
+                    <th class="py-2 px-4 text-left cursor-pointer" data-sort="stock">
+                        <div class="flex items-center">
+                            Stock Actual
+                            <svg class="ml-1 w-4 h-4 inline-block sort-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 11l5-5 5 5M7 13l5 5 5-5" />
+                            </svg>
+                        </div>
+                    </th>
+                    <th class="py-2 px-4 text-left">Acciones</th>
+                </tr>
+            </thead>
+
+            <!-- Cuerpo de la tabla -->
+            <tbody>
+                {% for producto in productos %}
+                <tr  data-pk="{{ producto.pk }}" class="border-t border-gray-700 hover:bg-gray-700 transition">
+                    <td class="py-2 px-4">{{ producto.id }}</td>
+                    <td class="py-2 px-4">{{ producto.nombre }}</td>
+                    <td class="py-2 px-4">{{ producto.descripcion }}</td>
+                    <td class="py-2 px-4">💲 {{ producto.precio }}</td>
+                    <td class="py-2 px-4">{{ producto.stock_actual }}</td>
+                    <td class="py-2 px-4">
+                        <button class="btnEditar bg-yellow-400 hover:bg-yellow-500 text-gray-900 px-3 py-1 rounded-md text-sm">Editar</button>
+                        <button class="btnEliminar bg-red-500 hover:bg-red-600 text-white px-3 py-1 rounded-md text-sm">Eliminar</button>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+
+    {% else %}
+        <p class="text-center text-gray-400">No hay productos registrados.</p>
+    {% endif %}
+</div>
+
+<script>
+    $(document).ready(function() {
+    // 🧱 Cambiar entre vista tarjetas y tabla
+    $("#btnCambiarVista").click(function() {
+        $("#vistaTarjetas, #vistaTabla").toggleClass("hidden");
+        $(this).text($("#vistaTarjetas").hasClass("hidden") ? "🧱 Ver como tarjetas" : "📋 Ver como tabla");
+    });
+
+    // 🔍 Filtro general (busca tanto en tabla como en tarjetas)
+    $("#buscarNombre").on("keyup", function() {
+        var valor = $(this).val().toLowerCase();
+        $("#vistaTarjetas .bg-gray-800, #vistaTabla tbody tr").filter(function() {
+            $(this).toggle($(this).text().toLowerCase().indexOf(valor) > -1);
+        });
+    });
+
+    // ⚙️ Ordenamiento con íconos dinámicos
+    let asc = true;
+    $("#vistaTabla th[data-sort]").click(function() {
+        const col = $(this).data("sort");
+        const rows = $("#vistaTabla tbody tr").get();
+        rows.sort(function(a, b) {
+            let A, B;
+            switch (col) {
+                case "id": A = parseInt($(a).find("td:eq(0)").text()); B = parseInt($(b).find("td:eq(0)").text()); break;
+                case "nombre": A = $(a).find("td:eq(1)").text().toLowerCase(); B = $(b).find("td:eq(1)").text().toLowerCase(); break;
+                case "precio": A = parseFloat($(a).find("td:eq(2)").text().replace(/[^\d.-]/g, "")); B = parseFloat($(b).find("td:eq(2)").text().replace(/[^\d.-]/g, "")); break;
+                case "stock_actual": A = parseInt($(a).find("td:eq(3)").text()); B = parseInt($(b).find("td:eq(3)").text()); break;
+            }
+            if (A < B) return asc ? -1 : 1;
+            if (A > B) return asc ? 1 : -1;
+            return 0;
+        });
+        $.each(rows, (i, row) => $("#vistaTabla tbody").append(row));
+        $(".sort-icon").removeClass("rotate-180 text-yellow-500");
+        $(this).find(".sort-icon").addClass("text-yellow-500");
+        if (!asc) $(this).find(".sort-icon").addClass("rotate-180");
+        asc = !asc;
+    });
+});
+</script>
