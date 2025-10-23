@@ -2,8 +2,9 @@ from django.shortcuts import render,redirect,get_object_or_404
 from django.contrib.auth.decorators import login_required
 from django.contrib import messages
 from django.utils import timezone
-from Otros.models import Cliente,Turno,EstadoTurno
-from datetime import date
+from Otros.models import Cliente,Turno,EstadoTurno,Empleado,MovimientoCaja,MetodoPago,Caja
+from datetime import date, timedelta
+from django.db.models import Sum, Q
 
 # Create your views here.
 def Inicio(request):
@@ -86,11 +87,41 @@ def home_empleado(request):
     empleado = getattr(request.user, 'empleado', None)
     if not empleado:
         return render(request, 'home_sin_empleado.html')
-
+    hoy= date.today()
     especialidad = empleado.especialidad
+
+    turnosemp_hoy=  Turno.objects.filter(empleado=empleado, fecha=hoy)
+    print("Turnos de hoy:", turnosemp_hoy)
+    turnosxempleado= turnosemp_hoy.count()
+    completados= turnosemp_hoy.filter(estado__nombre='Completado').count()
+    pendientes = turnosemp_hoy.filter(estado__nombre='Pendiente').count()
+    cancelados = turnosemp_hoy.filter(estado__nombre='Cancelado').count()
+    # 📅 Calculamos el rango de fechas de la semana actual
+    inicio_semana = hoy
+    fin_semana = hoy + timedelta(days=(6 - hoy.weekday()))  # hasta domingo
+
+    # 🔍 Filtramos turnos desde hoy hasta fin de semana
+    turnos_semana = Turno.objects.filter(
+        empleado=empleado,
+        fecha__range=[inicio_semana, fin_semana],
+        estado__nombre='Pendiente'
+    ).order_by('fecha', 'horario__hora_inicio')
+
+    turnostodos = Turno.objects.filter(fecha=hoy)
 
     context = {
         'empleado': empleado,
-        'especialidad': especialidad
+        'especialidad': especialidad,
+        'cantidad_turnos_hoy': turnosxempleado,
+        'turnoshoy':turnosemp_hoy,
+        'completados':completados,
+        'pendientes': pendientes,
+        'cancelados': cancelados,
+        'turnos_semana': turnos_semana,
+        'inicio_semana': inicio_semana,
+        'fin_semana': fin_semana,
+        'hoy':hoy,
+        'turnostodos':turnostodos,
+
     }
     return render(request, 'home.html', context)
