@@ -23,6 +23,10 @@ body {
     overflow-y: auto;
     transition: width .22s ease, transform .22s ease;
     z-index: 1100;
+
+    /* NUEVO: estructura en columna */
+    display: flex;
+    flex-direction: column;
 }
 
 /* CAMBIO: collapsed desktop */
@@ -39,7 +43,11 @@ body {
 /* CAMBIO: ocultar textos al colapsar (evita "restos" visibles) */
 #sidebar.collapsed .logo-text { display: none; }
 
-.sidebar-menu { padding:8px 0 40px 0; list-style:none; }
+.sidebar-menu { 
+    padding:8px 0 40px 0; 
+    list-style:none; 
+    flex: 1; /* NUEVO: ocupa todo el espacio libre */
+}
 .menu-item { position:relative; }
 .menu-link, .submenu-link {
     display:flex; align-items:center; gap:12px;
@@ -87,4 +95,112 @@ body {
     #sidebar { transform: translateX(-110%); }
     #sidebar.show { transform: translateX(0%); }
     #mainContent, #mainContent.collapsed { margin-left: 0 !important; }
+}
+
+/* ==============================================
+   PERFIL SIDEBAR — versión expandida y colapsada
+   ============================================== */
+
+/* Estilo base compartido */
+.sidebar-profile {
+    border-top: 1px solid rgba(255,255,255,0.1);
+    background: #1a1a1a;
+    color: #f6f8e6;
+    text-align: center;
+    transition: all 0.25s ease;
+
+    /* NUEVO: empujar hacia abajo siempre */
+    margin-top: auto;
+}
+
+/* PERFIL EXPANDIDO */
+.sidebar-profile.expanded {
+    padding: 1rem;
+}
+
+.sidebar-profile.expanded .profile-photo {
+    width: 64px;
+    height: 64px;
+    margin: 0 auto 0.75rem auto;
+    border-radius: 9999px;
+    overflow: hidden;
+    border: 2px solid #facc15;
+}
+.sidebar-profile.expanded .profile-photo img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+.sidebar-profile.expanded .profile-info p {
+    margin: 0;
+    line-height: 1.2;
+}
+.sidebar-profile.expanded .profile-actions {
+    display: flex;
+    flex-direction: column;
+    gap: 0.4rem;
+    margin-top: 0.75rem;
+}
+.sidebar-profile.expanded .profile-actions a,
+.sidebar-profile.expanded .profile-actions button {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.4rem;
+    text-decoration: none;
+    font-size: 0.75rem;
+    padding: 0.4rem 0.6rem;
+    border-radius: 4px;
+    transition: background 0.2s ease, color 0.2s ease;
+}
+.sidebar-profile.expanded .profile-actions a:hover,
+.sidebar-profile.expanded .profile-actions button:hover {
+    background: rgba(255,255,255,0.08);
+}
+
+/* PERFIL COLAPSADO */
+.sidebar-profile.collapsed {
+    display: none;
+    padding: 0.5rem 0.25rem;
+}
+.sidebar-profile.collapsed .profile-photo {
+    width: 42px;
+    height: 42px;
+    margin: 0 auto 0.5rem auto;
+    border-radius: 9999px;
+    overflow: hidden;
+    border: 2px solid #facc15;
+}
+.sidebar-profile.collapsed .profile-photo img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+.sidebar-profile.collapsed button {
+    background: #374151;
+    color: #fff;
+    border: none;
+    border-radius: 9999px;
+    width: 38px;
+    height: 38px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 0 auto;
+    transition: background 0.2s ease;
+}
+.sidebar-profile.collapsed button:hover {
+    background: #dc2626;
+}
+
+/* Mostrar / ocultar según estado del sidebar */
+#sidebar.collapsed .sidebar-profile.expanded { display: none; }
+#sidebar.collapsed .sidebar-profile.collapsed { display: block; }
+
+/* ==================================
+   COMPORTAMIENTO RESPONSIVE
+   ================================== */
+@media (max-width: 768px) {
+    #sidebar { overflow-y: auto; }
+    .sidebar-profile { position: relative; bottom: 0; margin-top: 1rem; } /* NUEVO: más cerca en pantallas pequeñas */
 }

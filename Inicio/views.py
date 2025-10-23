@@ -4,6 +4,7 @@ from django.contrib import messages
 from django.utils import timezone
 from Otros.models import Cliente,Turno,EstadoTurno
 from datetime import date
+from django.http import JsonResponse
 
 # Create your views here.
 def Inicio(request):
@@ -80,3 +81,4 @@ def cancelar_turno(request, turno_id):
     turno.estado = cancelado
     turno.save()
     return redirect('mis_turnos')
+

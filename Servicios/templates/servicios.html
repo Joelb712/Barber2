@@ -1,178 +1,60 @@
 {% load static %}
 <style>
-  .card-img-top {
-    height: 150px;
-    object-fit: cover;
+  label {
+    color: white;
+  }
+  .inactivo {
+    display: none;  /* Oculta las filas inactivas */
   }
 </style>
 
 <div class="card">
-  <div class="card-header">
-    <h2 class="text-center">Servicios</h2>
+  <div class="p-6 text-white text-center">
+      <h2 class="text-2xl font-bold text-yellow-400">Gestión de Servicios</h2>
   </div>
-  <div class="card-body p-6">
-    <div class="bg-white/30 backdrop-blur-md shadow-lg rounded-2xl p-4 mb-6">
-      <h2 class="text-2xl font-bold flex items-center gap-2">
-        <i class="fas fa-users"></i> Lista de Servicios
-      </h2>
-      <p>Aquí puedes ver todos los servicios de la Barbería</p>
-      <div class="flex justify-between mt-4">        
-        <button id="btnAgregarServicio" class="btn btn-primary me-2">Nuevo Servicio</button>
+
+  <div class="p-6 space-y-6">
+    <div class="bg-zinc-800 backdrop-blur-sm rounded-xl p-5 shadow">
+      <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+        <div>
+          <h2 class="text-xl font-bold flex items-center gap-2 text-white">
+            <i class="fas fa-users"></i> Lista de Servicios
+          </h2>
+          <p class="text-white">Aquí puedes ver todos los servicios de la Barbería</p>
+        </div>
+        <button data-url="{% url 'formserv' %}" data-titulo="Nuevo SErvicio" class="btn-ajax-form px-4 py-2 bg-yellow-500 hover:bg-blue-700 text-black font-medium rounded-lg transition">
+          <i class="fas fa-plus mr-2"></i> Nuevo Servicio
+        </button>
+        <button id="btnMostrarInactivos" class="px-4 py-2 bg-indigo-500 hover:bg-blue-700 text-black font-medium rounded-lg transition">
+          Mostrar Inactivos
+        </button>
       </div>
     </div>
 
-    <div class="bg-white/30 backdrop-blur-md shadow-lg rounded-2xl p-4">
-      <table id="listaserv" class="table table-hover display">
-        <thead>
-          <tr>
-            <th>Nombre</th>
-            <th>Precio</th>
-            <th>Duración</th>
-            <th>Descripción</th>
-            <th>Activo</th>
-            <th>Acciones</th>
-          </tr>
-        </thead>
-        <tbody>
-          {% for s in servicios %}
-            <tr data-pk="{{ s.pk }}">
-                <td>{{ s.nombre }}</td>
-                <td>{{ s.precio }}</td>
-                <td>{{ s.duracion }}</td>
-                <td>{{ s.descripcion }}</td>
-                <td>{{ s.activo }}</td>
-                <td>
-                    <!-- <button class="btn btn-sm btn-info"><i class="fas fa-eye"></i></button> -->
-                    <button class="btnEditarServ btn btn-sm btn-warning"><i class="fas fa-edit"></i></button>
-                    <button class="btnEliminarServ btn btn-sm btn-danger"><i class="fas fa-trash"></i></button>
-                </td>
-            </tr>
-        {% endfor %}
-        </tbody>
-      </table>
+    <div id="tablaServicios" class="bg-zinc-800 backdrop-blur-sm rounded-xl p-5 shadow overflow-x-auto" data-url="{% url 'tabla_servicios' %}">
+      {% include 'servicios_tabla.html' %}
     </div>
+
   </div>
 </div>
 
-<script type="text/javascript">
-$(document).ready(function () {
-    if ( $.fn.DataTable.isDataTable('#listaserv') ) {
-      $('#listaserv').DataTable().destroy();
-    }
+<script>
+  // Delegación de botones Editar/Eliminar usando el modal global
+  $('#tablaServicios').on('click', '.btnEditar', function() {
+    const id = $(this).closest('tr').data('pk');
+    abrirModalAjax(`/servicios/editar/${id}/`, 'Editar Servicio');
+  });
 
-    $('#listaserv').DataTable({
-        language: {
-            //se pone en español crack
-            "sProcessing": "Procesando...",
-            "sLengthMenu": "Mostrar _MENU_ registros",
-            "sZeroRecords": "No se encontraron resultados",
-            "sEmptyTable": "Ningún dato disponible en esta tabla",
-            "sInfo": "Mostrando registros del _START_ al _END_ de un total de _TOTAL_ registros",
-            "sInfoEmpty": "Mostrando registros del 0 al 0 de un total de 0 registros",
-            "sInfoFiltered": "(filtrado de un total de _MAX_ registros)",
-            "sInfoPostFix": "",
-            "sSearch": "Buscar:",
-            "sUrl": "",
-            "sInfoThousands": ",",
-            "sLoadingRecords": "Cargando...",
-            "oPaginate": {
-                "sFirst": "Primero",
-                "sLast": "Último",
-                "sNext": "Siguiente",
-                "sPrevious": "Anterior"
-            },
-            "oAria": {
-                "sSortAscending": ": Activar para ordenar la columna de manera ascendente",
-                "sSortDescending": ": Activar para ordenar la columna de manera descendente"
-            }
-        },
-              dom: 'Bfrtip',
-        buttons: [
-            {// Botón de Copiar
-                extend: 'copyHtml5',
-                className: 'btn btn-primary'
-            },
-            {// Botón de Excel
-                extend: 'excelHtml5',
-                className: 'btn btn-success'
-            },
-            {// Botón de PDF
-                extend: 'pdfHtml5',
-                className: 'btn btn-danger'
-            },
-            {// Botón de Imprimir
-                extend: 'print',
-                className: 'btn btn-info'
-            }
-        ]
+  $('#tablaServicios').on('click', '.btnEliminar', function() {
+    const id = $(this).closest('tr').data('pk');
+    abrirModalAjax(`/servicios/eliminar/${id}/`, 'Eliminar Servicio');
+  });
+
+  // Mostrar/Ocultar inactivos
+  $(document).ready(function () {
+    $('#btnMostrarInactivos').click(function() {
+      $('.inactivo').toggle();
     });
-});
-    
-    $(document).ready(function() {
-            $('#btnAgregarServicio').off('click').on('click', function() {
-                    const url = "{% url 'formserv' %}";
-                    bootbox.dialog({
-                            title: 'Formulario',
-                            message: "<iframe id='formIframe' src='" + url + "' scrolling='yes' frameborder='0' width='100%' height='500'></iframe>",
-                            buttons: {
-                                    cancel: {
-                                            label: 'Cerrar',
-                                            className: 'btn-secondary',
-                                            callback: function () {
-                                                    cargarContenido("{% url 'lista_servicios' %}");
-                                            }
-                                    }
-                            }
-                    });
-                    window.addEventListener('message', function(event) {
-                            if (event.data && event.data.action === 'closeBootbox') {
-                                bootbox.hideAll();
-                                cargarContenido("{% url 'lista_servicios' %}");
-                            }},{ once: true });
-                    });
-                    });
-            $(document).off('click').on('click','.btnEditarServ', function() {
-                const pk = $(this).closest('tr').data('pk');
-                const url = '/servicios/editar/' + pk + '/';
-                bootbox.dialog({
-                    title: 'Formulario Editar',
-                    message: "<iframe id='formIframe' src='" + url + "' scrolling='yes' frameborder='0' width='100%' height='500'></iframe>",
-                    buttons: {
-                        cancel: {
-                            label: 'Cerrar',
-                            className: 'btn-secondary',
-                            callback: function () {
-                                cargarContenido("{% url 'lista_servicios' %}");
-                            }
-                        }
-                    }
-                });
-                window.addEventListener('message', function(event) {
-                    if (event.data && event.data.action === 'closeBootbox') {
-                        bootbox.hideAll();
-                        cargarContenido("{% url 'lista_servicios' %}");
-                    }},{ once: true });
-                });
-            $('#listaserv').off('click').on('click','.btnEliminarServ', function() {
-                const pk = $(this).closest('tr').data('pk');
-                const url = '/servicios/eliminar/' + pk + '/';
-                bootbox.dialog({
-                    title: 'Eliminar',
-                    message: "<iframe id='formIframe' src='" + url + "' scrolling='yes' frameborder='0' width='100%' height='500'></iframe>",
-                    buttons: {
-                        cancel: {
-                            label: 'Cerrar',
-                            className: 'btn-secondary',
-                            callback: function () {
-                                cargarContenido("{% url 'lista_servicios' %}");
-                            }
-                        }
-                    }
-                });
-                window.addEventListener('message', function(event) {
-                    if (event.data && event.data.action === 'closeBootbox') {
-                        bootbox.hideAll();
-                        cargarContenido("{% url 'lista_servicios' %}");
-                    }},{ once: true });
-                });
+  });
+
 </script>

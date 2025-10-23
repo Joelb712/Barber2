@@ -109,49 +109,59 @@
       </li>
 
       <li class="menu-item">
-        <a href="#" class="menu-link" data-name="Servicios" data-icon="fa-scissors">
+        <a href="{% url 'lista_servicios' %}" class="menu-link" data-name="Servicios" data-icon="fa-scissors">
           <i class="fas fa-scissors"></i><span class="menu-text">Servicios</span>
         </a>
       </li>
 
     </ul>
-    <!-- Sección Perfil Usuario/Empleado -->
-    <div class="absolute bottom-0 left-0 w-full border-t border-neutral-700 bg-[#1a1a1a] p-4 text-center text-neutral-200">
-      <!-- Foto de perfil -->
+    <!-- PERFIL EXPANDIDO -->
+    <div class="sidebar-profile expanded text-center border-t border-neutral-700 bg-[#1a1a1a] p-4 text-neutral-200">
       <div class="w-16 h-16 mx-auto mb-3 rounded-full overflow-hidden border-2 border-yellow-400">
         {% if user.empleado.foto %}
-          <img src="{{ user.empleado.foto.url }}" alt="Foto de perfil" class="w-full h-full object-cover">
+          <img src="{{ user.empleado.foto.url }}" alt="Foto" class="w-full h-full object-cover">
         {% else %}
-          <img src="{% static 'imgs/default-profile.png' %}" alt="Foto de perfil" class="w-full h-full object-cover">
+          <img src="{% static 'imgs/default-profile.png' %}" alt="Foto" class="w-full h-full object-cover">
         {% endif %}
       </div>
-
-      <!-- Nombre y correo -->
       <p class="text-sm font-semibold text-yellow-400 truncate">{{ user.username }}</p>
       <p class="text-xs text-neutral-400 mb-3 truncate">{{ user.email }}</p>
 
-      <!-- Botones -->
-      <div class="flex flex-col gap-2 pb-5">
-        <a href="{% url 'Inicio' %}" 
-       class="text-gray-400 hover:text-yellow-400 text-xs mt-1">
-       <i class="fa fa-home mr-1"></i>Volver al inicio
-      </a>
-      </div>
-      <div class="flex flex-col gap-2">
-        <a href="#" 
-          class="text-xs bg-yellow-500 hover:bg-yellow-600 text-neutral-900 font-semibold py-1.5 rounded transition">
+      <div class="flex flex-col gap-2 mt-3">
+        <a href="{% url 'Inicio' %}" class="text-gray-400 hover:text-yellow-400 text-xs">
+          <i class="fa fa-home mr-1"></i>Volver al inicio
+        </a>
+
+        <a href="#" class="text-xs bg-yellow-500 hover:bg-yellow-600 text-neutral-900 font-semibold py-1.5 rounded transition">
           Ver perfil
         </a>
+
         <form method="POST" action="{% url 'logout' %}">
           {% csrf_token %}
-          <button type="submit"
-            class="w-full text-xs bg-neutral-700 hover:bg-red-700 text-neutral-200 py-1.5 rounded transition">
-            Cerrar sesión
+          <button type="submit" class="w-full text-xs bg-neutral-700 hover:bg-red-700 text-neutral-200 py-1.5 rounded transition">
+            <i class="fa fa-right-from-bracket mr-1"></i> Cerrar sesión
           </button>
         </form>
       </div>
     </div>
 
+    <!-- PERFIL COLAPSADO -->
+    <div class="sidebar-profile collapsed text-center border-t border-neutral-700 bg-[#1a1a1a] p-3 hidden">
+      <div class="w-10 h-10 mx-auto rounded-full overflow-hidden border-2 border-yellow-400 mb-2">
+        {% if user.empleado.foto %}
+          <img src="{{ user.empleado.foto.url }}" alt="Foto" class="w-full h-full object-cover">
+        {% else %}
+          <img src="{% static 'imgs/default-profile.png' %}" alt="Foto" class="w-full h-full object-cover">
+        {% endif %}
+      </div>
+
+      <form method="POST" action="{% url 'logout' %}">
+        {% csrf_token %}
+        <button type="submit" class="bg-neutral-700 hover:bg-red-700 text-neutral-200 rounded-full w-9 h-9 flex items-center justify-center transition">
+          <i class="fa fa-right-from-bracket text-sm"></i>
+        </button>
+      </form>
+    </div>
   </nav>
 
   <!-- Main -->
@@ -492,6 +502,9 @@
       recargarTabla('#tablaTurnos');
       recargarTabla('#tablaCajas');
       recargarTabla('#tablaMetodos');
+      recargarTabla('#tablaVentas');
+      recargarTabla('#tablaProductos');
+      recargarTabla('#tablaServicios');
     }
     function recargarTabla(divSelector) {
       const div = $(divSelector);
