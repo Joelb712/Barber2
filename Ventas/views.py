@@ -1,11 +1,8 @@
-from django.shortcuts import render,redirect,get_object_or_404,HttpResponse
+from django.shortcuts import render,get_object_or_404
 from django.http import JsonResponse
 from django.contrib import messages
-from django.views.decorators.csrf import csrf_exempt
-from django.views.decorators.clickjacking import xframe_options_exempt
 from django.contrib.auth.decorators import login_required,user_passes_test
 from django.db import transaction
-import json
 from Otros.models import Venta,Cliente,Servicio, DetalleVenta, Pago, MovimientoStock, MovimientoCaja, MetodoPago,Producto,Caja
 
 # @login_required
@@ -103,20 +100,18 @@ def tabla_ventas(request):
 
 
 #=========================================================================
-# HACER UNA VISTA PARA COBRAR O REGISTRAR PAGO
-# CORREGIR LO DE VENTAS, HACER QUE SE ABRA EL MODAL PARA COBRAR LUEGO DE CERRAR EL CREAR VENTA
-# EL CANCELAR VENTA NO FUNCIONA DESDE "VENTAS" EL BOTON NO HACE NADA
+# HACER QUE EL CANCELAR VENTA TAMBIEN CAMBIE EL ESTADO DEL PAGO ASOCIADO A ESA VENTA
 # HACER QUE VENTA PUEDA REGISTRAR UN SERVICIO
 #=========================================================================
 
+# --- CREAR VENTA ---
 @login_required
 @transaction.atomic
 def crear_venta(request):
     try:
         caja = Caja.objects.get(estado=True)
     except Caja.DoesNotExist:
-        messages.error(request, "No hay una caja abierta. Debe abrir caja primero.")
-        return JsonResponse({'success': False, 'error': 'No hay una caja abierta. Debe abrir caja primero.'})
+        return JsonResponse({'error': 'Debe abrir una caja antes de registrar ventas.'})
 
     if request.method == 'POST':
         cliente_id = request.POST.get('cliente')
@@ -127,21 +122,17 @@ def crear_venta(request):
         empleado = request.user.empleado
 
         venta = Venta.objects.create(cliente=cliente, empleado=empleado, caja=caja, total=0)
-
         total = 0
 
-        # Procesar productos
         for prod_id, cantidad in zip(productos, cantidades):
             if not prod_id or not cantidad:
                 continue
-
             producto = get_object_or_404(Producto, id=prod_id)
             cantidad = int(cantidad)
 
             if producto.stock_actual < cantidad:
-                messages.error(request, f"Stock insuficiente para {producto.nombre}")
                 venta.delete()
-                return JsonResponse({'success': False, 'error': f'Stock insuficiente para {producto.nombre}'})
+                return JsonResponse({'error': f"Stock insuficiente para {producto.nombre}"})
 
             DetalleVenta.objects.create(
                 venta=venta,
@@ -151,11 +142,9 @@ def crear_venta(request):
                 subtotal=producto.precio * cantidad
             )
 
-            # Descontar stock
             producto.stock_actual -= cantidad
             producto.save()
 
-            # Movimiento de stock
             MovimientoStock.objects.create(
                 producto=producto,
                 tipo='SALIDA',
@@ -163,15 +152,13 @@ def crear_venta(request):
                 motivo='Venta',
                 empleado=empleado,
             )
-
             total += producto.precio * cantidad
 
-        # ✅ Quitamos servicios (solo productos)
         venta.total = total
         venta.save()
 
-        # Mandamos a registrar pago
-        return JsonResponse({'success': True, 'venta_id': venta.id})
+        # En lugar de redirect, devolvemos JSON con la siguiente vista
+        return JsonResponse({'next_url': f'/crear/pago/{venta.id}/'})
 
     context = {
         'productos': Producto.objects.filter(stock_actual__gt=0),
@@ -217,6 +204,7 @@ def crear_venta(request):
 #     return render(request, 'registrar_pago.html', context)
 
 
+# --- REGISTRAR PAGO ---
 @login_required
 @transaction.atomic
 def registrar_pago(request, venta_id):
@@ -228,14 +216,11 @@ def registrar_pago(request, venta_id):
 
         for metodo_id, monto in zip(metodos, montos):
             if metodo_id and monto and float(monto) > 0:
-                # Registrar pago
                 Pago.objects.create(
                     venta=venta,
                     metodo_pago_id=metodo_id,
                     monto=float(monto)
                 )
-
-                # Registrar movimiento en caja
                 MovimientoCaja.objects.create(
                     caja=venta.caja,
                     tipo='INGRESO',
@@ -244,7 +229,6 @@ def registrar_pago(request, venta_id):
                     empleado=request.user.empleado,
                 )
 
-        messages.success(request, f"Venta #{venta.id} cobrada correctamente.")
         return JsonResponse({'success': True})
 
     context = {
@@ -254,13 +238,16 @@ def registrar_pago(request, venta_id):
     return render(request, 'registrar_pago.html', context)
 
 
+
+
 @login_required
 @transaction.atomic
 def cancelar_venta(request, venta_id):
     venta = get_object_or_404(Venta, id=venta_id)
     if request.method== 'POST':
         if not venta.activo:
-            return JsonResponse({'success': False, 'error': f'La venta #{venta.id} ya está cancelada.'})
+            messages.error(request, f"La venta #{venta.id} ya está cancelada")
+            return JsonResponse({'success': True})
 
         # Revertir stock
         detalles = DetalleVenta.objects.filter(venta=venta)
@@ -294,4 +281,4 @@ def cancelar_venta(request, venta_id):
 
         messages.success(request, f"La venta #{venta.id} fue cancelada correctamente.")
         return JsonResponse({'success': True})
-    return render(request, 'cancelar_venta.html')
+    return render(request, 'cancelar_venta.html',{'venta': venta})

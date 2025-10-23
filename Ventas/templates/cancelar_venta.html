@@ -3,7 +3,7 @@
     <h4>Cancelar Venta</h4>
     <p>¿Está seguro que desea cancelar la venta?</p>
 
-    <form  id="form-cancelar-venta" class="ajax-form" method="post" action="{% url 'cancelar_venta' venta.pk %}" data-contenedor="#tablaVentas">
+    <form  id="form-cancelar-venta" class="ajax-form" method="post" action="{% url 'cancelar_venta' venta.id %}" data-contenedor="#tablaVentas">
         {% csrf_token %}
         <div class="d-flex justify-content-end gap-2">
             <button type="button" class="bg-gray-700 hover:bg-gray-800 text-white px-4 py-2 rounded"  onclick="cerrarModalAjax();">Cancelar</button>

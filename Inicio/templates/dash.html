@@ -517,9 +517,14 @@
         url: form.attr('action'),
         method: form.attr('method'),
         data: form.serialize(),
-        success: function() {
-          cerrarModalAjax();
-
+        success: function(data) {
+          if (data.success) {
+            cerrarModalAjax();
+          } else if (data.next_url) {
+            abrirModalAjax(data.next_url, 'Registrar Pago');
+          } else {
+            $('#modalBody').html(data);
+          }
         },
         error: function(xhr) { $('#modalBody').html(xhr.responseText); }
       });
