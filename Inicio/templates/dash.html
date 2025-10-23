@@ -54,8 +54,8 @@
     <ul class="sidebar-menu">
       <!-- MANTENGO data-name/data-icon para breadcrumb y compatibilidad -->
       <li class="menu-item">
-        <a href="#" class="menu-link active" data-name="Inicio" data-icon="fa-house">
-          <i class="fas fa-house"></i><span class="menu-text">Inicio</span>
+        <a href="{% url 'home' %}" class="menu-link active" data-name="Home" data-icon="fa-house">
+          <i class="fas fa-house"></i><span class="menu-text">Home</span>
         </a>
       </li>
 
@@ -176,7 +176,7 @@
 
         <nav aria-label="breadcrumb" class="text-sm text-yellow-400 flex items-center gap-2">
           <a href="#"><i id="breadcrumb-icon"></i></a>
-          <span id="breadcrumb-text" class="font-medium">Inicio</span>
+          <span id="breadcrumb-text" class="font-medium">Home</span>
         </nav>
       </div>
     </div>
@@ -385,7 +385,7 @@
         this.classList.add('active');
 
         // Actualizar breadcrumb (si data-name/data-icon están presentes)
-        const name = this.dataset.name || this.querySelector('.menu-text')?.textContent?.trim() || 'Inicio';
+        const name = this.dataset.name || this.querySelector('.menu-text')?.textContent?.trim() || 'Home';
         const icon = this.dataset.icon || 'fa-house';
         updateBreadcrumb(name, icon);
       });
@@ -429,7 +429,7 @@
         // si url existe y no es '#', usamos AJAX
         if (url && url !== '#') {
           e.preventDefault();
-          const nombre = link.dataset.name || link.querySelector('.menu-text')?.textContent?.trim() || "Inicio";
+          const nombre = link.dataset.name || link.querySelector('.menu-text')?.textContent?.trim() || "Home";
           const icono = link.dataset.icon || 'fa-house';
           cargarContenido(url, nombre, icono);
 
@@ -595,6 +595,24 @@
       });
     });
 
+    $(document).on('click', '#home', function(e) {
+        e.preventDefault();
+        const url = $(this).data('url');
+        cargarContenido(url);
+    });
+
+    function cargarContenido(url) {
+        $.ajax({
+            url: url,
+            method: 'GET',
+            success: function(respuesta) {
+                $('#content-area').html(respuesta);
+            },
+            error: function() {
+                alert('Error al cargar el contenido.');
+            }
+        });
+    }
   </script>
 
   {% block extra_js %}

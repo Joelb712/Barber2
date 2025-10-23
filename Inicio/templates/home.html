@@ -1,0 +1,159 @@
+{% load static %}
+<div class="card">
+<div id="inicio-container" class="p-6 space-y-6">
+
+  <!-- Sección general -->
+  <div class="text-center">
+    <h2 class="text-2xl font-bold text-yellow-400">¡Bienvenido {{ empleado.user.first_name }}!</h2>
+  </div>
+
+  <!-- Sección Barbero -->
+  {% if especialidad == 'barbero' %}
+  <div class="bg-neutral-900 text-gray-200 antialiased">
+    <div class="max-w-5xl mx-auto px-4 py-6">
+        <!-- Encabezado -->
+        <header class="mb-6 flex items-center justify-between">
+        <div>
+            <h1 class="text-3xl font-bold text-yellow-400">Mi Agenda</h1>
+            <p class="text-neutral-400 text-sm mt-1">Turnos y próximos servicios</p>
+        </div>
+        <button class="bg-neutral-800 hover:bg-neutral-700 text-gray-200 px-4 py-2 rounded text-sm">
+            <i class="fa fa-user mr-2"></i>Perfil
+        </button>
+        </header>
+
+        <!-- Resumen rápido de estado -->
+        <section class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
+        <div class="bg-neutral-800 rounded-lg p-4 flex items-center justify-between">
+            <div>
+            <p class="text-neutral-400 text-sm">Turnos completados</p>
+            <h2 class="text-2xl font-bold text-green-400">6</h2>
+            </div>
+            <i class="fa-solid fa-check-circle text-green-400 text-2xl"></i>
+        </div>
+
+        <div class="bg-neutral-800 rounded-lg p-4 flex items-center justify-between">
+            <div>
+            <p class="text-neutral-400 text-sm">Turnos pendientes</p>
+            <h2 class="text-2xl font-bold text-yellow-400">3</h2>
+            </div>
+            <i class="fa-solid fa-clock text-yellow-400 text-2xl"></i>
+        </div>
+
+        <div class="bg-neutral-800 rounded-lg p-4 flex items-center justify-between">
+            <div>
+            <p class="text-neutral-400 text-sm">Cancelados</p>
+            <h2 class="text-2xl font-bold text-red-400">1</h2>
+            </div>
+            <i class="fa-solid fa-xmark-circle text-red-400 text-2xl"></i>
+        </div>
+        </section>
+
+        <!-- Turnos del día -->
+        <section class="bg-neutral-800 p-4 rounded-lg mb-6">
+        <div class="flex items-center justify-between mb-3">
+            <h3 class="text-lg font-semibold text-yellow-400">Turnos de Hoy</h3>
+            <span class="text-xs text-neutral-400">Datos de ejemplo</span>
+        </div>
+
+        <div class="overflow-x-auto">
+            <table class="min-w-full text-sm text-gray-300">
+            <thead class="bg-neutral-700">
+                <tr>
+                <th class="px-3 py-2 text-left">Hora</th>
+                <th class="px-3 py-2 text-left">Cliente</th>
+                <th class="px-3 py-2 text-left">Servicio</th>
+                <th class="px-3 py-2 text-left">Estado</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr class="border-b border-neutral-800">
+                <td class="px-3 py-2">09:00</td>
+                <td class="px-3 py-2">Martín López</td>
+                <td class="px-3 py-2">Corte clásico</td>
+                <td class="px-3 py-2 text-green-400">Completado</td>
+                </tr>
+                <tr class="border-b border-neutral-800">
+                <td class="px-3 py-2">10:00</td>
+                <td class="px-3 py-2">Carlos Ruiz</td>
+                <td class="px-3 py-2">Corte + Barba</td>
+                <td class="px-3 py-2 text-yellow-400">Pendiente</td>
+                </tr>
+                <tr class="border-b border-neutral-800">
+                <td class="px-3 py-2">11:30</td>
+                <td class="px-3 py-2">Lucía Torres</td>
+                <td class="px-3 py-2">Color y Peinado</td>
+                <td class="px-3 py-2 text-yellow-400">Pendiente</td>
+                </tr>
+                <tr>
+                <td class="px-3 py-2">13:00</td>
+                <td class="px-3 py-2">Santiago Ferreyra</td>
+                <td class="px-3 py-2">Corte moderno</td>
+                <td class="px-3 py-2 text-red-400">Cancelado</td>
+                </tr>
+            </tbody>
+            </table>
+        </div>
+        </section>
+
+        <!-- Próximos turnos -->
+        <section class="bg-neutral-800 p-4 rounded-lg">
+        <h3 class="text-lg font-semibold mb-3 text-yellow-400">Próximos Turnos (Semana)</h3>
+        <ul class="divide-y divide-neutral-700 text-sm max-h-72 overflow-y-auto">
+            <li class="py-3 flex justify-between">
+            <span>Mar 14/10 - 10:00</span>
+            <span class="text-neutral-300">Matías Vega - Corte</span>
+            </li>
+            <li class="py-3 flex justify-between">
+            <span>Mar 14/10 - 11:00</span>
+            <span class="text-neutral-300">Julieta Paredes - Barba</span>
+            </li>
+            <li class="py-3 flex justify-between">
+            <span>Mié 15/10 - 09:30</span>
+            <span class="text-neutral-300">Gonzalo Peña - Corte + Barba</span>
+            </li>
+            <li class="py-3 flex justify-between">
+            <span>Mié 15/10 - 11:15</span>
+            <span class="text-neutral-300">Carla Gómez - Corte</span>
+            </li>
+            <li class="py-3 flex justify-between">
+            <span>Jue 16/10 - 15:00</span>
+            <span class="text-neutral-300">Alejandro Ruiz - Color</span>
+            </li>
+            <li class="py-3 flex justify-between">
+            <span>Vie 17/10 - 09:00</span>
+            <span class="text-neutral-300">Nicolás Rojas - Corte clásico</span>
+            </li>
+        </ul>
+        </section>
+    </div>
+</div>
+  {% endif %}
+
+  <!-- Sección Recepcionista -->
+  {% if especialidad == 'recepcionista' %}
+  <div class="bg-gray-800/60 backdrop-blur-lg p-6 rounded-2xl shadow-lg border border-gray-700">
+    <h3 class="text-xl font-semibold mb-4 text-yellow-300">Panel de Recepcionista</h3>
+    <ul class="list-disc ml-6 text-gray-300">
+      <li>Gestionar los turnos del día</li>
+      <li>Registrar ventas o cobros</li>
+      <li>Consultar la disponibilidad de barberos</li>
+    </ul>
+  </div>
+  {% endif %}
+
+  <!-- Sección Gerente -->
+  {% if especialidad == 'gerente' %}
+  <div class="bg-gray-800/60 backdrop-blur-lg p-6 rounded-2xl shadow-lg border border-gray-700">
+    <h3 class="text-xl font-semibold mb-4 text-yellow-300">Panel de Gerente</h3>
+    <ul class="list-disc ml-6 text-gray-300">
+      <li>Visualizar métricas generales del negocio</li>
+      <li>Administrar empleados y sus permisos</li>
+      <li>Gestionar caja, stock y reportes</li>
+    </ul>
+  </div>
+  {% endif %}
+
+</div>
+
+</div>

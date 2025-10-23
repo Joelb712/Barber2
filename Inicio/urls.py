@@ -9,5 +9,5 @@ urlpatterns=[
     path('misturnos/',mis_turnos,name='mis_turnos'),
     path('perfil/',perfil_cliente,name='perfil_cliente'),
     path('turnos/cancelar/<int:turno_id>/', cancelar_turno, name='cancelar_turno'),
-
+    path('home/',home_empleado,name='home'),
 ]

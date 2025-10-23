@@ -188,3 +188,25 @@ class EmpleadoEditarForm(forms.ModelForm):
                 self.user_instance.save()
                 empleado.save()
         return empleado
+    
+# class PerfilEmpleadoEditarForm(forms.ModelForm):
+#     email = forms.EmailField(required=True, label="Correo electrónico")
+
+#     class Meta:
+#         model = Empleado
+#         fields = ['telefono', 'dni', 'foto']
+
+#     def __init__(self, *args, **kwargs):
+#         self.user_instance = kwargs.pop('user_instance', None)
+#         super().__init__(*args, **kwargs)
+#         if self.user_instance:
+#             self.fields['email'].initial = self.user_instance.email
+
+#     def save(self, commit=True):
+#         empleado = super().save(commit=False)
+#         if self.user_instance:
+#             self.user_instance.email = self.cleaned_data['email']
+#             if commit:
+#                 self.user_instance.save()
+#                 empleado.save()
+#         return empleado
