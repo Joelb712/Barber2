@@ -1,8 +1,11 @@
-<h2>Cierre de Caja</h2>
-<p>Caja actual abierta desde: {{ caja.fecha_apertura }}</p>
-<p>Monto inicial: {{ caja.monto_inicial }}</p>
-<button type="submit" form="form-cierre">Cerrar Caja</button>
-
-<form method="post" id="form-cierre">
+<form id="formCierreCaja" method="POST" action="{% url 'cierre_caja' %}" class="ajax-form">
   {% csrf_token %}
+  <div class="text-white space-y-3">
+    <p><strong>Caja N°:</strong> {{ caja.id }}</p>
+    <p><strong>Fecha Apertura:</strong> {{ caja.fecha_apertura }}</p>
+    <p><strong>Monto Inicial:</strong> ${{ caja.monto_inicial }}</p>
+  </div>
+  <div class="text-center mt-4">
+    <button type="submit" class="px-4 py-2 bg-red-500 hover:bg-red-600 text-white rounded-lg">Confirmar Cierre</button>
+  </div>
 </form>

@@ -83,7 +83,7 @@ function updateProducto(input) {
  {% load static %}
 <div class="container mt-4">
     <h3>Nueva Venta</h3>
-    <form method="post">
+    <form id="form-venta" class="ajax-form" action="{% url 'crear_venta' %}" method="post">
         {% csrf_token %}
 
         <!-- Cliente -->

@@ -1,0 +1,16 @@
+{% load static %}
+<div>
+    <h2>Cambiar Estado</h4>
+    <form id="form-estado-metodo" class="ajax-form" method="post" action="{% url 'estado_metodo' metodo.pk %}" data-contenedor="#tablaMetodos">
+        {% csrf_token %}
+        {% if metodo.actvo %}
+            <h3>¿Estás seguro que deseas activar este método de pago?</h1>
+        {% else %}
+            <h3>¿Estás seguro que deseas desactivar este método de pago?</h1>
+        {% endif %}
+        <div class="d-flex justify-content-end gap-2">
+            <button type="button" class="bg-gray-700 hover:bg-gray-800 text-white px-4 py-2 rounded"  onclick="cerrarModalAjax();">Cancelar</button>
+            <button type="submit" class="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded">Confirmar</button>
+        </div>
+    </form>
+</div>

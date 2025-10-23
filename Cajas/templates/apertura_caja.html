@@ -1,8 +1,9 @@
-<div class="container mt-4">
-  <h2>Apertura de Caja</h2>
-  <form method="post">
-    {% csrf_token %}
+<form id="formAperturaCaja" method="POST" action="{% url 'apertura_caja' %}" class="ajax-form">
+  {% csrf_token %}
+  <div class="space-y-4 text-white">
     {{ form.as_p }}
-    <button type="submit" class="btn btn-primary">Abrir Caja</button>
-  </form>
-</div>
+  </div>
+  <div class="text-center mt-5">
+    <button type="submit" class="px-4 py-2 bg-yellow-500 hover:bg-yellow-600 text-black rounded-lg">Abrir Caja</button>
+  </div>
+</form>

@@ -90,30 +90,28 @@
         </a>
       </li>
 
-      <!-- Cajas - submenu -->
       <li class="menu-item">
-        <button class="menu-link" type="button" onclick="toggleSubmenu(this)">
-          <i class="fas fa-cash-register"></i>
-          <span class="menu-text">Cajas</span>
-          <i class="fas fa-chevron-down menu-arrow"></i>
-        </button>
-        <ul class="submenu">
-          <li><a href="{% url 'cajas' %}" class="submenu-link" data-nombre="Cajas" data-icono="fa-cash-register">Ver Cajas</a></li>
-          <li><a href="#" class="submenu-link">Métodos de Pago</a></li>
-        </ul>
+        <a href="{% url 'cajas' %}" class="menu-link" data-name="Cajas" data-icon="fa-cash-register">
+          <i class="fas fa-cash-register"></i><span class="menu-text">Cajas</span>
+        </a>
       </li>
 
-      <!-- Catalogo -->
       <li class="menu-item">
-        <button class="menu-link" type="button" onclick="toggleSubmenu(this)">
-          <i class="fas fa-archive"></i>
-          <span class="menu-text">Catálogo</span>
-          <i class="fas fa-chevron-down menu-arrow"></i>
-        </button>
-        <ul class="submenu">
-          <li><a href="{% url 'lista_productos' %}" class="submenu-link" data-nombre="Productos" data-icono="fa-box">Productos</a></li>
-          <li><a href="{% url 'lista_servicios' %}" class="submenu-link" data-nombre="Servicios" data-icono="fa-scissors">Servicios</a></li>
-        </ul>
+        <a href="{% url 'metodos' %}" class="menu-link" data-name="Metodos de Pago" data-icon="fa-credit-card">
+          <i class="fas fa-credit-card"></i><span class="menu-text">Métodos de Pago</span>
+        </a>
+      </li>
+
+      <li class="menu-item">
+        <a href="#" class="menu-link" data-name="Productos" data-icon="fa-archive">
+          <i class="fas fa-archive"></i><span class="menu-text">Productos</span>
+        </a>
+      </li>
+
+      <li class="menu-item">
+        <a href="#" class="menu-link" data-name="Servicios" data-icon="fa-scissors">
+          <i class="fas fa-scissors"></i><span class="menu-text">Servicios</span>
+        </a>
       </li>
 
     </ul>
@@ -492,7 +490,8 @@
       recargarTabla('#tablaEmpleados'); // para empleados
       recargarTabla('#tablaHorarios');
       recargarTabla('#tablaTurnos');
-      recargarTabla('tablaCajas');
+      recargarTabla('#tablaCajas');
+      recargarTabla('#tablaMetodos');
     }
     function recargarTabla(divSelector) {
       const div = $(divSelector);
@@ -524,6 +523,37 @@
         },
         error: function(xhr) { $('#modalBody').html(xhr.responseText); }
       });
+    });
+
+    $(document).on('click', '.btnAbrirCaja', function() {
+      const url = $(this).data('url');
+      $.ajax({
+        url: url,
+        method: 'GET',
+        headers: { 'X-Requested-With': 'XMLHttpRequest' },
+        success: function(respuesta) {
+            // Aquí sabemos que es JSON con html
+            $('#tailwindModal #modalTitle').text('Abrir Caja');
+            $('#tailwindModal #modalBody').html(respuesta.html);
+            $('#tailwindModal').removeClass('hidden').addClass('flex');
+        },
+        error: function() { alert('Error al cargar el modal de apertura de caja.'); }
+      });
+    });
+
+    $(document).on('click', '.btnCerrarCaja', function() {
+        const url = $(this).data('url');
+        $.ajax({
+            url: url,
+            method: 'GET',
+            headers: { 'X-Requested-With': 'XMLHttpRequest' },
+            success: function(respuesta) {
+                $('#tailwindModal #modalTitle').text('Cerrar Caja');
+                $('#tailwindModal #modalBody').html(respuesta.html);
+                $('#tailwindModal').removeClass('hidden').addClass('flex');
+            },
+            error: function() { alert('Error al cargar el modal de cierre de caja.'); }
+        });
     });
 
   </script>

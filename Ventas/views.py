@@ -87,18 +87,36 @@ from Otros.models import Venta,Cliente,Servicio, DetalleVenta, Pago, MovimientoS
 def es_gerente(user):
     return user.groups.filter(name="Gerente").exists() or user.groups.filter(name="Recepcionista").exists() or user.is_superuser
 
+@login_required
+@user_passes_test(es_gerente)
+def lista_ventas(request):
+    ventas = Venta.objects.all()
+    total=0
+    for v in ventas:
+        if v.activo:
+            total += v.total
+    return render(request, 'ventas.html', {'ventas': ventas, 'total': total})
+
+def tabla_ventas(request):
+    ventas = Venta.objects.all()
+    return render(request, 'ventas_tabla.html', {'ventas': ventas})
+
+
+#=========================================================================
+# HACER UNA VISTA PARA COBRAR O REGISTRAR PAGO
+# CORREGIR LO DE VENTAS, HACER QUE SE ABRA EL MODAL PARA COBRAR LUEGO DE CERRAR EL CREAR VENTA
+# EL CANCELAR VENTA NO FUNCIONA DESDE "VENTAS" EL BOTON NO HACE NADA
+# HACER QUE VENTA PUEDA REGISTRAR UN SERVICIO
+#=========================================================================
 
 @login_required
 @transaction.atomic
-@xframe_options_exempt
 def crear_venta(request):
     try:
         caja = Caja.objects.get(estado=True)
     except Caja.DoesNotExist:
         messages.error(request, "No hay una caja abierta. Debe abrir caja primero.")
-        return HttpResponse(
-            "<script>window.parent.postMessage({action: 'closeBootbox'}, '*');</script>"
-        )
+        return JsonResponse({'success': False, 'error': 'No hay una caja abierta. Debe abrir caja primero.'})
 
     if request.method == 'POST':
         cliente_id = request.POST.get('cliente')
@@ -123,7 +141,7 @@ def crear_venta(request):
             if producto.stock_actual < cantidad:
                 messages.error(request, f"Stock insuficiente para {producto.nombre}")
                 venta.delete()
-                return redirect("crear_venta")
+                return JsonResponse({'success': False, 'error': f'Stock insuficiente para {producto.nombre}'})
 
             DetalleVenta.objects.create(
                 venta=venta,
@@ -153,9 +171,7 @@ def crear_venta(request):
         venta.save()
 
         # Mandamos a registrar pago
-        return HttpResponse(
-            f"<script>window.location.href='pago/{venta.id}/';</script>"
-        )
+        return JsonResponse({'success': True, 'venta_id': venta.id})
 
     context = {
         'productos': Producto.objects.filter(stock_actual__gt=0),
@@ -203,7 +219,6 @@ def crear_venta(request):
 
 @login_required
 @transaction.atomic
-@xframe_options_exempt
 def registrar_pago(request, venta_id):
     venta = get_object_or_404(Venta, id=venta_id)
 
@@ -230,9 +245,7 @@ def registrar_pago(request, venta_id):
                 )
 
         messages.success(request, f"Venta #{venta.id} cobrada correctamente.")
-        return HttpResponse(
-            f"<script>window.parent.postMessage({{action: 'showMessage', message: 'Venta #{venta.id} cobrada correctamente.', type: 'success'}}, '*');</script>"
-        )
+        return JsonResponse({'success': True})
 
     context = {
         'venta': venta,
@@ -242,27 +255,12 @@ def registrar_pago(request, venta_id):
 
 
 @login_required
-@user_passes_test(es_gerente)
-@xframe_options_exempt
-def lista_ventas(request):
-    ventas = Venta.objects.all()
-    total=0
-    for v in ventas:
-        if v.activo:
-            total += v.total
-    return render(request, 'ventas.html', {'ventas': ventas, 'total': total})
-
-
-@login_required
 @transaction.atomic
-@xframe_options_exempt
 def cancelar_venta(request, venta_id):
     venta = get_object_or_404(Venta, id=venta_id)
     if request.method== 'POST':
         if not venta.activo:
-            return HttpResponse(
-                f"<script>window.parent.postMessage({{action: 'showMessage', message: 'La Venta #{venta.id} ya está cancelada.', type: 'warning'}}, '*');</script>"
-            )
+            return JsonResponse({'success': False, 'error': f'La venta #{venta.id} ya está cancelada.'})
 
         # Revertir stock
         detalles = DetalleVenta.objects.filter(venta=venta)
@@ -295,7 +293,5 @@ def cancelar_venta(request, venta_id):
         venta.save()
 
         messages.success(request, f"La venta #{venta.id} fue cancelada correctamente.")
-        return HttpResponse(
-            f"<script>window.parent.postMessage({{action: 'showMessage', message: 'Venta #{venta.id} cancelada correctamente.', type: 'success'}}, '*');</script>"
-        )
+        return JsonResponse({'success': True})
     return render(request, 'cancelar_venta.html')

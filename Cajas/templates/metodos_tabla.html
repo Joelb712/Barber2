@@ -1,0 +1,36 @@
+{% load static %}
+<div class="bg-zinc-800 backdrop-blur-sm rounded-xl p-5 shadow overflow-x-auto">
+    <table id="listametodos" class="min-w-full divide-y divide-gray-200">
+        <thead class="bg-slate-700">
+            <tr>
+            <th class="px-4 py-3 text-left text-xs font-medium text-white uppercase tracking-wider">Nombre</th>
+            <th class="px-4 py-3 text-left text-xs font-medium text-white uppercase tracking-wider">Estado</th>
+            <th class="px-4 py-3 text-left text-xs font-medium text-white uppercase tracking-wider">Acciones</th>
+            </tr>
+        </thead>
+        <tbody class="bg-gray-300 divide-y divide-gray-200">
+            {% for m in metodos %}
+            <tr data-pk="{{ m.pk }}" class="{% if not m.activo %}inactivo{% endif %}   hover:bg-amber-100">
+            <td class="px-4 py-3 whitespace-nowrap text-sm font-medium text-black">{{ m.nombre }}</td>
+            <td class="px-4 py-3 whitespace-nowrap">
+                <span class="px-2 inline-flex text-sm leading-5 font-semibold rounded-full 
+                {% if m.activo %}bg-green-100 text-green-800{% else %}bg-red-100 text-red-800{% endif %}">
+                {{ m.activo|yesno:"Activo,Inactivo" }}
+                </span>
+            </td>
+            <td class="px-4 py-3 whitespace-nowrap text-m font-medium">
+                {% if m.activo %}
+                    <button class="btnEliminar w-28 bg-red-500 text-black py-1 px-3 rounded">
+                        Desactivar
+                    </button>
+                {% else %}
+                    <button class="btnEliminar w-28 bg-green-600 text-black py-1 px-3 rounded">
+                        Activar
+                    </button>
+                {% endif %}
+            </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>

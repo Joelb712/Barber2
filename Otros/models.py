@@ -182,8 +182,12 @@ class MovimientoStock(models.Model):
 
 # --- METODOS DE PAGO ---
 class MetodoPago(models.Model):
-    nombre= models.CharField(max_length=50)
+    nombre = models.CharField(
+        max_length=50,
+        choices=[('efectivo', 'Efectivo'), ('tranferencia', 'Transferencia'), ('tarjeta débito', 'Tarjeta Débito'),('tarjeta crédito','Tarjeta Crédito'),('qr','QR')]
+    )
     activo = models.BooleanField(default=True)
+
 
     def __str__(self):
         return f"{self.nombre}"

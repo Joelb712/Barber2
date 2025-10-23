@@ -42,7 +42,6 @@
   </div>
 
 
-
   <div class="p-6 space-y-6">
     <div class="bg-zinc-800 backdrop-blur-sm rounded-xl p-5 shadow">
       <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
@@ -52,7 +51,7 @@
           </h2>
           <p class="text-white">Aquí puedes ver todos las ventas de la Barberia</p>
         </div>
-        <button id="btnAgregarVta" class="px-4 py-2 bg-yellow-500 hover:bg-blue-700 text-black font-medium rounded-lg transition">
+        <button data-url="{% url 'crear_venta' %}" data-titulo="Nuevo Venta" class="btn-ajax-form px-4 py-2 bg-yellow-500 hover:bg-blue-700 text-black font-medium rounded-lg transition">
           <i class="fas fa-plus mr-2"></i> Nueva Venta
         </button>
         <button id="btnMostrarInactivos" class="px-4 py-2 bg-indigo-500 hover:bg-blue-700 text-black font-medium rounded-lg transition">
@@ -61,95 +60,25 @@
       </div>
     </div>
 
-    <div class="bg-zinc-800 backdrop-blur-sm rounded-xl p-5 shadow overflow-x-auto">
-      <table id="listavent" class="min-w-full divide-y divide-gray-200">
-        <thead class="bg-slate-700">
-          <tr>
-            <th class="px-4 py-3 text-left text-xs font-medium text-white uppercase tracking-wider">Nro Venta</th>
-            <th class="px-4 py-3 text-left text-xs font-medium text-white uppercase tracking-wider">Fecha</th>
-            <th class="px-4 py-3 text-left text-xs font-medium text-white uppercase tracking-wider">Cliente</th>
-            <th class="px-4 py-3 text-left text-xs font-medium text-white uppercase tracking-wider">Empleado</th>
-            <th class="px-4 py-3 text-left text-xs font-medium text-white uppercase tracking-wider">Caja</th>
-            <th class="px-4 py-3 text-left text-xs font-medium text-white uppercase tracking-wider">Total</th>
-            <th class="px-4 py-3 text-left text-xs font-medium text-white uppercase tracking-wider">Acciones</th>
-          </tr>
-        </thead>
-        <tbody class="bg-gray-300 divide-y divide-gray-200">
-          {% for v in ventas %}
-          <tr data-pk="{{ v.pk }}" class="{% if not v.activo %}inactivo{% endif %}   hover:bg-amber-100">
-            <td class="px-4 py-3 whitespace-nowrap text-sm font-medium text-black">{{ v.id }}</td>
-            <td class="px-4 py-3 whitespace-nowrap text-sm font-medium text-black">{{ v.fecha }}</td>
-            <td class="px-4 py-3 whitespace-nowrap text-sm font-medium text-black">{{ v.cliente }}</td>
-            <td class="px-4 py-3 whitespace-nowrap text-sm font-medium text-black">{{ v.empleado }}</td>
-            <td class="px-4 py-3 whitespace-nowrap text-sm font-medium text-black">{{ v.caja }}</td>
-            <td class="px-4 py-3 whitespace-nowrap text-sm font-medium text-black">{{ v.total }}</td>
-            <td class="px-4 py-3 whitespace-nowrap text-m font-medium">
-              <button class="btnCancelarVta text-red-600 hover:text-red-800">
-                <i class="fas fa-trash"></i>
-              </button>
-            </td>
-          </tr>
-          {% endfor %}
-        </tbody>
-      </table>
+    <div id="tablaVentas" class="bg-zinc-800 backdrop-blur-sm rounded-xl p-5 shadow overflow-x-auto" data-url="{% url 'tabla_ventas' %}">
+      {% include 'ventas_tabla.html' %}
     </div>
   </div>
 </div>
 
 
 <script>
-  function openModal(url, title = 'Formulario') {
-    const modal = document.getElementById('tailwindModal');
-    const iframe = document.getElementById('modalIframe');
-    const titleEl = document.getElementById('modalTitle');
-
-    if (modal && iframe && titleEl) {
-      titleEl.textContent = title;
-      iframe.src = url;
-      modal.classList.remove('hidden');
-    }
-  }
-
-  // Eventos delegados (funcionan incluso tras AJAX)
-  document.addEventListener('click', function(e) {
-    const row = e.target.closest('tr[data-pk]');
-    let pk;
-
-    if (e.target.closest('#btnAgregarVta')) {
-      openModal("{% url 'crear_venta' %}", "Nueva Venta");
-    }
-    else if (e.target.closest('.btnCancelarVta')) {
-      pk = row?.dataset.pk;
-      if (pk) openModal(`/ventas/cancelar/${pk}/`, "Cancelar Venta");
-    }
-    // else if (e.target.closest('.btnEliminarVta')) {
-    //   pk = row?.dataset.pk;
-    //   if (pk) openModal(`/clientes/eliminar/${pk}/`, "Eliminar Venta");
-    // }
+  // Delegación de botones Editar/Eliminar usando el modal global
+  $('#tablaVentas').on('click', '.btnEliminar', function() {
+    const id = $(this).closest('tr').data('pk');
+    abrirModalAjax(`/ventas/cancelar/${id}/`, 'Cancelar Venta');
   });
 
-
+  // Mostrar/Ocultar inactivos
   $(document).ready(function () {
-    if ($.fn.DataTable.isDataTable('#listavent')) {
-      $('#listavent').DataTable().destroy();
-    }
-    $('#listavent').DataTable({
-      language: { url: '//cdn.datatables.net/plug-ins/1.13.6/i18n/es-ES.json' },
-      dom: 'Bfrtip',
-      buttons: [
-        {// Botón de Excel
-          extend: 'excelHtml5',
-        },
-        {// Botón de PDF
-          extend: 'pdfHtml5',
-        },
-        {// Botón de Imprimir
-          extend: 'print',
-        }
-      ]
+    $('#btnMostrarInactivos').click(function() {
+      $('.inactivo').toggle();
     });
   });
-  $('#btnMostrarInactivos').click(function() {
-    $('.inactivo').toggle(); // Muestra u oculta filas inactivas
-});
+
 </script>

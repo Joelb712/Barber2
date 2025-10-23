@@ -48,8 +48,11 @@
           </h2>
           <p class="text-white">Aquí puedes ver todos las cajas de la Barberia</p>
         </div>
-        <button id="btnAbrirCaja" class="px-4 py-2 bg-yellow-500 hover:bg-blue-700 text-black font-medium rounded-lg transition">
-          <i class="fas fa-plus mr-2"></i> Abrir Caja
+        <button data-url="{% url 'apertura_caja' %}"  class="btnAbrirCaja px-4 py-2 bg-yellow-500 hover:bg-blue-700 text-black font-medium rounded-lg transition">
+          <i class="fas fa-cash-register mr-2"></i> Abrir Caja
+        </button>
+        <button data-url="{% url 'cierre_caja' %}" class="btnCerrarCaja px-4 py-2 bg-blue-500 hover:bg-blue-700 text-black font-medium rounded-lg transition">
+          <i class="fas fa-lock mr-2"></i> Cerrar Caja
         </button>
       </div>
     </div>
@@ -64,4 +67,5 @@
 
 
 <script>
+
 </script>
