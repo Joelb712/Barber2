@@ -2,7 +2,7 @@ from django.shortcuts import render,redirect
 from django.contrib import messages
 from .forms import RegistroClienteForm, LoginUsuarioForm
 from django.urls import reverse
-
+from Otros.models import Empleado
 from django.contrib.auth import authenticate, login
 from django.contrib.auth.forms import AuthenticationForm
 
@@ -21,8 +21,13 @@ def login_personalizado(request):
             if user is not None:
                 # Iniciar sesión si el usuario es válido
                 login(request, user)
-                # Redirigir a una página de éxito (ej. 'home')
-                return redirect('Inicio')
+                try:
+                    empleado = Empleado.objects.get(user=user)
+                    # Si existe, redirigir al dashboard
+                    return redirect('dash')
+                except Empleado.DoesNotExist:
+                    # Si no está vinculado, redirigir al inicio general
+                    return redirect('Inicio')
             else:
                 # Si la autenticación falla, añadir un error al formulario
                 form.add_error(None, 'Nombre de usuario o contraseña incorrectos.')

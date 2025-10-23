@@ -18,7 +18,11 @@ def Inicio(request):
 
 @login_required
 def dash(request):
-    return render(request,'dash.html')
+    try:
+        empleadito = Empleado.objects.get(user=request.user)
+    except Empleado.DoesNotExist:
+        empleadito = None
+    return render(request,'dash.html',{'empleadito': empleadito})
 
 def contacto(request):
     return render(request,'contacto.html')

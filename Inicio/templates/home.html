@@ -137,13 +137,13 @@
         <div class="bg-neutral-800 p-4 rounded-lg">
             <h3 class="text-lg font-semibold mb-4 text-yellow-400">Accesos Rápidos</h3>
             <div class="flex flex-col gap-3">
-            <button class="bg-yellow-500 hover:bg-yellow-600 text-neutral-900 font-semibold py-2 rounded">
+            <button data-url="{% url 'dar_turno' %}" data-titulo="Nuevo Turno" class="btn-ajax-form bg-yellow-500 hover:bg-yellow-600 text-neutral-900 font-semibold py-2 rounded">
                 <i class="fa fa-calendar-check mr-2"></i>Nuevo Turno
             </button>
-            <button class="bg-neutral-700 hover:bg-neutral-600 text-gray-200 font-semibold py-2 rounded">
+            <button data-url="{% url 'formcli' %}" data-titulo="Nuevo Cliente" class="btn-ajax-form bg-neutral-700 hover:bg-neutral-600 text-gray-200 font-semibold py-2 rounded">
                 <i class="fa fa-user mr-2"></i>Nuevo Cliente
             </button>
-            <button class="bg-yellow-500 hover:bg-yellow-600 text-neutral-900 font-semibold py-2 rounded">
+            <button data-url="{% url 'crear_venta' %}" data-titulo="Nuevo Venta" class="btn-ajax-form bg-yellow-500 hover:bg-yellow-600 text-neutral-900 font-semibold py-2 rounded">
                 <i class="fa fa-cash-register mr-2"></i>Nueva Venta
             </button>
             </div>

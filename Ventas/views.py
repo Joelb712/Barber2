@@ -94,6 +94,8 @@ def lista_ventas(request):
             total += v.total
     return render(request, 'ventas.html', {'ventas': ventas, 'total': total})
 
+@login_required
+@user_passes_test(es_gerente)
 def tabla_ventas(request):
     ventas = Venta.objects.all()
     return render(request, 'ventas_tabla.html', {'ventas': ventas})
@@ -106,6 +108,7 @@ def tabla_ventas(request):
 
 # --- CREAR VENTA ---
 @login_required
+@user_passes_test(es_gerente)
 @transaction.atomic
 def crear_venta(request):
     try:
@@ -206,6 +209,7 @@ def crear_venta(request):
 
 # --- REGISTRAR PAGO ---
 @login_required
+@user_passes_test(es_gerente)
 @transaction.atomic
 def registrar_pago(request, venta_id):
     venta = get_object_or_404(Venta, id=venta_id)
@@ -228,7 +232,7 @@ def registrar_pago(request, venta_id):
                     descripcion=f"Pago de venta #{venta.id}",
                     empleado=request.user.empleado,
                 )
-
+        messages.success(request, "✅ El pago se registro correctamente.")
         return JsonResponse({'success': True})
 
     context = {
@@ -241,6 +245,7 @@ def registrar_pago(request, venta_id):
 
 
 @login_required
+@user_passes_test(es_gerente)
 @transaction.atomic
 def cancelar_venta(request, venta_id):
     venta = get_object_or_404(Venta, id=venta_id)

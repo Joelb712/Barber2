@@ -45,7 +45,7 @@
         <li><a id="divContacto" href="#" class="hover:text-yellow-500 transition">Contacto</a></li>
 
         {% if user.is_authenticated %}
-          <li><a href="{% url 'dash' %}" class="hover:text-yellow-500 transition">Dash</a></li>
+          <!-- <li><a href="{% url 'dash' %}" class="hover:text-yellow-500 transition">Dash</a></li> -->
           {% if request.user.is_superuser %}
             <li><a href="{% url 'admin:index' %}" class="hover:text-yellow-500 transition">Administrador</a></li>
           {% endif %}
@@ -80,7 +80,7 @@
                   <form method="post" action="{% url 'logout' %}">
                     {% csrf_token %}
                     <button type="submit"
-                            class="w-full text-left px-4 py-2 hover:bg-red-600 transition">
+                      class="w-full text-left px-4 py-2 hover:bg-red-600 transition">
                       Cerrar sesión
                     </button>
                   </form>
