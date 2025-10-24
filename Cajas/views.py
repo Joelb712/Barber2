@@ -11,10 +11,8 @@ from django.views.decorators.csrf import csrf_exempt
 
 # Create your views here.
 def es_gerente(user):
-    return user.groups.filter(name='Gerente').exists() or user.is_superuser
+    return user.groups.filter(name="Gerente").exists() or user.groups.filter(name="Recepcionista").exists() or user.is_superuser
 
-def es_recepcionista(user):
-    return user.groups.filter(name='Recepcionista').exists() or es_gerente(user)
 
 @login_required
 @user_passes_test(es_gerente)

@@ -35,7 +35,7 @@
                 <!-- Datos del producto -->
                 <h2 class="text-lg font-semibold text-white">{{ producto.nombre }}</h2>
                 <p class="text-yellow-300 mt-1">💲 {{ producto.precio }}</p>
-                <p class="text-gray-300">Stock: {{ producto.stock }}</p>
+                <p class="text-gray-300">Stock: {{ producto.stock_actual }}</p>
 
                 <!-- Botones Editar / Eliminar -->
                 <div class="mt-4 flex justify-between">
@@ -102,12 +102,12 @@
             <tbody>
                 {% for producto in productos %}
                 <tr  data-pk="{{ producto.pk }}" class="border-t border-gray-700 hover:bg-gray-700 transition">
-                    <td class="py-2 px-4">{{ producto.id }}</td>
-                    <td class="py-2 px-4">{{ producto.nombre }}</td>
-                    <td class="py-2 px-4">{{ producto.descripcion }}</td>
-                    <td class="py-2 px-4">💲 {{ producto.precio }}</td>
-                    <td class="py-2 px-4">{{ producto.stock_actual }}</td>
-                    <td class="py-2 px-4">
+                    <td class="py-2 px-4 text-white">{{ producto.id }}</td>
+                    <td class="py-2 px-4 text-white">{{ producto.nombre }}</td>
+                    <td class="py-2 px-4 text-white">{{ producto.descripcion }}</td>
+                    <td class="py-2 px-4 text-white">💲 {{ producto.precio }}</td>
+                    <td class="py-2 px-4 text-white">{{ producto.stock_actual }}</td>
+                    <td class="py-2 px-4 text-white">
                         <button class="btnEditar bg-yellow-400 hover:bg-yellow-500 text-gray-900 px-3 py-1 rounded-md text-sm">Editar</button>
                         <button class="btnEliminar bg-red-500 hover:bg-red-600 text-white px-3 py-1 rounded-md text-sm">Eliminar</button>
                     </td>

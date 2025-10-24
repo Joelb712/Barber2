@@ -6,20 +6,17 @@ from .forms import ClienteAltaForm,ClienteEditarForm
 
 
 def es_gerente(user):
-    return user.groups.filter(name='Gerente').exists() or user.is_superuser
-
-def es_recepcionista(user):
-    return user.groups.filter(name='Recepcionista').exists() or es_gerente(user)
+    return user.groups.filter(name="Gerente").exists() or user.groups.filter(name="Recepcionista").exists() or user.is_superuser
 
 @login_required
-@user_passes_test(lambda u: es_recepcionista(u))
+@user_passes_test(es_gerente)
 def lista_clientes(request):
     clientes = Cliente.objects.all()
     # Siempre render completo para la primera carga
     return render(request, 'clientes.html', {'clientes': clientes})
 
 @login_required
-@user_passes_test(lambda u: es_recepcionista(u))
+@user_passes_test(es_gerente)
 def tabla_clientes(request):
     clientes = Cliente.objects.all()
     return render(request, 'clientes_tabla.html', {'clientes': clientes})
@@ -27,7 +24,7 @@ def tabla_clientes(request):
 
 
 @login_required
-@user_passes_test(lambda u: es_recepcionista(u))
+@user_passes_test(es_gerente)
 def crear_cliente(request):
     if request.method == 'POST':
         form = ClienteAltaForm(request.POST)

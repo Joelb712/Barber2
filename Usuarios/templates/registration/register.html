@@ -9,30 +9,50 @@
 
   <div class="glass z-10 max-w-md w-full p-8 rounded-2xl shadow-xl text-white mt-20">
     <div class="text-center mb-6">
-      <i class="fas fa-user-plus text-5xl text-white/80 mb-4"></i>
+      <i class="fas fa-user-plus text-5xl text-yellow-500 mb-4"></i>
       <h1 class="text-2xl font-light tracking-widest uppercase">Registrarse</h1>
     </div>
 
-    {% if messages %}
-    {% for message in messages %}
-    <div class="bg-red-500 text-white text-sm rounded p-2 mb-4 text-center">
-      {{ message }}
-    </div>
-    {% endfor %}
-    {% endif %}
-    <form method="POST" class="space-y-4" novalidate>
+    <form method="POST" class="space-y-4 text-yellow-500" novalidate>
       {% csrf_token %}
       {% for field in form %}
       <div class="relative">
         <label for="{{ field.id_for_label }}">
           {{ field.label }}
         </label>
-        {{ field }}
-
+        <div class="relative">
+    
+          {{ field }}
+          {% if field.name == 'password1' or field.name == 'password2' %}
+          <span id="toggle-{{ field.name }}"
+            class="absolute inset-y-0 right-0 pr-3 flex items-center cursor-pointer text-yellow-500 transition duration-300">
+            <i class="fas fa-eye-slash text-xl"></i>
+          </span>
+          <span id="toggle-{{ field.name }}" class="absolute inset-y-0 left-0 pl-3 flex items-center text-yellow-500">
+            <i class="fas fa-lock text-xl"></i>
+          </span>
+          {% elif field.name == 'username' or field.name == 'first_name' or field.name == 'last_name' %}
+          <span id="toggle-{{ field.name }}" class="absolute inset-y-0 left-0 pl-3 flex items-center text-yellow-500">
+            <i class="fas fa-user text-xl"></i>
+          </span>
+          {% elif field.name == 'email' %}
+          <span id="toggle-{{ field.name }}" class="absolute inset-y-0 left-0 pl-3 flex items-center text-yellow-500">
+            <i class="fa-solid fa-envelope text-xl"></i>
+          </span>
+          {% elif field.name == 'dni' %}
+          <span id="toggle-{{ field.name }}" class="absolute inset-y-0 left-0 pl-3 flex items-center text-yellow-500">
+            <i class="fa-solid fa-passport text-xl"></i>
+          </span>
+          {% elif field.name == 'telefono' %}
+          <span id="toggle-{{ field.name }}" class="absolute inset-y-0 left-0 pl-3 flex items-center text-yellow-500">
+            <i class="fa-solid fa-phone text-xl"></i>
+          </span>
+          {% endif %}
+    
+        </div>
         {% if field.help_text %}
-        <small class="text-yellow-500">{{ field.help_text|safe }}</small>
+        <small id="help-{{ field.id_for_label }}" class="text-yellow-500 hidden">{{ field.help_text|safe }}</small>
         {% endif %}
-
         {% if field.errors %}
         {% for error in field.errors %}
         <p class="text-red-500 text-sm mt-1">{{ error }}</p>
@@ -45,80 +65,100 @@
         Crear cuenta
       </button>
     </form>
-
   </div>
 </div>
 {% endblock %}
 
 {% block extra_head %}
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
-<style>
-  .form-input {
-    background: rgba(255, 255, 255, 0.9);
-    border: none;
-    outline: none;
-    transition: all 0.3s ease;
-  }
 
-  .form-input:focus {
-    background: white;
-    transform: translateY(-2px);
-    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
-  }
-
-  .glass {
-    background: rgba(255, 255, 255, 0.05);
-    backdrop-filter: blur(15px);
-    border: 1px solid rgba(255, 255, 255, 0.1);
-  }
-</style>
 {% endblock %}
 
 {% block scripts %}
 <script>
-  document.addEventListener('DOMContentLoaded', function () {
-    const telefonoInput = document.querySelector('input[name="telefono"]');
-    
-    telefonoInput.addEventListener('input', function () {
-      // Permite solo dígitos y un + al principio
-      let valor = this.value;
-      valor = valor.replace(/(?!^\+)[^\d]/g, ''); // Elimina todo excepto dígitos y + al inicio
-      this.value = valor;
-    });
-  });
-</script>
 
-<!-- <script>
-  function createParticles() {
-    const container = document.getElementById('particles');
-    for (let i = 0; i < 6; i++) {
-      const el = document.createElement('div');
-      el.style.cssText = `
-        position: fixed;
-        width: ${Math.random() * 10 + 5}px;
-        height: ${Math.random() * 10 + 5}px;
-        background: rgba(255, 255, 255, 0.1);
-        border-radius: 50%;
-        top: ${Math.random() * 100}vh;
-        left: ${Math.random() * 100}vw;
-        animation: float ${Math.random() * 6 + 4}s infinite linear;
-        pointer-events: none;
-        z-index: -1;
-      `;
-      container.appendChild(el);
+</script>
+<!-- mostrarcontraseña -->
+<script>
+  function mostrarContraseña(fieldName) {
+    // Busca el campo de entrada (input) y el ícono de interruptor (toggle)
+    const passwordInput = document.getElementById(`id_${fieldName}`);
+    const togglePassword = document.getElementById(`toggle-${fieldName}`);
+
+    // Sale si los elementos no existen (para evitar errores)
+    if (!passwordInput || !togglePassword) {
+      return;
     }
+
+    // 3. Añade el evento click al ícono
+    togglePassword.addEventListener('click', function () {
+      // Alternar el atributo 'type' entre 'password' y 'text'
+      const type = passwordInput.getAttribute('type') === 'password' ? 'text' : 'password';
+      passwordInput.setAttribute('type', type);
+
+      // 4. Cambiar el ícono de Font Awesome
+      const icon = this.querySelector('i');
+      if (type === 'text') {
+        // Muestra ojo abierto
+        icon.classList.remove('fa-eye-slash');
+        icon.classList.add('fa-eye');
+      } else {
+        // Muestra ojo cerrado
+        icon.classList.remove('fa-eye');
+        icon.classList.add('fa-eye-slash');
+      }
+    });
   }
 
-  const style = document.createElement('style');
-  style.textContent = `
-    @keyframes float {
-      0% { transform: translateY(100vh) rotate(0deg); opacity: 0; }
-      10%, 90% { opacity: 1; }
-      100% { transform: translateY(-100vh) rotate(360deg); opacity: 0; }
+  // Inicializa el interruptor para ambos campos de contraseña
+  mostrarContraseña('password1');
+  mostrarContraseña('password2'); // Asumiendo que tiene un campo de confirmación 'password2'
+</script> 
+
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+  // Selecciona todos los campos de entrada (input, select, textarea) en el formulario
+  const fields = document.querySelectorAll('form input, form select, form textarea');
+
+  fields.forEach(field => {
+    const helpTextId = `help-${field.id}`;
+    const helpElement = document.getElementById(helpTextId);
+
+    // Solo si existe un texto de ayuda para este campo
+    if (helpElement) {
+      // Evento al enfocar (click o tab en el campo)
+      field.addEventListener('focus', function () {
+        // Muestra el texto de ayuda (quita la clase 'hidden')
+        helpElement.classList.remove('hidden');
+      });
+
+      // Evento al desenfocar (click fuera o tab fuera del campo)
+      field.addEventListener('blur', function () {
+        // Oculta el texto de ayuda (añade la clase 'hidden')
+        helpElement.classList.add('hidden');
+      });
     }
-  `;
-  document.head.appendChild(style);
-  createParticles();
-  setInterval(createParticles, 10000);
-</script> -->
+  });
+});
+document.addEventListener("DOMContentLoaded", function () {
+  const telefonoInput = document.getElementById("id_dni");
+
+  telefonoInput.addEventListener("input", function () {
+    // Permite solo dígitos y un + al principio
+    let valor = this.value;
+    valor = valor.replace(/(?!^\'')[^\d]/g, ""); // Elimina todo excepto dígitos y + al inicio
+    this.value = valor;
+  });
+});
+document.addEventListener("DOMContentLoaded", function () {
+  const telefonoInput = document.getElementById("telefono");
+
+  telefonoInput.addEventListener("input", function () {
+    // Permite solo dígitos y un + al principio
+    let valor = this.value;
+    valor = valor.replace(/(?!^\+)[^\d]/g, ""); // Elimina todo excepto dígitos y + al inicio
+    this.value = valor;
+  });
+});
+
+</script>
 {% endblock %}

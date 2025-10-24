@@ -1,7 +1,7 @@
 {% load static %}
-<body class="p-4">
-    <h4>Cancelar Venta</h4>
-    <p>¿Está seguro que desea cancelar la venta?</p>
+<body class="p-4 text-white">
+    <h4 class="text-white">Cancelar Venta</h4>
+    <p class="text-white">¿Está seguro que desea cancelar la venta?</p>
 
     <form  id="form-cancelar-venta" class="ajax-form" method="post" action="{% url 'cancelar_venta' venta.id %}" data-contenedor="#tablaVentas">
         {% csrf_token %}

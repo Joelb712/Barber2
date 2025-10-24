@@ -83,13 +83,13 @@ function updateProducto(input) {
  {% load static %}
 <div class="container mt-4">
     <h3>Nueva Venta</h3>
-    <form id="form-venta" class="ajax-form" action="{% url 'crear_venta' %}" method="post">
+    <form id="form-venta" class="ajax-form text-white" action="{% url 'crear_venta' %}" method="post">
         {% csrf_token %}
 
         <!-- Cliente -->
         <div class="mb-3">
             <label for="cliente" class="form-label">Cliente</label>
-            <select name="cliente" id="cliente" class="form-select" required>
+            <select name="cliente" id="cliente" class="form-select text-black" required>
                 <option value="">Seleccione un cliente</option>
                 {% for c in clientes %}
                 <option value="{{ c.id }}">{{ c.nombre }} {{ c.apellido }}</option>
@@ -103,7 +103,7 @@ function updateProducto(input) {
             <div id="productos-container">
                 <div class="row mb-2 producto-item">
                     <div class="col-md-6">
-                        <select name="productos[]" class="form-select">
+                        <select name="productos[]" class="form-select text-black">
                             <option value="">Seleccione producto</option>
                             {% for p in productos %}
                             <option value="{{ p.id }}">{{ p.nombre }} (Stock: {{ p.stock_actual }})</option>

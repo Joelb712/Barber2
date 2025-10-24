@@ -2,19 +2,49 @@
 <div class="form-container">
     <form  id="form-cliente" class="ajax-form" action="{% if cliente %}{% url 'editar_cliente' cliente.pk %}{% else %}{% url 'formcli' %}{% endif %}"  method="post" novalidate>
         {% csrf_token %}
-        {% for field in form %}
-        <div class="mb-3">
-            <label for="{{ field.id_for_label }}" class="form-label">{{ field.label }}</label>
-            {{ field }}
-            {% if field.errors %}
-            <div class="text-danger small mt-1">
-                {% for error in field.errors %}{{ error }}{% endfor %}
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+            
+            {% for field in form %}
+            
+            {% if field.name == 'activo' %}
+            <div class="flex items-center text-yellow-400">
+                
+                {{ field }} <label for="{{ field.id_for_label }}" class="ml-2 block text-sm font-medium">{{ field.label }}</label>
+                
+                {% if field.errors %}
+                <div class="text-red-500 mt-1 text-xs">
+                    {% for error in field.errors %}{{ error }}{% endfor %}
+                </div>
+                {% endif %}
+            </div>
+            {% else %}
+            <div class="text-yellow-400 {% if field.name == 'notas' %}md:col-span-2{% endif %}">
+                <label for="{{ field.id_for_label }}" class="block text-sm font-medium mb-1">{{ field.label }}</label>
+                {{ field }}
+                
+                {% if field.errors %}
+                <div class="text-red-500 mt-1 text-xs">
+                    {% for error in field.errors %}{{ error }}{% endfor %}
+                </div>
+                {% endif %}
             </div>
             {% endif %}
+            
+            {% endfor %}
+            
         </div>
-        {% endfor %}
-        <div class="d-flex justify-content-center">
-            <button type="submit" class="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded">Guardar</button>
+        <div class="flex justify-around mt-6">
+            <button type="button" class="bg-gray-600 hover:bg-gray-700 text-white font-bold py-2 px-6 rounded-lg transition duration-150 ease-in-out " onclick="cerrarModalAjax();">
+                Cancelar
+            </button>
+            </button>
+            <button type="submit" class="bg-green-500 hover:bg-green-600 text-black hover:text-white font-bold py-2 px-6 rounded-lg transition duration-150 ease-in-out">
+                {% if cliente %}
+                    Guardar Cambios
+                {% else %}
+                    Guardar
+                {% endif %}
+            </button>
         </div>
     </form>
 </div>

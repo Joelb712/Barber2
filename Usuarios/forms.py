@@ -6,7 +6,7 @@ from Otros.models import Cliente, Empleado
 
 from django.contrib.auth.forms import AuthenticationForm
 
-estilos_formulario = 'w-full pl-14 pr-4 py-3 form-input text-black rounded-md'
+estilos_formulario = 'w-full pl-14 pr-4 py-3 form-input text-white rounded-md bg-neutral-700'
 
 class LoginUsuarioForm(AuthenticationForm):
     # Personaliza el campo 'username'
@@ -39,6 +39,7 @@ class RegistroClienteForm(UserCreationForm):
         required=False,
         validators=[telefono_validator],
         widget=forms.TextInput(attrs={
+            'id':'telefono',
             'class': estilos_formulario,
             'placeholder': 'Teléfono (Opcional)'
         }),

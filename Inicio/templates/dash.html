@@ -58,7 +58,7 @@
           <i class="fas fa-house"></i><span class="menu-text">Home</span>
         </a>
       </li>
-      {% if empleadito.especialidad == 'gerente' %}
+      {% if empleadito.especialidad == 'gerente' or request.user.is_superuser%}
       <li class="menu-item">
         <!-- CAMBIO: uso href con tu url Django (igual que tenías) -->
         <a href="{% url 'lista_empleados' %}" class="menu-link" data-name="Empleados" data-icon="fa-users">
@@ -66,56 +66,56 @@
         </a>
       </li>
       {% endif%}
-      {% if empleadito.especialidad == 'gerente' or empleadito.especialidad == 'recepcionista'%}
+      {% if empleadito.especialidad == 'gerente' or empleadito.especialidad == 'recepcionista' or request.user.is_superuser%}
       <li class="menu-item">
         <a href="{% url 'lista_clientes' %}" class="menu-link" data-name="Clientes" data-icon="fa-user">
           <i class="fas fa-user"></i><span class="menu-text">Clientes</span>
         </a>
       </li>
       {% endif %}
-      {% if empleadito.especialidad == 'gerente' or empleadito.especialidad == 'recepcionista' %}
+      {% if empleadito.especialidad == 'gerente' or empleadito.especialidad == 'recepcionista' or request.user.is_superuser%}
       <li class="menu-item">
         <a href="{% url 'lista_ventas' %}" class="menu-link" data-name="Ventas" data-icon="fa-dollar-sign">
           <i class="fas fa-dollar-sign"></i><span class="menu-text">Ventas</span>
         </a>
       </li>
       {% endif%}
-      {% if empleadito.especialidad == 'gerente' or empleadito.especialidad == 'recepcionista' %}
+      {% if empleadito.especialidad == 'gerente' or empleadito.especialidad == 'recepcionista' or request.user.is_superuser%}
       <li class="menu-item">
         <a href="{% url 'turnos' %}" class="menu-link" data-name="Turnos" data-icon="fa-calendar-check">
           <i class="fas fa-calendar-check"></i><span class="menu-text">Turnos</span>
         </a>
       </li>
       {% endif %}
-      {% if empleadito.especialidad == 'gerente' %}
+      {% if empleadito.especialidad == 'gerente' or request.user.is_superuser %}
       <li class="menu-item">
         <a href="{% url 'lista_horarios' %}" class="menu-link" data-name="Horarios" data-icon="fa-clock">
           <i class="fas fa-clock"></i><span class="menu-text">Horarios</span>
         </a>
       </li>
       {% endif %}
-      {% if empleadito.especialidad == 'gerente' or empleadito.especialidad == 'recepcionista'%}
+      {% if empleadito.especialidad == 'gerente' or empleadito.especialidad == 'recepcionista' or request.user.is_superuser%}
       <li class="menu-item">
         <a href="{% url 'cajas' %}" class="menu-link" data-name="Cajas" data-icon="fa-cash-register">
           <i class="fas fa-cash-register"></i><span class="menu-text">Cajas</span>
         </a>
       </li>
       {% endif%}
-      {% if empleadito.especialidad == 'gerente' %}
+      {% if empleadito.especialidad == 'gerente' or request.user.is_superuser %}
       <li class="menu-item">
         <a href="{% url 'metodos' %}" class="menu-link" data-name="Metodos de Pago" data-icon="fa-credit-card">
           <i class="fas fa-credit-card"></i><span class="menu-text">Métodos de Pago</span>
         </a>
       </li>
       {% endif%}
-      {% if empleadito.especialidad == 'gerente' or empleadito.especialidad == 'recepcionista'%}
+      {% if empleadito.especialidad == 'gerente' or empleadito.especialidad == 'recepcionista' or request.user.is_superuser%}
       <li class="menu-item">
         <a href="{% url 'lista_productos' %}" class="menu-link" data-name="Productos" data-icon="fa-archive">
           <i class="fas fa-archive"></i><span class="menu-text">Productos</span>
         </a>
       </li>
       {% endif %}
-      {% if empleadito.especialidad == 'gerente' or empleadito.especialidad == 'recepcionista'%}
+      {% if empleadito.especialidad == 'gerente' or empleadito.especialidad == 'recepcionista' or request.user.is_superuser%}
       <li class="menu-item">
         <a href="{% url 'lista_servicios' %}" class="menu-link" data-name="Servicios" data-icon="fa-scissors">
           <i class="fas fa-scissors"></i><span class="menu-text">Servicios</span>
@@ -197,10 +197,10 @@
   </main>
   <!-- Modal genérico AJAX -->
   <div id="tailwindModal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 hidden">
-    <div class="bg-white rounded-lg shadow-xl w-full max-w-2xl max-h-[90vh] flex flex-col">
-        <div class="p-4 border-b border-gray-200 flex justify-between items-center">
-            <h3 id="modalTitle" class="text-lg font-semibold text-gray-800">Formulario</h3>
-            <button id="closeModalBtn" class="text-gray-500 hover:text-gray-800">
+    <div class="bg-neutral-900 rounded-lg shadow-xl w-full max-w-2xl max-h-[90vh] flex flex-col">
+        <div class="p-4 border-b border-yellow-500 flex justify-between items-center">
+            <h3 id="modalTitle" class="text-lg font-semibold text-yellow-500 flex-1 text-center">Formulario</h3>
+            <button id="closeModalBtn" class="text-white hover:text-yellow-500">
                 <i class="fas fa-times"></i>
             </button>
         </div>
