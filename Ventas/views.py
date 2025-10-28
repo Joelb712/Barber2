@@ -116,7 +116,8 @@ def crear_venta(request):
     try:
         caja = Caja.objects.get(estado=True)
     except Caja.DoesNotExist:
-        return JsonResponse({'error': 'Debe abrir una caja antes de registrar ventas.'})
+        return render(request, 'abra_caja.html')
+        # return JsonResponse({'error': 'Debe abrir una caja antes de registrar ventas.'})
 
     if request.method == 'POST':
         cliente_id = request.POST.get('cliente')
@@ -167,7 +168,7 @@ def crear_venta(request):
 
     context = {
         'productos': Producto.objects.filter(stock_actual__gt=0),
-        'clientes': Cliente.objects.all(),
+        'clientes': Cliente.objects.filter(activo=True),
     }
     return render(request, 'crear_venta.html', context)
 
@@ -205,6 +206,7 @@ def cobrar_turno(request, turno_id):
 
         # 2️⃣ Agregar servicios extra si los hay
         servicios_extra = request.POST.getlist('servicios_extra[]')
+        servicios_extra = [s for s in servicios_extra if s]
         for serv_id in servicios_extra:
             serv = get_object_or_404(Servicio, id=serv_id)
             DetalleVenta.objects.create(
@@ -348,7 +350,7 @@ def registrar_pago(request, venta_id):
 
     context = {
         'venta': venta,
-        'metodos_pago': MetodoPago.objects.all(),
+        'metodos_pago': MetodoPago.objects.filter(activo=True),
     }
     return render(request, 'registrar_pago.html', context)
 

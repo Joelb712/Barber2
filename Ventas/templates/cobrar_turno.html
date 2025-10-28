@@ -1,13 +1,14 @@
 {% load static %}
-<div class="container mt-4 text-white">
-  <h3>Cobrar Turno</h3>
-  <form id="form-cobro-turno" class="ajax-form text-white" method="post" action="{% url 'cobrar_turno' turno.id %}">
+<div class="bg-neutral-900 text-gray-200 p-6 rounded-lg shadow-lg max-w-4xl mx-auto">
+  <h2 class="text-2xl font-bold mb-4 text-yellow-400 text-center">Cobrar Turno</h2>
+
+  <form id="form-cobro-turno" class="space-y-6 ajax-form" method="post" action="{% url 'cobrar_turno' turno.id %}">
     {% csrf_token %}
 
     <!-- Servicios del turno -->
-    <div class="mb-3">
-      <label class="form-label">Servicios incluidos</label>
-      <ul>
+    <div>
+      <label class="block text-sm font-medium mb-2 text-yellow-400">Servicios incluidos</label>
+      <ul class="list-disc list-inside text-gray-100">
         {% for st in servicios_turno %}
         <li>{{ st.servicio.nombre }} - ${{ st.servicio.precio }}</li>
         {% endfor %}
@@ -15,127 +16,131 @@
     </div>
 
     <!-- Servicios Extra -->
-    <div class="mb-3">
-    <label class="form-label">Servicios Extra</label>
-    <div id="servicios-extra-container">
-        <div class="row mb-2 servicio-item">
-        <div class="col-md-8">
-            <select name="servicios_extra[]" class="form-select text-black">
-            <option value="">Seleccione servicio</option>
-            {% for s in servicios %}
+    <div>
+      <label class="block text-sm font-medium mb-2 text-yellow-400">Servicios Extra</label>
+      <div id="servicios-extra-container" class="space-y-2">
+        <div class="grid grid-cols-12 gap-2 servicio-item">
+          <div class="col-span-10">
+            <select name="servicios_extra[]" class="w-full rounded-lg bg-neutral-700 text-gray-100 border border-neutral-600 p-2">
+              <option value="" disabled selected hidden>Seleccione servicio</option>
+              {% for s in servicios %}
                 {% if s.id not in servicios_turno_ids %}
                 <option value="{{ s.id }}" data-precio="{{ s.precio }}">{{ s.nombre }} - ${{ s.precio }}</option>
                 {% endif %}
-            {% endfor %}
-            </select>
-        </div>
-        <div class="col-md-2">
-            <button type="button" class="btn btn-danger btn-sm" onclick="removeServicio(this)">X</button>
-        </div>
-        </div>
-    </div>
-    <button type="button" class="btn btn-secondary btn-sm" onclick="addServicio()">Agregar servicio</button>
-    </div>
-
-    <!-- Productos -->
-    <div class="mb-3">
-      <label class="form-label">Productos</label>
-      <div id="productos-container">
-        <div class="row mb-2 producto-item">
-          <div class="col-md-6">
-            <select name="productos[]" class="form-select text-black">
-              <option value="">Seleccione producto</option>
-              {% for p in productos %}
-              <option value="{{ p.id }}">{{ p.nombre }} (Stock: {{ p.stock_actual }})</option>
               {% endfor %}
             </select>
           </div>
-          <div class="col-md-4">
-            <input type="number" min="1" value="1" class="form-control prod-cant" name="cantidades[]">
-          </div>
-          <div class="col-md-2">
-            <button type="button" class="btn btn-danger btn-sm" onclick="removeProducto(this)">X</button>
+          <div class="col-span-2 flex items-center justify-center">
+            <button type="button" onclick="removeServicio(this)"
+                    class="bg-red-600 hover:bg-red-700 text-white px-3 py-2 rounded text-sm font-semibold">X</button>
           </div>
         </div>
       </div>
-      <button type="button" class="btn btn-secondary btn-sm" onclick="addProducto()">Agregar producto</button>
+      <button type="button" onclick="addServicio()"
+              class="mt-2 bg-neutral-700 hover:bg-neutral-600 text-yellow-400 font-medium px-4 py-2 rounded">
+        + Agregar servicio
+      </button>
+    </div>
+
+    <!-- Productos -->
+    <div>
+      <label class="block text-sm font-medium mb-2 text-yellow-400">Productos</label>
+      <div id="productos-container" class="space-y-2">
+        <div class="grid grid-cols-12 gap-2 producto-item">
+          <div class="col-span-6">
+            <select name="productos[]" class="w-full rounded-lg bg-neutral-700 text-gray-100 border border-neutral-600">
+              <option value="" disabled selected hidden>Seleccione producto</option>
+              {% for p in productos %}
+              <option value="{{ p.id }}" data-precio="{{ p.precio }}">{{ p.nombre }} (Stock: {{ p.stock_actual }})</option>
+              {% endfor %}
+            </select>
+          </div>
+          <div class="col-span-4">
+            <input type="number" min="1" value="1" name="cantidades[]" class="w-full rounded-lg bg-neutral-700 text-gray-100 border border-neutral-600 text-center prod-cant">
+          </div>
+          <div class="col-span-2 flex items-center justify-center">
+            <button type="button" onclick="removeProducto(this)"
+                    class="bg-red-600 hover:bg-red-700 text-white px-3 py-2 rounded text-sm font-semibold">X</button>
+          </div>
+        </div>
+      </div>
+      <button type="button" onclick="addProducto()"
+              class="mt-2 bg-neutral-700 hover:bg-neutral-600 text-yellow-400 font-medium px-4 py-2 rounded">
+        + Agregar producto
+      </button>
     </div>
 
     <!-- Total -->
-    <div class="mb-3">
-      <strong>Total: $<span id="totalTurno">0</span></strong>
+    <div class="text-right text-lg font-semibold">
+      Total: <span id="totalTurno" class="text-green-400">$0.00</span>
     </div>
 
-    <button type="submit" class="btn btn-primary" id="btnCobrarTurno">Cobrar Turno</button>
+    <div class="text-right">
+      <button type="submit"
+              class="bg-yellow-500 hover:bg-yellow-600 text-neutral-900 font-bold py-2 px-6 rounded-lg transition">
+        Cobrar Turno
+      </button>
+    </div>
   </form>
 </div>
+
 <script>
-  const preciosTurno = JSON.parse('{{ precios_servicios_json|escapejs }}');
+const preciosTurno = JSON.parse('{{ precios_servicios_json|escapejs }}');
 
-  // -----------------------------
-  // Función para calcular total
-  // -----------------------------
-  function calcularTotal() {
-    let total = 0;
+// Función para calcular total
+function calcularTotal() {
+  let total = 0;
+  preciosTurno.forEach(precio => total += precio);
 
-    // Sumar servicios del turno
-    preciosTurno.forEach(precio => total += precio);
+  // Servicios extra
+  document.querySelectorAll('#servicios-extra-container select').forEach(sel => {
+    const precio = parseFloat(sel.selectedOptions[0]?.dataset.precio || 0);
+    total += precio;
+  });
 
-    // Sumar servicios extra seleccionados
-    $('#servicios-extra-container select').each(function() {
-      const precio = parseFloat($(this).find('option:selected').data('precio')) || 0;
-      total += precio;
-    });
+  // Productos
+  document.querySelectorAll('#productos-container .producto-item').forEach(item => {
+    const cant = parseInt(item.querySelector('.prod-cant').value) || 0;
+    const precio = parseFloat(item.querySelector('select option:selected')?.dataset.precio || 0);
+    total += cant * precio;
+  });
 
-    // Sumar productos
-    $('#productos-container .producto-item').each(function() {
-      const cant = parseInt($(this).find('.prod-cant').val()) || 0;
-      const precio = parseFloat($(this).find('select option:selected').data('precio')) || 0;
-      total += cant * precio;
-    });
+  document.getElementById('totalTurno').innerText = `$${total.toFixed(2)}`;
+}
 
-    $('#totalTurno').text(`$${total.toFixed(2)}`);
+// Servicios extra
+function addServicio() {
+  const container = document.getElementById("servicios-extra-container");
+  const row = container.querySelector(".servicio-item").cloneNode(true);
+  row.querySelector("select").value = "";
+  container.appendChild(row);
+}
+
+function removeServicio(btn) {
+  const container = document.getElementById("servicios-extra-container");
+  if(container.querySelectorAll(".servicio-item").length > 1){
+    btn.closest('.servicio-item').remove();
   }
+}
 
-  // -----------------------------
-  // Funciones de Servicios Extra
-  // -----------------------------
-  function addServicio() {
-    let container = document.getElementById("servicios-extra-container");
-    let row = container.querySelector(".servicio-item").cloneNode(true);
-    row.querySelector("select").value = "";
-    container.appendChild(row);
+// Productos
+function addProducto() {
+  const container = document.getElementById("productos-container");
+  const row = container.querySelector(".producto-item").cloneNode(true);
+  row.querySelector("select").value = "";
+  row.querySelector(".prod-cant").value = 1;
+  container.appendChild(row);
+}
+
+function removeProducto(btn) {
+  const container = document.getElementById("productos-container");
+  if(container.querySelectorAll(".producto-item").length > 1){
+    btn.closest('.producto-item').remove();
   }
+}
 
-  function removeServicio(btn) {
-    let container = document.getElementById("servicios-extra-container");
-    if (container.querySelectorAll(".servicio-item").length > 1) {
-      btn.closest(".servicio-item").remove();
-    }
-  }
-
-  // -----------------------------
-  // Funciones de Productos
-  // -----------------------------
-  function addProducto() {
-    let container = document.getElementById("productos-container");
-    let row = container.querySelector(".producto-item").cloneNode(true);
-    row.querySelector("select").value = "";
-    row.querySelector(".prod-cant").value = 1;
-    container.appendChild(row);
-  }
-
-  function removeProducto(btn) {
-    let container = document.getElementById("productos-container");
-    if (container.querySelectorAll(".producto-item").length > 1) {
-      btn.closest(".producto-item").remove();
-    }
-  }
-
-  // -----------------------------
-  // Listeners
-  // -----------------------------
-  $(document).on('change keyup', '#servicios-extra-container select, .prod-cant', calcularTotal);
-  calcularTotal();
+// Listeners
+document.addEventListener('change', calcularTotal);
+document.addEventListener('input', calcularTotal);
+calcularTotal();
 </script>
-

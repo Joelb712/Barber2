@@ -2,7 +2,7 @@ from django.shortcuts import render,redirect,get_object_or_404
 from django.contrib.auth.decorators import login_required
 from django.contrib import messages
 from django.utils import timezone
-from Otros.models import Cliente,Turno,EstadoTurno,Empleado,MovimientoCaja,MetodoPago,Caja
+from Otros.models import Cliente,Turno,EstadoTurno,Empleado,Caja,Pago
 from datetime import date, timedelta
 from django.db.models import Sum, Q
 
@@ -32,20 +32,18 @@ def mis_turnos(request):
     
     # Estado 'cancelado'
     estado_cancelado = EstadoTurno.objects.get(nombre='cancelado')
-
+    estado_completado = EstadoTurno.objects.get(nombre='completado')
     # Turnos activos: futuros y no cancelados
     turnos_activos = Turno.objects.filter(
         cliente=cliente,
         fecha__gte=date.today()
-    ).exclude(estado=estado_cancelado).order_by('fecha', 'horario__hora_inicio')
+    ).exclude(estado__in=[estado_cancelado,estado_completado]).order_by('fecha', 'horario__hora_inicio')
 
     # Historial: turnos pasados o cancelados
-    turnos_historial = Turno.objects.filter(
-        cliente=cliente
-    ).filter(
-        fecha__lt=date.today()
-    ) | Turno.objects.filter(cliente=cliente, estado=estado_cancelado)
-
+    turnos_historial = Turno.objects.filter(cliente=cliente).filter(
+        Q(fecha__lt=date.today()) |  
+        Q(estado__in=[estado_cancelado, estado_completado]) 
+        )
     turnos_historial = turnos_historial.order_by('-fecha', '-horario__hora_inicio')
 
     return render(request, 'mis_turnos.html', {
@@ -91,19 +89,22 @@ def home_empleado(request):
     empleado = getattr(request.user, 'empleado', None)
     if not empleado:
         return render(request, 'home_sin_empleado.html')
+    
     hoy= date.today()
     especialidad = empleado.especialidad
 
+    #--Turnos--
     turnosemp_hoy=  Turno.objects.filter(empleado=empleado, fecha=hoy)
     print("Turnos de hoy:", turnosemp_hoy)
     turnosxempleado= turnosemp_hoy.count()
     completados= turnosemp_hoy.filter(estado__nombre='Completado').count()
     pendientes = turnosemp_hoy.filter(estado__nombre='Pendiente').count()
     cancelados = turnosemp_hoy.filter(estado__nombre='Cancelado').count()
+
+    #Rango de la Semana
     # 📅 Calculamos el rango de fechas de la semana actual
     inicio_semana = hoy
     fin_semana = hoy + timedelta(days=(6 - hoy.weekday()))  # hasta domingo
-
     # 🔍 Filtramos turnos desde hoy hasta fin de semana
     turnos_semana = Turno.objects.filter(
         empleado=empleado,
@@ -111,7 +112,23 @@ def home_empleado(request):
         estado__nombre='Pendiente'
     ).order_by('fecha', 'horario__hora_inicio')
 
+    #turnos de todos
     turnostodos = Turno.objects.filter(fecha=hoy)
+
+    caja = Caja.objects.filter(estado=True).first()  # caja abierta actual
+    efectivo = tarjeta = otros = 0
+    if caja:
+        pagos = Pago.objects.filter(venta__caja=caja, estado=True)
+
+        efectivo = pagos.filter(metodo_pago__nombre__iexact='efectivo').aggregate(total=Sum('monto'))['total'] or 0
+        tarjeta = pagos.filter(metodo_pago__nombre__icontains='tarjeta').aggregate(total=Sum('monto'))['total'] or 0
+        otros = pagos.exclude(
+            Q(metodo_pago__nombre__iexact='efectivo') |
+            Q(metodo_pago__nombre__icontains='tarjeta')
+        ).aggregate(total=Sum('monto'))['total'] or 0
+
+    total_caja = efectivo + tarjeta + otros
+
 
     context = {
         'empleado': empleado,
@@ -126,6 +143,11 @@ def home_empleado(request):
         'fin_semana': fin_semana,
         'hoy':hoy,
         'turnostodos':turnostodos,
+           # ✅ Caja actual
+        'efectivo': efectivo,
+        'tarjeta': tarjeta,
+        'otros': otros,
+        'total_caja': total_caja,
 
     }
     return render(request, 'home.html', context)
