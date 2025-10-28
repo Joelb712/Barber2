@@ -1,7 +1,18 @@
 <form id="formAperturaCaja" method="POST" action="{% url 'apertura_caja' %}" class="ajax-form">
   {% csrf_token %}
   <div class="space-y-4 text-white">
-    {{ form.as_p }}
+    <label for="{{ form.monto_inicial.id_for_label }}" class=" text-sm font-bold mb-1">{{ form.monto_inicial.label }}</label>
+    <div class="relative">
+        {{ form.monto_inicial }}        
+        <span class="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none text-yellow-400">
+          <i class="fas fa-dollar-sign"></i>
+        </span>
+    </div>
+    {% if form.monto_inicial.errors %}
+      <div class="text-red-500 text-xs">
+          {% for error in form.monto_inicial.errors %}{{ error }}{% endfor %}
+      </div>
+    {% endif %}
   </div>
   <div class="text-center mt-5">
     <button type="submit" class="px-4 py-2 bg-yellow-500 hover:bg-yellow-600 text-black rounded-lg">Abrir Caja</button>

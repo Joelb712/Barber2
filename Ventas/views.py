@@ -3,7 +3,9 @@ from django.http import JsonResponse
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required,user_passes_test
 from django.db import transaction
-from Otros.models import Venta,Cliente,Servicio, DetalleVenta, Pago, MovimientoStock, MovimientoCaja, MetodoPago,Producto,Caja
+from Otros.models import Venta,Cliente,Servicio, DetalleVenta, Pago, MovimientoStock, MovimientoCaja, MetodoPago,Producto,Caja,ServiciosXTurno,Turno,EstadoTurno
+import json
+from django.core.serializers.json import DjangoJSONEncoder
 
 # @login_required
 # @transaction.atomic
@@ -169,7 +171,116 @@ def crear_venta(request):
     }
     return render(request, 'crear_venta.html', context)
 
+@login_required
+@user_passes_test(es_gerente)
+@transaction.atomic
+def cobrar_turno(request, turno_id):
+    turno = get_object_or_404(Turno, id=turno_id)
 
+    # Verificar caja abierta
+    try:
+        caja = Caja.objects.get(estado=True)
+    except Caja.DoesNotExist:
+        return JsonResponse({'error': 'Debe abrir una caja antes de cobrar un turno.'})
+
+    if request.method == 'POST':
+        cliente = turno.cliente
+        empleado = request.user.empleado
+
+        # Crear venta base
+        venta = Venta.objects.create(cliente=cliente, empleado=empleado, caja=caja, total=0)
+        total = 0
+
+        # 1️⃣ Agregar servicios del turno (puede tener varios)
+        servicios_turno = ServiciosXTurno.objects.filter(turno=turno, activo=True)
+        for st in servicios_turno:
+            DetalleVenta.objects.create(
+                venta=venta,
+                servicio=st.servicio,
+                cantidad=1,
+                precio_unitario=st.servicio.precio,
+                subtotal=st.servicio.precio
+            )
+            total += st.servicio.precio
+
+        # 2️⃣ Agregar servicios extra si los hay
+        servicios_extra = request.POST.getlist('servicios_extra[]')
+        for serv_id in servicios_extra:
+            serv = get_object_or_404(Servicio, id=serv_id)
+            DetalleVenta.objects.create(
+                venta=venta,
+                servicio=serv,
+                cantidad=1,
+                precio_unitario=serv.precio,
+                subtotal=serv.precio
+            )
+            total += serv.precio
+
+        # 3️⃣ Agregar productos
+        productos = request.POST.getlist('productos[]')
+        cantidades = request.POST.getlist('cantidades[]')
+        for prod_id, cant in zip(productos, cantidades):
+            if not prod_id or not cant:
+                continue
+            producto = get_object_or_404(Producto, id=prod_id)
+            cant = int(cant)
+
+            if producto.stock_actual < cant:
+                venta.delete()
+                return JsonResponse({'error': f"Stock insuficiente para {producto.nombre}"})
+
+            producto.stock_actual -= cant
+            producto.save()
+
+            DetalleVenta.objects.create(
+                venta=venta,
+                producto=producto,
+                cantidad=cant,
+                precio_unitario=producto.precio,
+                subtotal=producto.precio * cant
+            )
+
+            MovimientoStock.objects.create(
+                producto=producto,
+                tipo='SALIDA',
+                cantidad=cant,
+                motivo=f"Venta producto durante cobro de turno #{turno.id}",
+                empleado=empleado,
+            )
+
+            total += producto.precio * cant
+
+        # 4️⃣ Actualizar total de la venta
+        venta.total = total
+        venta.save()
+
+        # 5️⃣ Cambiar estado del turno a "Completado"
+        try:
+            estado_completado = EstadoTurno.objects.get(nombre='completado')
+            turno.estado = estado_completado
+        except EstadoTurno.DoesNotExist:
+            turno.estado = None  # fallback
+        turno.save()
+
+        # 6️⃣ Redirigir al registro de pago
+        return JsonResponse({'next_url': f'/crear/pago/{venta.id}/'})
+
+    # GET → Datos para el modal
+    servicios_turno_qs = ServiciosXTurno.objects.filter(turno=turno, activo=True)
+    context = {
+        'turno': turno,
+        'servicios_turno': servicios_turno_qs,
+        'productos': Producto.objects.filter(activo=True, stock_actual__gt=0),
+        'servicios': Servicio.objects.filter(activo=True),
+        # ✅ Precios de servicios del turno como lista JSON para JS
+        'precios_servicios_json': json.dumps(
+            list(servicios_turno_qs.values_list('servicio__precio', flat=True)),
+            cls=DjangoJSONEncoder
+        ),
+        # ✅ IDs de servicios del turno para filtrar en el template
+        'servicios_turno_ids': list(servicios_turno_qs.values_list('servicio__id', flat=True)),
+    }
+    return render(request, 'cobrar_turno.html', context)
 
 
 #@login_required

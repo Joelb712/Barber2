@@ -1,13 +1,18 @@
 {% load static %}
 <div>
-    <h4>Eliminar Empleado</h4>
-    <p>¿Está seguro que desea eliminar al empleado ?</p>
-
     <form id="form-eliminar-empleado" class="ajax-form" method="post" action="{% url 'eliminar_empleado' empleado.pk %}"  data-contenedor="#tablaEmpleados">
         {% csrf_token %}
-        <div class="d-flex justify-content-end gap-2">
-            <button type="button" class="bg-gray-700 hover:bg-gray-800 text-white px-4 py-2 rounded"  onclick="cerrarModalAjax();">Cancelar</button>
-            <button type="submit" class="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded">Confirmar</button>
+        <p class="text-neutral-300 mb-3">¿Está seguro que desea eliminar al empleado <strong class="text-yellow-500">
+            {{ empleado.user.first_name }} {{ empleado.user.last_name }}
+        </strong>?</p>
+        {% csrf_token %}
+        <div class="flex justify-around mt-8">
+            <button type="button" class="bg-neutral-600 hover:bg-neutral-700 text-white font-bold py-2 px-6 rounded-lg transition duration-150 ease-in-out " onclick="cerrarModalAjax();">
+                Cancelar
+            </button>
+            <button type="submit" class="bg-red-500 hover:bg-red-600 text-black hover:text-white font-bold py-2 px-6 rounded-lg transition duration-150 ease-in-out">
+                Confirmar
+            </button>
         </div>
     </form>
 </div>

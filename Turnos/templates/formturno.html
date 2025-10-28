@@ -1,23 +1,54 @@
 {% load static %}
-<div class="form-container">
-    <form id="form-turno" class="ajax-form" action="{% if turno %}{% url 'editar_turno' turno.pk %}{% else %}{% url 'dar_turno' %}{% endif %}"  method="post" novalidate>
-        {% csrf_token %}
+<form id="form-turno" class="ajax-form"
+    action="{% if turno %}{% url 'editar_turno' turno.pk %}{% else %}{% url 'dar_turno' %}{% endif %}" method="post"
+    novalidate>
+    {% csrf_token %}
+
+    <div class="grid grid-cols-2 gap-4"> 
         {% for field in form %}
-        <div class="p-2">
-            <label for="{{ field.id_for_label }}" class="form-label">{{ field.label }}</label>
-            {{ field }}
+        <div class="text-yellow-400">
+            <label for="{{ field.id_for_label }}" class="block text-sm font-medium mb-1">{{ field.label }}</label>
+            <div class="relative">
+                {{ field }}
+
+                <span class="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none text-yellow-400">
+                    {% if field.name == 'cliente' %} 
+                        <i class="fas fa-user-tag"></i> 
+                    {% elif field.name == 'empleado' %} 
+                        <i class="fas fa-cut"></i> 
+                    {% elif field.name == 'fecha' %} 
+                        <i class="fas fa-calendar-alt"></i>
+                    {% elif field.name == 'horario' %} 
+                        <i class="fas fa-clock"></i>
+                    {% endif %}
+                </span>
+            </div>
+
             {% if field.errors %}
-            <div class="text-danger small mt-1">
+            <div class="text-red-500 mt-1 text-xs"> 
                 {% for error in field.errors %}{{ error }}{% endfor %}
             </div>
             {% endif %}
         </div>
         {% endfor %}
-        <div class="d-flex justify-content-center">
-            <button type="submit" class="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded">Guardar</button>
-        </div>
-    </form>
-</div>
+        
+    </div>
+    <div class="flex justify-around mt-5">
+        <button type="button"
+            class="bg-gray-600 hover:bg-gray-700 text-white font-bold py-2 px-4 rounded-lg transition duration-150 ease-in-out"
+            onclick="cerrarModalAjax();">
+            Cancelar
+        </button>
+        <button type="submit"
+            class="bg-green-600 hover:bg-green-700 text-white font-bold py-2 px-4 rounded-lg transition duration-150 ease-in-out">
+            {% if turno %}
+            Guardar Cambios
+            {% else %}
+            Guardar
+            {% endif %}
+          </button>
+    </div>
+</form>
     <!-- <div class="max-w-3xl mx-auto bg-[#1A1A1A] text-gray-200 rounded-2xl p-8 shadow-lg">
         <h2 class="text-2xl font-semibold text-yellow-500 mb-6">Nuevo Turno</h2>
 

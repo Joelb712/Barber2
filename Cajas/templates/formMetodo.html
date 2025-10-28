@@ -1,20 +1,21 @@
 {% load static %}
-<div class="form-container">
-    <form  id="form-metodo" class="ajax-form" action="{% url 'crear_metodo' %}"  method="post" novalidate>
-        {% csrf_token %}
-        {% for field in form %}
-        <div class="mb-3">
-            <label for="{{ field.id_for_label }}" class="form-label">{{ field.label }}</label>
-            {{ field }}
-            {% if field.errors %}
-            <div class="text-danger small mt-1">
-                {% for error in field.errors %}{{ error }}{% endfor %}
-            </div>
-            {% endif %}
+<form id="form-metodo" class="ajax-form" action="{% url 'crear_metodo' %}" method="post" novalidate>
+    {% csrf_token %}
+    <div class="space-y-4 text-white">
+        <label for="{{ form.nombre.id_for_label }}" class=" text-sm font-bold mb-1">{{ form.nombre.label }}</label>
+        <div class="relative">
+            {{ form.nombre }}
+            <span class="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none text-yellow-400">
+                <i class="fas fa-credit-card"></i>
+            </span>
         </div>
-        {% endfor %}
-        <div class="d-flex justify-content-center">
-            <button type="submit" class="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded">Guardar</button>
+        {% if form.nombre.errors %}
+        <div class="text-red-500 text-sm">
+            {% for error in form.nombre.errors %}{{ error }}{% endfor %}
         </div>
-    </form>
-</div>
+        {% endif %}
+    </div>
+    <div class="text-center mt-5">
+        <button type="submit" class="px-4 py-2 bg-yellow-500 hover:bg-yellow-600 text-black rounded-lg">Guardar</button>
+    </div>
+</form>

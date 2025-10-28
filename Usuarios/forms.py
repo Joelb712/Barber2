@@ -7,6 +7,7 @@ from Otros.models import Cliente, Empleado
 from django.contrib.auth.forms import AuthenticationForm
 
 estilos_formulario = 'w-full pl-14 pr-4 py-3 form-input text-white rounded-md bg-neutral-700'
+estilos_Empleado= 'w-full py-2 pl-10 pr-4 rounded-lg border border-yellow-400 bg-gray-700 text-white placeholder-gray-400'
 
 class LoginUsuarioForm(AuthenticationForm):
     # Personaliza el campo 'username'
@@ -25,10 +26,6 @@ class LoginUsuarioForm(AuthenticationForm):
             'class': estilos_formulario
         }))
     
-
-
-
-
 class RegistroClienteForm(UserCreationForm):
     telefono_validator = RegexValidator(
         regex=r'^\+?\d{7,15}$',
@@ -100,41 +97,55 @@ class RegistroClienteForm(UserCreationForm):
             user.groups.add(grupo_cliente)
             return user
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 class EmpleadoCreateForm(forms.ModelForm):
-    username = forms.CharField(required=True, label="Nombre de usuario")
-    first_name = forms.CharField(required=True, label="Nombre")
-    last_name = forms.CharField(required=True, label="Apellido")
-    email = forms.EmailField(required=True, label="Correo electrónico")
-    password = forms.CharField(required=False, label="Contraseña (opcional)", widget=forms.PasswordInput)
-
+    username = forms.CharField(
+        required=True, 
+        label="Nombre de usuario",
+        widget=forms.TextInput(attrs={
+            'class': estilos_Empleado
+        }))
+    first_name = forms.CharField(
+        required=True,
+        label="Nombre",
+        widget=forms.TextInput(attrs={
+            'class': estilos_Empleado
+        }))
+    last_name = forms.CharField(
+        required=True,
+        label="Apellido",
+        widget=forms.TextInput(attrs={
+            'class': estilos_Empleado
+        }))
+    email = forms.EmailField(
+        required=True,
+        label="Correo electrónico",
+        widget=forms.EmailInput(attrs={
+            'class': estilos_Empleado
+        }))
+    password = forms.CharField(
+        required=False,
+        label="Contraseña (opcional)",
+        widget=forms.PasswordInput(attrs={
+            'class': estilos_Empleado
+        }))
+    dni = forms.CharField(
+        required= True,
+        label= 'Dni',
+        widget=forms.TextInput(attrs={
+            'class': estilos_Empleado
+        }))
+    telefono = forms.CharField(
+        required=True,
+        label='Telefono',
+        widget=forms.TextInput(attrs={
+            'class': estilos_Empleado
+        }))
     class Meta:
         model = Empleado
-        fields = ['dni', 'telefono', 'especialidad']
-
+        fields = ['username','password','first_name', 'last_name', 'especialidad','email','dni', 'telefono']
+        widgets = {
+            'especialidad': forms.Select(attrs={'class': estilos_Empleado}),
+        }
     def save(self, commit=True):
         # Crear usuario
         password = self.cleaned_data.get('password') or "cambiame123"  # genérica si no se pasa
@@ -169,11 +180,30 @@ class EmpleadoCreateForm(forms.ModelForm):
         return empleado
     
 class EmpleadoEditarForm(forms.ModelForm):
-    email = forms.EmailField(required=True, label="Correo electrónico")  # solo email editable
-
+    email = forms.EmailField(
+        required=True, 
+        label="Correo electrónico",
+        widget=forms.EmailInput(attrs={
+            'class': estilos_Empleado
+        }))
+    telefono = forms.CharField(
+        required=True,
+        label='Telefono',
+        widget=forms.TextInput(attrs={
+            'class': estilos_Empleado
+        }))
+    dni = forms.CharField(
+        required= True,
+        label= 'Dni',
+        widget=forms.TextInput(attrs={
+            'class': estilos_Empleado
+        }))  
     class Meta:
         model = Empleado
-        fields = ['telefono', 'dni', 'especialidad', 'activo']  # campos del empleado que se pueden cambiar
+        fields = ['telefono', 'dni', 'especialidad', 'email', 'activo']
+        widgets = {
+            'especialidad': forms.Select(attrs={'class': estilos_Empleado}),
+        }
 
     def __init__(self, *args, **kwargs):
         self.user_instance = kwargs.pop('user_instance', None)
@@ -189,6 +219,7 @@ class EmpleadoEditarForm(forms.ModelForm):
                 self.user_instance.save()
                 empleado.save()
         return empleado
+    
     
 # class PerfilEmpleadoEditarForm(forms.ModelForm):
 #     email = forms.EmailField(required=True, label="Correo electrónico")

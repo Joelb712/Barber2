@@ -1,0 +1,141 @@
+{% load static %}
+<div class="container mt-4 text-white">
+  <h3>Cobrar Turno</h3>
+  <form id="form-cobro-turno" class="ajax-form text-white" method="post" action="{% url 'cobrar_turno' turno.id %}">
+    {% csrf_token %}
+
+    <!-- Servicios del turno -->
+    <div class="mb-3">
+      <label class="form-label">Servicios incluidos</label>
+      <ul>
+        {% for st in servicios_turno %}
+        <li>{{ st.servicio.nombre }} - ${{ st.servicio.precio }}</li>
+        {% endfor %}
+      </ul>
+    </div>
+
+    <!-- Servicios Extra -->
+    <div class="mb-3">
+    <label class="form-label">Servicios Extra</label>
+    <div id="servicios-extra-container">
+        <div class="row mb-2 servicio-item">
+        <div class="col-md-8">
+            <select name="servicios_extra[]" class="form-select text-black">
+            <option value="">Seleccione servicio</option>
+            {% for s in servicios %}
+                {% if s.id not in servicios_turno_ids %}
+                <option value="{{ s.id }}" data-precio="{{ s.precio }}">{{ s.nombre }} - ${{ s.precio }}</option>
+                {% endif %}
+            {% endfor %}
+            </select>
+        </div>
+        <div class="col-md-2">
+            <button type="button" class="btn btn-danger btn-sm" onclick="removeServicio(this)">X</button>
+        </div>
+        </div>
+    </div>
+    <button type="button" class="btn btn-secondary btn-sm" onclick="addServicio()">Agregar servicio</button>
+    </div>
+
+    <!-- Productos -->
+    <div class="mb-3">
+      <label class="form-label">Productos</label>
+      <div id="productos-container">
+        <div class="row mb-2 producto-item">
+          <div class="col-md-6">
+            <select name="productos[]" class="form-select text-black">
+              <option value="">Seleccione producto</option>
+              {% for p in productos %}
+              <option value="{{ p.id }}">{{ p.nombre }} (Stock: {{ p.stock_actual }})</option>
+              {% endfor %}
+            </select>
+          </div>
+          <div class="col-md-4">
+            <input type="number" min="1" value="1" class="form-control prod-cant" name="cantidades[]">
+          </div>
+          <div class="col-md-2">
+            <button type="button" class="btn btn-danger btn-sm" onclick="removeProducto(this)">X</button>
+          </div>
+        </div>
+      </div>
+      <button type="button" class="btn btn-secondary btn-sm" onclick="addProducto()">Agregar producto</button>
+    </div>
+
+    <!-- Total -->
+    <div class="mb-3">
+      <strong>Total: $<span id="totalTurno">0</span></strong>
+    </div>
+
+    <button type="submit" class="btn btn-primary" id="btnCobrarTurno">Cobrar Turno</button>
+  </form>
+</div>
+<script>
+  const preciosTurno = JSON.parse('{{ precios_servicios_json|escapejs }}');
+
+  // -----------------------------
+  // Función para calcular total
+  // -----------------------------
+  function calcularTotal() {
+    let total = 0;
+
+    // Sumar servicios del turno
+    preciosTurno.forEach(precio => total += precio);
+
+    // Sumar servicios extra seleccionados
+    $('#servicios-extra-container select').each(function() {
+      const precio = parseFloat($(this).find('option:selected').data('precio')) || 0;
+      total += precio;
+    });
+
+    // Sumar productos
+    $('#productos-container .producto-item').each(function() {
+      const cant = parseInt($(this).find('.prod-cant').val()) || 0;
+      const precio = parseFloat($(this).find('select option:selected').data('precio')) || 0;
+      total += cant * precio;
+    });
+
+    $('#totalTurno').text(`$${total.toFixed(2)}`);
+  }
+
+  // -----------------------------
+  // Funciones de Servicios Extra
+  // -----------------------------
+  function addServicio() {
+    let container = document.getElementById("servicios-extra-container");
+    let row = container.querySelector(".servicio-item").cloneNode(true);
+    row.querySelector("select").value = "";
+    container.appendChild(row);
+  }
+
+  function removeServicio(btn) {
+    let container = document.getElementById("servicios-extra-container");
+    if (container.querySelectorAll(".servicio-item").length > 1) {
+      btn.closest(".servicio-item").remove();
+    }
+  }
+
+  // -----------------------------
+  // Funciones de Productos
+  // -----------------------------
+  function addProducto() {
+    let container = document.getElementById("productos-container");
+    let row = container.querySelector(".producto-item").cloneNode(true);
+    row.querySelector("select").value = "";
+    row.querySelector(".prod-cant").value = 1;
+    container.appendChild(row);
+  }
+
+  function removeProducto(btn) {
+    let container = document.getElementById("productos-container");
+    if (container.querySelectorAll(".producto-item").length > 1) {
+      btn.closest(".producto-item").remove();
+    }
+  }
+
+  // -----------------------------
+  // Listeners
+  // -----------------------------
+  $(document).on('change keyup', '#servicios-extra-container select, .prod-cant', calcularTotal);
+  calcularTotal();
+</script>
+
