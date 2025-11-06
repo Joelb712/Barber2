@@ -448,6 +448,9 @@ document.getElementById('btnConfirmarTurno').addEventListener('click', function(
 });
 
 // Fecha mínima
-document.getElementById('inputFecha').min = new Date().toISOString().split('T')[0];
+// document.getElementById('inputFecha').min = new Date().toISOString().split('T')[0];
+const hoy = new Date();
+hoy.setMinutes(hoy.getMinutes() - hoy.getTimezoneOffset());
+document.getElementById('inputFecha').min = hoy.toISOString().split('T')[0];
 </script>
 {% endblock %}

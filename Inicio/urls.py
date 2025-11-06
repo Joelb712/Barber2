@@ -10,4 +10,5 @@ urlpatterns=[
     path('perfil/',perfil_cliente,name='perfil_cliente'),
     path('turnos/cancelar/<int:turno_id>/', cancelar_turno, name='cancelar_turno'),
     path('home/',home_empleado,name='home'),
+    path('mi-perfil/', mi_perfil, name='mi_perfil'),
 ]

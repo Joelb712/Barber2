@@ -220,8 +220,9 @@ def editar_turno(request, pk):
 @user_passes_test(es_gerente)
 def eliminar_turno(request, pk):
     turno = get_object_or_404(Turno, pk=pk)
+    cancelado = EstadoTurno.objects.get(nombre='cancelado')
     if request.method == 'POST':
-        turno.estado = 'cancelado'
+        turno.estado = cancelado
         turno.save()
         return JsonResponse({'success': True})
     return render(request, 'eliminarturno.html', {'turno': turno})

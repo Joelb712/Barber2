@@ -5,6 +5,7 @@ from django.utils import timezone
 from Otros.models import Cliente,Turno,EstadoTurno,Empleado,Caja,Pago
 from datetime import date, timedelta
 from django.db.models import Sum, Q
+from django.http import JsonResponse
 
 # Create your views here.
 def Inicio(request):
@@ -151,3 +152,29 @@ def home_empleado(request):
 
     }
     return render(request, 'home.html', context)
+
+@login_required
+def mi_perfil(request):
+    empleado = get_object_or_404(Empleado, user=request.user)
+
+    if request.method == "POST":
+        empleado.user.first_name = request.POST.get("first_name", "")
+        empleado.user.last_name = request.POST.get("last_name", "")
+        empleado.telefono = request.POST.get("telefono", "")
+        empleado.dni = request.POST.get("dni", "")
+
+        if 'foto' in request.FILES:
+            empleado.foto = request.FILES['foto']
+
+        email = request.POST.get('email')
+        if email and email != empleado.user.email:
+            empleado.user.email = email
+
+        empleado.user.save()
+        empleado.save()
+        messages.success(request, "✅ Tus datos fueron actualizados correctamente.")
+
+        
+        return redirect("dash")
+
+    return render(request, "perfil.html", {"empleado": empleado})

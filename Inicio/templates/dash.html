@@ -140,7 +140,7 @@
           <i class="fa fa-home mr-1"></i>Volver al inicio
         </a>
 
-        <a href="#" class="text-xs bg-yellow-500 hover:bg-yellow-600 text-neutral-900 font-semibold py-1.5 rounded transition">
+        <a href="{% url 'mi_perfil' %}" onclick="event.preventDefault(); cargarContenido(`{% url 'mi_perfil' %}`, 'Mi Perfil', 'fa-user');" class="text-xs bg-yellow-500 hover:bg-yellow-600 text-neutral-900 font-semibold py-1.5 rounded transition">
           Ver perfil
         </a>
 
@@ -621,6 +621,11 @@
             }
         });
     }
+    // cargar vista Home por defecto al abrir el dash
+    window.addEventListener("DOMContentLoaded", function() {
+        const urlHome = "{% url 'home' %}";
+        cargarContenido(urlHome, "Home", "fa-house");
+    });
   </script>
 
   {% block extra_js %}
