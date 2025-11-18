@@ -3,8 +3,8 @@
 {% block title %}Inicio | La Barbería{% endblock %}
 
 {% block content %}
-
-<!-- Hero con carrusel personalizado (sin Bootstrap) -->
+<div data-page="index">
+<!-- Hero con carrusel personalizado -->
 <section class="relative h-screen overflow-hidden">
   <!-- Contenedor del carrusel -->
   <div id="heroCarousel" class="h-full w-full relative">
@@ -192,19 +192,15 @@
     </div>
   </div>
 </div>
+</div>
 
 {% endblock %}
 
 {% block footer %}
 <footer class="bg-[#111] text-center py-10 text-gray-400 text-sm">
   <div class="max-w-5xl mx-auto px-4">
-    <div class="flex flex-col sm:flex-row justify-between items-center space-y-4 sm:space-y-0">
+    <div class="flex flex-col sm:flex-row justify-center items-center text-center space-y-4 sm:space-y-0">
       <p>&copy; 2025 Barber Studio. Todos los derechos reservados.</p>
-      <div class="flex space-x-4">
-        <a href="#" class="hover:text-yellow-500 transition">Política de Privacidad</a>
-        <a href="#" class="hover:text-yellow-500 transition">Términos y Condiciones</a>
-        <a href="#contacto" class="hover:text-yellow-500 transition">Contacto</a>
-      </div>
     </div>
   </div>
 </footer>

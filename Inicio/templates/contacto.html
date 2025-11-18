@@ -10,21 +10,57 @@
 
     <form method="post" action="#" class="grid grid-cols-1 md:grid-cols-2 gap-6">
       {% csrf_token %}
+
+      <!-- NOMBRE -->
       <div>
         <label for="nombre" class="block text-sm font-medium mb-1">Nombre</label>
-        <input type="text" id="nombre" name="nombre" required class="w-full rounded px-4 py-2 bg-gray-800 text-white border border-yellow-500 focus:outline-none focus:ring-2 focus:ring-yellow-400">
+        <input type="text" id="nombre" name="nombre"
+               pattern="[A-Za-zÁÉÍÓÚáéíóúÑñ ]+" required
+               class="w-full rounded px-4 py-2 bg-gray-800 text-white border border-yellow-500 focus:outline-none focus:ring-2 focus:ring-yellow-400">
+        <p id="error-nombre" class="text-red-500 text-sm mt-1"></p>
       </div>
+
+      <!-- APELLIDO -->
+      <div>
+        <label for="apellido" class="block text-sm font-medium mb-1">Apellido</label>
+        <input type="text" id="apellido" name="apellido"
+               pattern="[A-Za-zÁÉÍÓÚáéíóúÑñ ]+" required
+               class="w-full rounded px-4 py-2 bg-gray-800 text-white border border-yellow-500 focus:outline-none focus:ring-2 focus:ring-yellow-400">
+        <p id="error-apellido" class="text-red-500 text-sm mt-1"></p>
+      </div>
+
+      <!-- EMAIL -->
       <div>
         <label for="email" class="block text-sm font-medium mb-1">Email</label>
-        <input type="email" id="email" name="email" required class="w-full rounded px-4 py-2 bg-gray-800 text-white border border-yellow-500 focus:outline-none focus:ring-2 focus:ring-yellow-400">
+        <input type="email" id="email" name="email" required
+               class="w-full rounded px-4 py-2 bg-gray-800 text-white border border-yellow-500 focus:outline-none focus:ring-2 focus:ring-yellow-400">
+        <p id="error-email" class="text-red-500 text-sm mt-1"></p>
       </div>
+
+      <!-- TELEFONO (opcional) -->
+      <div>
+        <label for="telefono" class="block text-sm font-medium mb-1">Teléfono (opcional)</label>
+        <input type="text" id="telefono" name="telefono"
+               pattern="[0-9]{0,15}"
+               class="w-full rounded px-4 py-2 bg-gray-800 text-white border border-yellow-500 focus:outline-none focus:ring-2 focus:ring-yellow-400">
+        <p id="error-telefono" class="text-red-500 text-sm mt-1"></p>
+      </div>
+
+      <!-- MENSAJE -->
       <div class="md:col-span-2">
         <label for="mensaje" class="block text-sm font-medium mb-1">Mensaje</label>
-        <textarea id="mensaje" name="mensaje" rows="5" required class="w-full rounded px-4 py-2 bg-gray-800 text-white border border-yellow-500 focus:outline-none focus:ring-2 focus:ring-yellow-400"></textarea>
+        <textarea id="mensaje" name="mensaje" rows="5" required
+                  class="w-full rounded px-4 py-2 bg-gray-800 text-white border border-yellow-500 focus:outline-none focus:ring-2 focus:ring-yellow-400"></textarea>
+        <p id="error-mensaje" class="text-red-500 text-sm mt-1"></p>
       </div>
+
       <div class="md:col-span-2 text-center">
-        <button type="submit" class="bg-yellow-500 hover:bg-yellow-600 text-black font-bold py-2 px-6 rounded">Enviar Mensaje</button>
+        <button type="submit"
+                class="bg-yellow-500 hover:bg-yellow-600 text-black font-bold py-2 px-6 rounded">
+          Enviar Mensaje
+        </button>
       </div>
+
     </form>
 
     <div class="mt-10 text-center text-gray-400 text-sm">

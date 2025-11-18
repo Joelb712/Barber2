@@ -40,11 +40,11 @@
     <!-- Navegación principal -->
     <nav id="menu" class="hidden md:block">
       <ul class="flex flex-col md:flex-row items-center gap-4 md:gap-6 text-sm font-medium text-white">
-        <li><a href="#servicios" class="hover:text-yellow-500 transition">Servicios</a></li>
-        <li><a href="#productos" class="hover:text-yellow-500 transition">Productos</a></li>
-        <li><a href="#nosotros" class="hover:text-yellow-500 transition">Nosotros</a></li>
-        <li><a href="#reserva" class="hover:text-yellow-500 transition">Reserva</a></li>
-        <li><a id="divContacto" href="#" class="hover:text-yellow-500 transition">Contacto</a></li>
+        <li><a data-target="servicios" href="#" class="nav-link hover:text-yellow-500 transition">Servicios</a></li>
+        <li><a data-target="productos" href="#" class="nav-link hover:text-yellow-500 transition">Productos</a></li>
+        <li><a data-target="nosotros" href="#" class="nav-link hover:text-yellow-500 transition">Nosotros</a></li>
+        <li><a data-target="reserva" href="#" class="nav-link hover:text-yellow-500 transition">Reserva</a></li>
+        <li><a id="divContacto" href="{% url 'contacto' %}" class="hover:text-yellow-500 transition">Contacto</a></li>
 
         {% if user.is_authenticated %}
           <!-- <li><a href="{% url 'dash' %}" class="hover:text-yellow-500 transition">Dash</a></li> -->
@@ -107,11 +107,11 @@
   <!-- Menú desplegable (solo visible en móvil) -->
   <div id="mobile-menu" class="hidden md:hidden mt-3 bg-black/60 backdrop-blur-xl rounded-xl p-4">
     <ul class="flex flex-col items-center gap-4 text-white text-sm font-medium">
-      <li><a href="#servicios" class="hover:text-yellow-400 transition">Servicios</a></li>
-      <li><a href="#productos" class="hover:text-yellow-400 transition">Productos</a></li>
-      <li><a href="#nosotros" class="hover:text-yellow-400 transition">Nosotros</a></li>
-      <li><a href="#reserva" class="hover:text-yellow-400 transition">Reserva</a></li>
-      <li><a id="divContacto" href="#" class="hover:text-yellow-400 transition">Contacto</a></li>
+      <li><a href="#servicios" data-target="servicios" class="mobile-link hover:text-yellow-400 transition">Servicios</a></li>
+      <li><a href="#productos" data-target="productos" class="mobile-link hover:text-yellow-400 transition">Productos</a></li>
+      <li><a href="#nosotros" data-target="nosotros" class="mobile-link hover:text-yellow-400 transition">Nosotros</a></li>
+      <li><a href="#reserva" data-target="reserva" class="mobile-link hover:text-yellow-400 transition">Reserva</a></li>
+      <li><a id="divmobileContacto" href="{% url 'contacto' %}" class="mobile-link hover:text-yellow-400 transition">Contacto</a></li>
 
       {% if user.is_authenticated %}
         <li><a href="{% url 'dash' %}" class="hover:text-yellow-400 transition">Dash</a></li>
@@ -155,80 +155,162 @@
   <!-- Si usás modales de Bootstrap en otras vistas, deberás reemplazarlos por modales en Tailwind o Alpine.js -->
 
   <script>
-    function cargarContenido(url) {
-      $.ajax({
-          url: url,
-          method: 'GET',
-          headers: { 'X-Requested-With': 'XMLHttpRequest' },
-          xhrFields: { withCredentials: true },
-          success: function(respuesta, status, jqXHR) {
-            if (typeof respuesta === 'string' && (respuesta.includes('<html') || respuesta.includes('<head'))) {
-                window.location.href = url;
-                return;
-            }
-            if (respuesta.includes('name="username"') && respuesta.includes('name="password"')) {
-                window.location.href = "{% url 'login' %}";
-                return;
-            }
-            $('#main-content').html(respuesta);
-          },
-          error: function(error) {
-              console.error('Error:', error);
-          }
-      });
-    }
-
-    $(document).ready(function() {
-      $('#divContacto').on('click', function(e) {
-        e.preventDefault();
-        cargarContenido("{% url 'contacto' %}");
-        return false;
-      });
-    });
-    $(document).ready(function() {
-      $('#divPerfil').on('click', function(e) {
-        e.preventDefault();
-        cargarContenido("{% url 'perfil_cliente' %}");
-        return false;
-      });
-    });
-    $(document).ready(function() {
-      $('#divMisturnos').on('click', function(e) {
-        e.preventDefault();
-        cargarContenido("{% url 'mis_turnos' %}");
-        return false;
-      });
-    });
-
-
-  </script>
-
-  <script>
+    /* ------------------------------ */
+    /* MENÚ MÓVIL                     */
+    /* ------------------------------ */
     const menuBtn = document.getElementById('menu-btn');
     const mobileMenu = document.getElementById('mobile-menu');
 
     menuBtn.addEventListener('click', () => {
-      mobileMenu.classList.toggle('hidden');
-      menuBtn.classList.toggle('open');
+        mobileMenu.classList.toggle('hidden');
     });
 
+
+    /* ------------------------------ */
+    /* DROPDOWN DE USUARIO            */
+    /* ------------------------------ */
     const userMenu = document.getElementById("user-menu");
-  const dropdown = document.getElementById("user-dropdown");
+    const dropdown = document.getElementById("user-dropdown");
+    let hideTimeout;
 
-  let hideTimeout;
+    if (userMenu) {
+        userMenu.addEventListener("mouseenter", () => {
+            clearTimeout(hideTimeout);
+            dropdown.classList.remove("hidden");
+        });
 
-  userMenu.addEventListener("mouseenter", () => {
-    clearTimeout(hideTimeout);
-    dropdown.classList.remove("hidden");
-    dropdown.classList.add("opacity-100");
-  });
+        userMenu.addEventListener("mouseleave", () => {
+            hideTimeout = setTimeout(() => {
+                dropdown.classList.add("hidden");
+            }, 200);
+        });
+    }
 
-  userMenu.addEventListener("mouseleave", () => {
-    hideTimeout = setTimeout(() => {
-      dropdown.classList.add("hidden");
-      dropdown.classList.remove("opacity-100");
-    }, 300); // 🔥 retardo de 300ms antes de ocultarse
-  });
-</script>
+
+    /* ------------------------------ */
+    /* FUNCIÓN GLOBAL AJAX            */
+    /* ------------------------------ */
+    function cargarContenido(url) {
+        $.ajax({
+            url: url,
+            method: 'GET',
+            headers: { 'X-Requested-With': 'XMLHttpRequest' },
+            success: function(respuesta) {
+
+                // Si devuelve HTML completo → redirigimos
+                if (respuesta.includes('<html')) {
+                    window.location.href = url;
+                    return;
+                }
+
+                // Si aparece login → redirigir
+                if (respuesta.includes('name="username"')) {
+                    window.location.href = "{% url 'login' %}";
+                    return;
+                }
+
+                $("#main-content").html(respuesta);
+            },
+            error: function(e) {
+                console.error("Error AJAX:", e);
+            }
+        });
+    }
+
+
+    /* ------------------------------ */
+    /* EVENTOS PARA CARGAR VISTAS     */
+    /* ------------------------------ */
+    $(document).on("click", "#divContacto, #divmobileContacto", function(e) {
+        e.preventDefault();
+        cargarContenido("{% url 'contacto' %}");
+    });
+
+    $(document).on("click", "#divPerfil", function(e) {
+        e.preventDefault();
+        cargarContenido("{% url 'perfil_cliente' %}");
+    });
+
+    $(document).on("click", "#divMisturnos", function(e) {
+        e.preventDefault();
+        cargarContenido("{% url 'mis_turnos' %}");
+    });
+
+
+    /* ------------------------------ */
+    /* NAVEGACIÓN A SECCIONES DEL INDEX */
+    /* ------------------------------ */
+    $(document).on("click", ".nav-link, .mobile-link", function(e) {
+        e.preventDefault();
+
+        let target = $(this).data("target");
+        let indexUrl = "{% url 'Inicio' %}";
+
+        // Si YA estamos en index
+        if ($("#main-content").attr("data-page") === "index") {
+            scrollToSection(target);
+            mobileMenu.classList.add("hidden");
+            return;
+        }
+
+        // Si NO estamos en index → cargar index primero
+        $.ajax({
+            url: indexUrl,
+            method: "GET",
+            headers: { "X-Requested-With": "XMLHttpRequest" },
+            success: function(r) {
+                $("#main-content").html(r).attr("data-page", "index");
+
+                setTimeout(() => {
+                    scrollToSection(target);
+                    mobileMenu.classList.add("hidden");
+                }, 100);
+            }
+        });
+    });
+
+    /* ------------------------------ */
+    /* SCROLL ANIMADO A UNA SECCIÓN   */
+    /* ------------------------------ */
+    function scrollToSection(id) {
+        const element = document.getElementById(id);
+        if (element) {
+            element.scrollIntoView({ behavior: "smooth" });
+        }
+    }
+
+    /* ------------------------------ */
+    /* VALIDACIONES FORMULARIO CONTACTO */
+    /* ------------------------------ */
+    document.addEventListener("input", function (e) {
+        const id = e.target.id;
+
+        const reglas = {
+            nombre: /^[A-Za-zÁÉÍÓÚáéíóúÑñ ]+$/,
+            apellido: /^[A-Za-zÁÉÍÓÚáéíóúÑñ ]+$/,
+            email: /^[^\s@]+@[^\s@]+\.[^\s@]+$/,
+            telefono: /^[0-9]*$/
+        };
+
+        if (reglas[id]) {
+            validarCampo(e.target, reglas[id], `error-${id}`, "Formato no válido.");
+        }
+
+        if (id === "mensaje") {
+            const error = document.getElementById("error-mensaje");
+            error.textContent = e.target.value.trim() === "" ? "El mensaje es obligatorio." : "";
+        }
+    });
+
+    function validarCampo(input, regex, errorId, mensaje) {
+        const error = document.getElementById(errorId);
+        if (input.value === "") {
+            error.textContent = "";
+            return;
+        }
+        error.textContent = regex.test(input.value) ? "" : mensaje;
+    }
+  </script>
+
 </body>
 </html>
