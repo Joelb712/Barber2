@@ -13,53 +13,60 @@
       <h1 class="text-2xl font-light tracking-widest uppercase">Registrarse</h1>
     </div>
 
-    <form method="POST" class="space-y-4 text-yellow-500" novalidate>
+    <form method="POST" class="space-y-4 text-yellow-500" id="form-register" novalidate>
       {% csrf_token %}
       {% for field in form %}
-      <div class="relative">
-        <label for="{{ field.id_for_label }}">
-          {{ field.label }}
-        </label>
         <div class="relative">
-    
-          {{ field }}
-          {% if field.name == 'password1' or field.name == 'password2' %}
-          <span id="toggle-{{ field.name }}"
-            class="absolute inset-y-0 right-0 pr-3 flex items-center cursor-pointer text-yellow-500 transition duration-300">
-            <i class="fas fa-eye-slash text-xl"></i>
-          </span>
-          <span id="toggle-{{ field.name }}" class="absolute inset-y-0 left-0 pl-3 flex items-center text-yellow-500">
-            <i class="fas fa-lock text-xl"></i>
-          </span>
-          {% elif field.name == 'username' or field.name == 'first_name' or field.name == 'last_name' %}
-          <span id="toggle-{{ field.name }}" class="absolute inset-y-0 left-0 pl-3 flex items-center text-yellow-500">
-            <i class="fas fa-user text-xl"></i>
-          </span>
-          {% elif field.name == 'email' %}
-          <span id="toggle-{{ field.name }}" class="absolute inset-y-0 left-0 pl-3 flex items-center text-yellow-500">
-            <i class="fa-solid fa-envelope text-xl"></i>
-          </span>
-          {% elif field.name == 'dni' %}
-          <span id="toggle-{{ field.name }}" class="absolute inset-y-0 left-0 pl-3 flex items-center text-yellow-500">
-            <i class="fa-solid fa-passport text-xl"></i>
-          </span>
-          {% elif field.name == 'telefono' %}
-          <span id="toggle-{{ field.name }}" class="absolute inset-y-0 left-0 pl-3 flex items-center text-yellow-500">
-            <i class="fa-solid fa-phone text-xl"></i>
-          </span>
-          {% endif %}
-    
+            <label for="{{ field.id_for_label }}">
+                {{ field.label }}
+            </label>
+
+            <div class="relative">
+                {{ field }}
+
+                {% if field.name == 'password1' or field.name == 'password2' %}
+                    <span id="toggle-{{ field.name }}"
+                          class="absolute inset-y-0 right-0 pr-3 flex items-center cursor-pointer text-yellow-500">
+                        <i class="fas fa-eye-slash text-xl"></i>
+                    </span>
+                    <span class="absolute inset-y-0 left-0 pl-3 flex items-center text-yellow-500">
+                        <i class="fas fa-lock text-xl"></i>
+                    </span>
+
+                {% elif field.name in 'username first_name last_name' %}
+                    <span class="absolute inset-y-0 left-0 pl-3 flex items-center text-yellow-500">
+                        <i class="fas fa-user text-xl"></i>
+                    </span>
+
+                {% elif field.name == 'email' %}
+                    <span class="absolute inset-y-0 left-0 pl-3 flex items-center text-yellow-500">
+                        <i class="fa-solid fa-envelope text-xl"></i>
+                    </span>
+
+                {% elif field.name == 'dni' %}
+                    <span class="absolute inset-y-0 left-0 pl-3 flex items-center text-yellow-500">
+                        <i class="fa-solid fa-passport text-xl"></i>
+                    </span>
+
+                {% elif field.name == 'telefono' %}
+                    <span class="absolute inset-y-0 left-0 pl-3 flex items-center text-yellow-500">
+                        <i class="fa-solid fa-phone text-xl"></i>
+                    </span>
+                {% endif %}
+            </div>
+
+            <!-- ERRORES DEL BACKEND -->
+            {% if field.errors %}
+                <p class="text-red-500 text-sm mt-1">{{ field.errors.0 }}</p>
+            {% endif %}
+
+            <!-- ERRORES EN VIVO -->
+            <span id="error-{{ field.name }}" class="text-red-500 text-sm"></span>
+
         </div>
-        {% if field.help_text %}
-        <small id="help-{{ field.id_for_label }}" class="text-yellow-500 hidden">{{ field.help_text|safe }}</small>
-        {% endif %}
-        {% if field.errors %}
-        {% for error in field.errors %}
-        <p class="text-red-500 text-sm mt-1">{{ error }}</p>
-        {% endfor %}
-        {% endif %}
-      </div>
       {% endfor %}
+
+
       <button type="submit"
         class="w-full py-3 bg-yellow-500 hover:bg-yellow-600 rounded-full font-semibold mt-6 text-black transition">
         Crear cuenta
@@ -69,96 +76,110 @@
 </div>
 {% endblock %}
 
-{% block extra_head %}
-
-{% endblock %}
-
 {% block scripts %}
 <script>
+// ======================
+// Mostrar/Ocultar contraseña
+// ======================
+function togglePassword(fieldName) {
+  const input = document.getElementById(`id_${fieldName}`);
+  const toggle = document.getElementById(`toggle-${fieldName}`);
+  if (!input || !toggle) return;
 
-</script>
-<!-- mostrarcontraseña -->
-<script>
-  function mostrarContraseña(fieldName) {
-    // Busca el campo de entrada (input) y el ícono de interruptor (toggle)
-    const passwordInput = document.getElementById(`id_${fieldName}`);
-    const togglePassword = document.getElementById(`toggle-${fieldName}`);
+  toggle.addEventListener('click', () => {
+    const isPass = input.type === "password";
+    input.type = isPass ? "text" : "password";
 
-    // Sale si los elementos no existen (para evitar errores)
-    if (!passwordInput || !togglePassword) {
+    const icon = toggle.querySelector("i");
+    icon.classList.toggle("fa-eye");
+    icon.classList.toggle("fa-eye-slash");
+  });
+}
+
+togglePassword("password1");
+togglePassword("password2");
+
+
+// ======================
+// VALIDACIONES EN VIVO
+// ======================
+
+const reglas = {
+  username: {
+    regex: /^[A-Za-z0-9]+$/,
+    msg: "Solo letras y números. Sin espacios."
+  },
+  first_name: {
+    regex: /^[A-Za-zÁÉÍÓÚáéíóúÑñ ]+$/,
+    msg: "Solo letras y espacios."
+  },
+  last_name: {
+    regex: /^[A-Za-zÁÉÍÓÚáéíóúÑñ ]+$/,
+    msg: "Solo letras y espacios."
+  },
+  email: {
+    regex: /^[^\s@]+@[^\s@]+\.[^\s@]+$/,
+    msg: "Correo electrónico inválido."
+  },
+  dni: {
+    regex: /^[0-9]{7,10}$/,
+    msg: "Debe contener entre 7 y 10 dígitos numéricos."
+  },
+  telefono: {
+    regex: /^\+?\d{7,15}$/,
+    msg: "Sólo números (puede comenzar con +)."
+  }
+};
+
+
+document.querySelectorAll("input").forEach(input => {
+  const name = input.name;
+  const errorSpan = document.getElementById(`error-${name}`);
+
+  if (!errorSpan || !reglas[name]) return;
+
+  input.addEventListener("input", () => {
+    const { regex, msg } = reglas[name];
+    const value = input.value;
+
+    if (value === "") {
+      errorSpan.textContent = "";
+      input.classList.remove("border-red-500");
       return;
     }
 
-    // 3. Añade el evento click al ícono
-    togglePassword.addEventListener('click', function () {
-      // Alternar el atributo 'type' entre 'password' y 'text'
-      const type = passwordInput.getAttribute('type') === 'password' ? 'text' : 'password';
-      passwordInput.setAttribute('type', type);
-
-      // 4. Cambiar el ícono de Font Awesome
-      const icon = this.querySelector('i');
-      if (type === 'text') {
-        // Muestra ojo abierto
-        icon.classList.remove('fa-eye-slash');
-        icon.classList.add('fa-eye');
-      } else {
-        // Muestra ojo cerrado
-        icon.classList.remove('fa-eye');
-        icon.classList.add('fa-eye-slash');
-      }
-    });
-  }
-
-  // Inicializa el interruptor para ambos campos de contraseña
-  mostrarContraseña('password1');
-  mostrarContraseña('password2'); // Asumiendo que tiene un campo de confirmación 'password2'
-</script> 
-
-<script>
-document.addEventListener('DOMContentLoaded', function () {
-  // Selecciona todos los campos de entrada (input, select, textarea) en el formulario
-  const fields = document.querySelectorAll('form input, form select, form textarea');
-
-  fields.forEach(field => {
-    const helpTextId = `help-${field.id}`;
-    const helpElement = document.getElementById(helpTextId);
-
-    // Solo si existe un texto de ayuda para este campo
-    if (helpElement) {
-      // Evento al enfocar (click o tab en el campo)
-      field.addEventListener('focus', function () {
-        // Muestra el texto de ayuda (quita la clase 'hidden')
-        helpElement.classList.remove('hidden');
-      });
-
-      // Evento al desenfocar (click fuera o tab fuera del campo)
-      field.addEventListener('blur', function () {
-        // Oculta el texto de ayuda (añade la clase 'hidden')
-        helpElement.classList.add('hidden');
-      });
+    if (!regex.test(value)) {
+      errorSpan.textContent = msg;
+      input.classList.add("border-red-500");
+    } else {
+      errorSpan.textContent = "";
+      input.classList.remove("border-red-500");
     }
   });
 });
-document.addEventListener("DOMContentLoaded", function () {
-  const telefonoInput = document.getElementById("id_dni");
 
-  telefonoInput.addEventListener("input", function () {
-    // Permite solo dígitos y un + al principio
-    let valor = this.value;
-    valor = valor.replace(/(?!^\'')[^\d]/g, ""); // Elimina todo excepto dígitos y + al inicio
-    this.value = valor;
-  });
+// ======================
+// Validación antes de enviar formulario
+// ======================
+document.getElementById("form-register").addEventListener("submit", function (e) {
+  let valido = true;
+
+  for (let name in reglas) {
+    const input = document.querySelector(`[name="${name}"]`);
+    if (!input) continue;
+
+    const { regex } = reglas[name];
+    const errorSpan = document.getElementById(`error-${name}`);
+
+    if (!regex.test(input.value) && input.value !== "") {
+      errorSpan.textContent = reglas[name].msg;
+      valido = false;
+    }
+  }
+
+  if (!valido) {
+    e.preventDefault();
+  }
 });
-document.addEventListener("DOMContentLoaded", function () {
-  const telefonoInput = document.getElementById("telefono");
-
-  telefonoInput.addEventListener("input", function () {
-    // Permite solo dígitos y un + al principio
-    let valor = this.value;
-    valor = valor.replace(/(?!^\+)[^\d]/g, ""); // Elimina todo excepto dígitos y + al inicio
-    this.value = valor;
-  });
-});
-
 </script>
 {% endblock %}
