@@ -40,10 +40,11 @@
     <!-- Navegación principal -->
     <nav id="menu" class="hidden md:block">
       <ul class="flex flex-col md:flex-row items-center gap-4 md:gap-6 text-sm font-medium text-white">
-        <li><a data-target="servicios" href="#" class="nav-link hover:text-yellow-500 transition">Servicios</a></li>
-        <li><a data-target="productos" href="#" class="nav-link hover:text-yellow-500 transition">Productos</a></li>
-        <li><a data-target="nosotros" href="#" class="nav-link hover:text-yellow-500 transition">Nosotros</a></li>
-        <li><a data-target="reserva" href="#" class="nav-link hover:text-yellow-500 transition">Reserva</a></li>
+        <li><a href="{% url 'Inicio' %}" class="hover:text-yellow-500 transition {% if es_index %}text-gray-400 cursor-not-allowed pointer-events-none{% endif %}">Inicio</a></li>
+        <li><a href="#servicios" class="hover:text-yellow-500 transition {% if not es_index %}text-gray-400 cursor-not-allowed pointer-events-none{% endif %}">Servicios</a></li>
+        <li><a href="#productos" class="hover:text-yellow-500 transition {% if not es_index %}text-gray-400 cursor-not-allowed pointer-events-none{% endif %}">Productos</a></li>
+        <li><a href="#nosotros" class="hover:text-yellow-500 transition {% if not es_index %}text-gray-400 cursor-not-allowed pointer-events-none{% endif %}">Nosotros</a></li>
+        <li><a href="#reserva" class="hover:text-yellow-500 transition {% if not es_index %}text-gray-400 cursor-not-allowed pointer-events-none{% endif %}">Reserva</a></li>
         <li><a id="divContacto" href="{% url 'contacto' %}" class="hover:text-yellow-500 transition">Contacto</a></li>
 
         {% if user.is_authenticated %}
@@ -235,49 +236,6 @@
         e.preventDefault();
         cargarContenido("{% url 'mis_turnos' %}");
     });
-
-
-    /* ------------------------------ */
-    /* NAVEGACIÓN A SECCIONES DEL INDEX */
-    /* ------------------------------ */
-    $(document).on("click", ".nav-link, .mobile-link", function(e) {
-        e.preventDefault();
-
-        let target = $(this).data("target");
-        let indexUrl = "{% url 'Inicio' %}";
-
-        // Si YA estamos en index
-        if ($("#main-content").attr("data-page") === "index") {
-            scrollToSection(target);
-            mobileMenu.classList.add("hidden");
-            return;
-        }
-
-        // Si NO estamos en index → cargar index primero
-        $.ajax({
-            url: indexUrl,
-            method: "GET",
-            headers: { "X-Requested-With": "XMLHttpRequest" },
-            success: function(r) {
-                $("#main-content").html(r).attr("data-page", "index");
-
-                setTimeout(() => {
-                    scrollToSection(target);
-                    mobileMenu.classList.add("hidden");
-                }, 100);
-            }
-        });
-    });
-
-    /* ------------------------------ */
-    /* SCROLL ANIMADO A UNA SECCIÓN   */
-    /* ------------------------------ */
-    function scrollToSection(id) {
-        const element = document.getElementById(id);
-        if (element) {
-            element.scrollIntoView({ behavior: "smooth" });
-        }
-    }
 
     /* ------------------------------ */
     /* VALIDACIONES FORMULARIO CONTACTO */

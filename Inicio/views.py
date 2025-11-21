@@ -15,7 +15,7 @@ def Inicio(request):
             cliente = Cliente.objects.get(user=request.user)
         except Cliente.DoesNotExist:
             cliente = None
-    return render(request, 'index.html', {'cliente': cliente})
+    return render(request, 'index.html', {'cliente': cliente, 'es_index': True})
 
 @login_required
 def dash(request):
@@ -26,7 +26,7 @@ def dash(request):
     return render(request,'dash.html',{'empleadito': empleadito})
 
 def contacto(request):
-    return render(request,'contacto.html')
+    return render(request,'contacto.html',{"es_index": False})
 
 def mis_turnos(request):
     cliente = get_object_or_404(Cliente, user=request.user)
