@@ -58,6 +58,12 @@
           <i class="fas fa-house"></i><span class="menu-text">Home</span>
         </a>
       </li>
+      {% if empleadito.especialidad == 'barbero'%}
+      <li class="menu-item">
+        <a href="{% url 'historial_turnos' %}" class="menu-link" data-name="Mis Turnos" data-icon="fa-calendar-check">
+          <i class="fas fa-calendar-check"></i><span class="menu-text">Mis Turnos</span>
+        </a>
+      {% endif %}
       {% if empleadito.especialidad == 'gerente' or request.user.is_superuser%}
       <li class="menu-item">
         <!-- CAMBIO: uso href con tu url Django (igual que tenías) -->
@@ -356,6 +362,12 @@
           // Caso normal: inyectar contenido
             const contentArea = document.getElementById('content-area');
             contentArea.innerHTML = respuesta;
+            
+            //AQUI SE PUEDEN AGREGAR PARA INICIALIZAR JS ESPECIFICOS SEGUN LA URL
+            //consulta si es historial para inicializar js
+            if (url.includes("historial")) {
+              initHistorial();
+            }
 
             // 👇 Ejecutar scripts manualmente
             contentArea.querySelectorAll('script').forEach(oldScript => {

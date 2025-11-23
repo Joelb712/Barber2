@@ -178,3 +178,28 @@ def mi_perfil(request):
         return redirect("dash")
 
     return render(request, "perfil.html", {"empleado": empleado})
+
+def historial_turnos_empleado(request):
+    empleado = get_object_or_404(Empleado, user=request.user)
+
+    # Traer TODOS los turnos del empleado
+    historial = Turno.objects.filter(
+        empleado=empleado
+    ).order_by("-fecha", "-horario__hora_inicio")
+
+    # Años disponibles para el selector
+    años_disponibles = [
+        d.year
+        for d in Turno.objects.filter(empleado=empleado).dates('fecha', 'year')
+    ]
+
+    meses = [
+        "Enero", "Febrero", "Marzo", "Abril", "Mayo", "Junio",
+        "Julio", "Agosto", "Septiembre", "Octubre", "Noviembre", "Diciembre"
+    ]
+
+    return render(request, "historial_turnos_empleado.html", {
+        "historial": historial,
+        "meses": meses,
+        "años": años_disponibles,
+    })

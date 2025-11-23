@@ -1,0 +1,237 @@
+<div class="bg-neutral-900 text-gray-200 antialiased">
+  <div class="max-w-6xl mx-auto px-4 py-6">
+
+    <!-- Encabezado -->
+    <header class="mb-6 flex items-center justify-between">
+      <div>
+        <h1 class="text-3xl font-bold text-yellow-400">Historial de Turnos</h1>
+        <p class="text-neutral-400 text-sm mt-1">Todos los turnos que atendiste</p>
+      </div>
+    </header>
+
+    <!-- BUSCADOR -->
+    <div class="mb-4">
+      <input id="buscador" type="text" placeholder="Buscar por cliente o servicio..."
+        class="w-full bg-neutral-800 border border-neutral-600 rounded px-3 py-2 text-sm text-gray-200">
+    </div>
+
+    <!-- Filtros -->
+    <section class="bg-neutral-800 rounded-lg p-4 mb-6">
+      <h3 class="text-lg font-semibold text-yellow-400 mb-4">Filtros</h3>
+
+      <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
+
+        <!-- Fecha -->
+        <div>
+          <label class="text-neutral-400 text-sm">Fecha específica</label>
+          <input id="filtro_fecha" type="date"
+            class="w-full bg-neutral-700 border border-neutral-600 rounded px-2 py-1 text-sm text-gray-200">
+        </div>
+
+        <!-- Mes -->
+        <div>
+          <label class="text-neutral-400 text-sm">Mes</label>
+          <select id="filtro_mes"
+            class="w-full bg-neutral-700 border border-neutral-600 rounded px-2 py-1 text-sm text-gray-200">
+            <option value="">--</option>
+            {% for m in meses %}
+            <option value="{{ forloop.counter|stringformat:'02d' }}">{{ m }}</option>
+            {% endfor %}
+          </select>
+        </div>
+
+        <!-- Año -->
+        <div>
+          <label class="text-neutral-400 text-sm">Año</label>
+          <select id="filtro_año"
+            class="w-full bg-neutral-700 border border-neutral-600 rounded px-2 py-1 text-sm text-gray-200">
+            <option value="">--</option>
+            {% for a in años %}
+            <option value="{{ a }}">{{ a }}</option>
+            {% endfor %}
+          </select>
+        </div>
+
+        <!-- Estado -->
+        <div>
+          <label class="text-neutral-400 text-sm">Estado</label>
+          <select id="filtro_estado"
+            class="w-full bg-neutral-700 border border-neutral-600 rounded px-2 py-1 text-sm text-gray-200">
+            <option value="">Todos</option>
+            <option value="Completado">Completado</option>
+            <option value="Pendiente">Pendiente</option>
+            <option value="Cancelado">Cancelado</option>
+          </select>
+        </div>
+
+      </div>
+    </section>
+
+    <!-- Tabla -->
+    <section class="bg-neutral-800 rounded-lg p-4">
+      <div class="flex justify-between items-end mb-2">
+        <h3 class="text-lg font-semibold text-yellow-400 mb-0">Resultados</h3>
+        <div class="text-sm text-neutral-400" id="contador">Cargando...</div>
+      </div>
+
+      <div class="overflow-x-auto">
+        <table class="min-w-full text-sm text-gray-300" id="tabla-turnos">
+          <thead class="bg-neutral-700 text-gray-200">
+            <tr>
+              <th class="px-3 py-2 text-left">Fecha</th>
+              <th class="px-3 py-2 text-left">Hora</th>
+              <th class="px-3 py-2 text-left">Cliente</th>
+              <th class="px-3 py-2 text-left">Servicio</th>
+              <th class="px-3 py-2 text-left">Estado</th>
+            </tr>
+          </thead>
+          <tbody id="tbody-turnos">
+            {% for turno in historial %}
+            <tr class="fila-turno border-b border-neutral-800 hover:bg-neutral-700 transition"
+                data-fecha="{{ turno.fecha|date:'Y-m-d' }}"
+                data-month="{{ turno.fecha.month|stringformat:'02d' }}"
+                data-year="{{ turno.fecha.year }}"
+                data-cliente="{{ turno.cliente.first_name }} {{ turno.cliente.last_name }}"
+                data-servicio="{{ turno.servicio.nombre }}"
+                data-estado="{{ turno.estado.nombre }}">
+              <td class="px-3 py-2">{{ turno.fecha|date:"d/m/Y" }}</td>
+              <td class="px-3 py-2">{{ turno.horario.hora_inicio|time:"H:i" }}</td>
+              <td class="px-3 py-2">{{ turno.cliente.first_name }} {{ turno.cliente.last_name }}</td>
+              <td class="px-3 py-2">{{ turno.servicio.nombre }}</td>
+
+              <td class="px-3 py-2">
+                {% if turno.estado.nombre == "Completado" %}
+                <span class="text-green-400 font-semibold">{{ turno.estado.nombre }}</span>
+                {% elif turno.estado.nombre == "Pendiente" %}
+                <span class="text-yellow-400 font-semibold">{{ turno.estado.nombre }}</span>
+                {% else %}
+                <span class="text-red-400 font-semibold">{{ turno.estado.nombre }}</span>
+                {% endif %}
+              </td>
+            </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+
+      <!-- PAGINACIÓN -->
+      <div id="paginacion" class="flex justify-center mt-4 gap-2"></div>
+    </section>
+
+  </div>
+</div>
+
+<script>
+function initHistorial() {
+    console.log("Historial TURNOS cargado correctamente");
+
+    const tbody = document.getElementById("tbody-turnos");
+    const buscador = document.getElementById("buscador");
+
+    const filtro_fecha = document.getElementById("filtro_fecha");
+    const filtro_mes = document.getElementById("filtro_mes");
+    const filtro_año = document.getElementById("filtro_año");
+    const filtro_estado = document.getElementById("filtro_estado");
+    const paginacionCont = document.getElementById("paginacion");
+    const contador = document.getElementById("contador");
+
+    let paginaActual = 1;
+    const porPagina = 10;
+
+    const originalRows = [...document.querySelectorAll(".fila-turno")].map(r => r.cloneNode(true));
+
+    function rowsFromList(list) {
+        return list.map(r => r.cloneNode(true));
+    }
+
+    function filtrar() {
+        paginaActual = 1;
+
+        const texto = (buscador.value || "").trim().toLowerCase();
+        const fechaFiltro = filtro_fecha.value || "";
+        const mesFiltro = filtro_mes.value ? filtro_mes.value.padStart(2, "0") : "";
+        const yearFiltro = filtro_año.value || "";
+        const estadoFiltro = filtro_estado.value || "";
+
+        const filtradas = originalRows.filter(r => {
+
+            if (fechaFiltro && fechaFiltro !== r.dataset.fecha) return false;
+
+            if (mesFiltro && mesFiltro !== r.dataset.month) return false;
+
+            if (yearFiltro && yearFiltro !== r.dataset.year) return false;
+
+            if (estadoFiltro && estadoFiltro !== "Todos" && estadoFiltro !== r.dataset.estado)
+                return false;
+
+            const cliente = r.dataset.cliente.toLowerCase();
+            const servicio = r.dataset.servicio.toLowerCase();
+
+            if (texto && !cliente.includes(texto) && !servicio.includes(texto)) return false;
+
+            return true;
+        });
+
+        contador.textContent = `${filtradas.length} / ${originalRows.length} resultados`;
+        renderTabla(rowsFromList(filtradas));
+    }
+
+    function renderTabla(rows) {
+        tbody.innerHTML = "";
+        const inicio = (paginaActual - 1) * porPagina;
+        const paginados = rows.slice(inicio, inicio + porPagina);
+
+        if (paginados.length === 0) {
+            const tr = document.createElement("tr");
+            tr.innerHTML = `<td colspan="5" class="text-center py-4 text-neutral-400">No se encontraron turnos.</td>`;
+            tbody.appendChild(tr);
+        } else {
+            paginados.forEach(r => tbody.appendChild(r));
+        }
+
+        generarPaginacion(rows.length);
+    }
+
+    function generarPaginacion(total) {
+        paginacionCont.innerHTML = "";
+        const totalPaginas = Math.max(1, Math.ceil(total / porPagina));
+
+        // prev
+        const prev = document.createElement("button");
+        prev.textContent = "<";
+        prev.className = "px-3 py-1 bg-neutral-700 hover:bg-neutral-600 rounded";
+        prev.disabled = paginaActual === 1;
+        prev.onclick = () => { paginaActual--; filtrar(); };
+        paginacionCont.appendChild(prev);
+
+        for (let i = 1; i <= totalPaginas; i++) {
+            const btn = document.createElement("button");
+            btn.textContent = i;
+            btn.className = "px-3 py-1 rounded mx-1 " + (i === paginaActual ? "bg-yellow-500 text-black font-bold" : "bg-neutral-700");
+            btn.onclick = () => { paginaActual = i; filtrar(); };
+            paginacionCont.appendChild(btn);
+        }
+
+        const next = document.createElement("button");
+        next.textContent = ">";
+        next.className = "px-3 py-1 bg-neutral-700 hover:bg-neutral-600 rounded";
+        next.disabled = paginaActual === totalPaginas;
+        next.onclick = () => { paginaActual++; filtrar(); };
+        paginacionCont.appendChild(next);
+    }
+
+    // Eventos
+    buscador.addEventListener("input", filtrar);
+    filtro_fecha.addEventListener("change", filtrar);
+    filtro_mes.addEventListener("change", filtrar);
+    filtro_año.addEventListener("change", filtrar);
+    filtro_estado.addEventListener("change", filtrar);
+
+    // Inicial
+    contador.textContent = `${originalRows.length} / ${originalRows.length} resultados`;
+    renderTabla(rowsFromList(originalRows));
+}
+
+// Ejecutar SIEMPRE cuando se carga esta vista
+initHistorial();
+</script>

@@ -11,4 +11,5 @@ urlpatterns=[
     path('turnos/cancelar/<int:turno_id>/', cancelar_turno, name='cancelar_turno'),
     path('home/',home_empleado,name='home'),
     path('mi-perfil/', mi_perfil, name='mi_perfil'),
+    path('historial-turnos/', historial_turnos_empleado, name='historial_turnos'),
 ]
