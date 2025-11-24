@@ -50,7 +50,10 @@ def registro_cliente(request):
             # Guardamos el nuevo usuario
             form.save()
             # Mostramos un mensaje de éxito
-            messages.success(request, "Cliente registrado correctamente. ¡Ya podés iniciar sesión!")
+            messages.success(
+                request,
+                "Cliente registrado correctamente.<br>¡Ya podés iniciar sesión!"
+            )
             # Redirigimos al usuario a la página de login
             return redirect(reverse('login'))
     else:

@@ -13,6 +13,17 @@
       <h1 class="text-2xl font-light tracking-widest uppercase">Iniciar Sesión</h1>
     </div>
 
+    {% if messages %}
+        {% for message in messages %}
+            <div class="{% if message.tags == 'error' %}bg-red-500{% else %}bg-green-500{% endif %} 
+                        text-white text-sm font-bold rounded p-3 mb-4 text-center shadow-md">
+
+                {{ message|safe }}
+
+            </div>
+        {% endfor %}
+    {% endif %}
+
     <form method="POST" class="space-y-4 text-yellow-500" novalidate>
       {% csrf_token %}
 

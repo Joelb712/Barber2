@@ -1,4 +1,40 @@
 {% load static %}
+
+<link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
+<script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
+
+<style>
+    /* Ajustes para Select2 en modo oscuro */
+    .select2-container--default .select2-selection--single {
+        background-color: #374151 !important; /* bg-gray-700 */
+        border: 1px solid #facc15 !important; /* border-yellow-400 */
+        border-radius: 0.5rem !important;     /* rounded-lg */
+        height: 42px !important;
+        color: white !important;
+    }
+    .select2-container--default .select2-selection--single .select2-selection__rendered {
+        color: white !important;
+        line-height: 40px !important;
+        padding-left: 16px !important; /* Alineación con otros inputs */
+    }
+    .select2-container--default .select2-selection--single .select2-selection__arrow {
+        height: 40px !important;
+    }
+    .select2-dropdown {
+        background-color: #1f2937 !important; /* bg-gray-800 */
+        border: 1px solid #facc15 !important;
+        color: white !important;
+    }
+    .select2-container--default .select2-results__option--highlighted.select2-results__option--selectable {
+        background-color: #facc15 !important; /* yellow-400 */
+        color: black !important;
+    }
+    .select2-search__field {
+        background-color: #374151 !important;
+        color: white !important;
+    }
+</style>
+
 <form id="form-turno" class="ajax-form"
     action="{% if turno %}{% url 'editar_turno' turno.pk %}{% else %}{% url 'dar_turno' %}{% endif %}" method="post"
     novalidate>
@@ -11,17 +47,15 @@
             <div class="relative">
                 {{ field }}
 
+                {% if field.name != 'cliente' %}
                 <span class="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none text-yellow-400">
-                    {% if field.name == 'cliente' %} 
-                        <i class="fas fa-user-tag"></i> 
-                    {% elif field.name == 'empleado' %} 
+                    {% if field.name == 'empleado' %} 
                         <i class="fas fa-cut"></i> 
-                    {% elif field.name == 'fecha' %} 
-                        <i class="fas fa-calendar-alt"></i>
                     {% elif field.name == 'horario' %} 
                         <i class="fas fa-clock"></i>
                     {% endif %}
                 </span>
+                {% endif %}
             </div>
 
             {% if field.errors %}
@@ -49,37 +83,13 @@
           </button>
     </div>
 </form>
-    <!-- <div class="max-w-3xl mx-auto bg-[#1A1A1A] text-gray-200 rounded-2xl p-8 shadow-lg">
-        <h2 class="text-2xl font-semibold text-yellow-500 mb-6">Nuevo Turno</h2>
 
-         <form method="post" class="space-y-6 relative">
-            {% csrf_token %}
-
-            <div>
-                <label class="block mb-1 text-sm font-medium">Cliente</label>
-                {{ form.cliente }}
-            </div>
-
-            <div>
-                <label class="block mb-1 text-sm font-medium">Barbero</label>
-                {{ form.empleado }}
-            </div>
-
-            <div class="grid grid-cols-2 gap-4">
-                <div>
-                    <label class="block mb-1 text-sm font-medium">Fecha</label>
-                    {{ form.fecha }}
-                </div>
-                <div>
-                    <label class="block mb-1 text-sm font-medium">Hora</label>
-                    {{ form.horario }}
-                </div>
-            </div>
-
-            <div class="flex justify-end pt-6">
-                <button type="submit" class="ml-3 px-4 py-2 bg-yellow-500 text-black rounded-lg hover:bg-yellow-400">
-                    Guardar Turno
-                </button>
-            </div>
-        </form>
-    </div> -->
+<script>
+    $(document).ready(function() {
+        // Aplicamos Select2 solo al campo cliente
+        $('#id_cliente').select2({
+            width: '100%',
+            dropdownParent: $('#tailwindModal') // Importante para que funcione dentro del modal
+        });
+    });
+</script>

@@ -4,11 +4,8 @@
 
 {% block content %}
 <div data-page="index">
-<!-- Hero con carrusel personalizado -->
 <section class="relative h-screen overflow-hidden">
-  <!-- Contenedor del carrusel -->
   <div id="heroCarousel" class="h-full w-full relative">
-    <!-- Imágenes del carrusel -->
     <div class="absolute inset-0 transition-opacity duration-1000 ease-in-out opacity-100" data-slide="0">
       <img src="/static/imgs/c1.jpg" class="w-full h-full object-cover" alt="Imagen 1">
     </div>
@@ -34,7 +31,6 @@
       <img src="/static/imgs/c8.jpg" class="w-full h-full object-cover" alt="Imagen 8">
     </div>
 
-    <!-- Controles del carrusel -->
     <button id="carouselPrev" class="absolute left-4 top-1/2 -translate-y-1/2 z-20 bg-black/40 hover:bg-black/60 text-white p-2 rounded-full">
       ❮
     </button>
@@ -43,25 +39,30 @@
     </button>
   </div>
 
-  <!-- Capa oscura y contenido glass encima -->
   <div class="absolute inset-0 bg-black bg-opacity-60 flex items-center justify-center">
-    <div class="glass text-center p-5 rounded-2xl z-10">
-      <h2 class="text-white text-4xl font-bold mb-3">Cortes de precisión y estilo único</h2>
-      <p class="text-gray-300 mb-4">Transformamos tu look con arte y actitud</p>
+    <div class="glass text-center p-8 rounded-2xl z-10 max-w-2xl mx-4">
+      <h2 class="text-white text-4xl md:text-5xl font-bold mb-4">Cortes de precisión y estilo único</h2>
+      <p class="text-gray-300 text-lg mb-6">Transformamos tu look con arte y actitud</p>
+      
+      {% if user.is_authenticated %}
+      <div class="mt-6 pt-6 border-t border-white/10 animate-fade-in-up">
+          <p class="text-yellow-400 font-medium mb-3 text-lg">¿Listo para cambiar tu estilo?</p>
+          <button class="btn-reservar-trigger bg-yellow-500 hover:bg-yellow-400 text-black font-bold py-3 px-8 rounded-full text-lg shadow-lg shadow-yellow-500/20 transition transform hover:scale-105">
+              Reservar Turno Ahora
+          </button>
+      </div>
+      {% endif %}
     </div>
   </div>
 </section>
 
-<!-- Servicios -->
 <section id="servicios" class="py-20 px-6 bg-[#111]">
   <div class="text-center mb-12">
     <h3 class="text-3xl font-bold">Nuestros Servicios</h3>
     <p class="text-gray-400">Lo mejor para tu estilo</p>
   </div>
    <div id="servicios-container" class="grid grid-cols-1 md:grid-cols-3 gap-8 max-w-6xl mx-auto">
-    <!-- Los servicios se insertarán aquí -->
-  </div>
- 
+    </div>
 </section>
 
 <section id="productos" class="py-20 bg-black px-6">
@@ -71,17 +72,14 @@
   </div>
 
   <div id="productos-container" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-8 max-w-6xl mx-auto">
-    <!-- Los productos se insertarán aquí -->
-  </div>
+    </div>
 </section>
 
-<!-- Nosotros -->
 <section id="nosotros" class="py-20 px-6 bg-[#111] text-gray-200">
   <div class="max-w-6xl mx-auto glass p-10 rounded-xl shadow-lg">
     <h2 class="text-4xl font-bold text-center text-white mb-10">Nosotros</h2>
 
     <div class="grid md:grid-cols-2 gap-10">
-      <!-- Info institucional -->
       <div>
         <p class="text-lg mb-4">
           En <span class="text-yellow-400 font-semibold">Barber Studio</span> combinamos tradición y estilo moderno para ofrecerte un servicio personalizado en cada visita. Somos más que un lugar de cortes: somos un espacio donde cada cliente se siente como en casa.
@@ -92,7 +90,6 @@
         </p>
       </div>
 
-      <!-- Mapa y dirección -->
       <div>
         <h3 class="text-2xl font-semibold text-yellow-400 mb-2">¿Dónde estamos?</h3>
         <p class="text-lg mb-4">📍 Manuela Martínez Cangas de Tineo 140, Salta Capital, Argentina</p>
@@ -112,29 +109,24 @@
   </div>
 </section>
 
-<!-- Reserva CTA -->
 <section id="reserva" class="py-20 bg-gradient-to-br from-black via-gray-900 to-black text-center">
   <div class="glass max-w-xl mx-auto p-10 rounded-xl">
     <h3 class="text-2xl font-bold mb-4">¿Listo para cambiar tu estilo?</h3>
     <p class="text-gray-300 mb-6">Reservá tu turno online en segundos</p>
-    <button id="btnReservar" class="bg-yellow-500 hover:bg-yellow-600 text-black px-6 py-2 rounded font-semibold text-sm transition duration-200">
+    <button class="btn-reservar-trigger bg-yellow-500 hover:bg-yellow-600 text-black px-6 py-2 rounded font-semibold text-sm transition duration-200">
         Reservar
     </button>
   </div>
 </section>
 
-<!-- Modal -->
 <div id="modalTurno" class="fixed inset-0 bg-black/50 backdrop-blur-sm hidden flex justify-center items-center z-50 p-4">
   <div class="bg-[#111] glass rounded-xl w-full max-w-3xl p-6 relative">
-    <!-- Cerrar modal -->
-    <button id="cerrarModal" class="absolute top-4 right-4 text-white text-xl font-bold">&times;</button>
+    <button id="cerrarModal" class="absolute top-4 right-4 text-white text-xl font-bold">×</button>
 
     <h2 class="text-2xl font-bold text-yellow-400 mb-4">Solicitar Turno</h2>
 
-    <!-- Acordeón -->
     <div id="accordionTurno" class="space-y-3">
 
-      <!-- Paso 1: Servicios -->
       <div class="border border-gray-700 rounded">
         <button class="w-full flex justify-between items-center px-4 py-2 bg-gray-900 text-white font-semibold accordion-btn">
           1. Selecciona tus servicios
@@ -145,7 +137,6 @@
         </div>
       </div>
 
-      <!-- Paso 2: Barbero -->
       <div class="border border-gray-700 rounded">
         <button class="w-full flex justify-between items-center px-4 py-2 bg-gray-900 text-white font-semibold accordion-btn">
           2. Elige un barbero
@@ -156,7 +147,6 @@
         </div>
       </div>
 
-      <!-- Paso 3: Fecha -->
       <div class="border border-gray-700 rounded">
         <button class="w-full flex justify-between items-center px-4 py-2 bg-gray-900 text-white font-semibold accordion-btn">
           3. Selecciona fecha
@@ -164,15 +154,13 @@
         </button>
         <div class="accordion-content hidden px-4 py-3 text-white" id="step3">
           <div class="relative">
-            <input type="date" id="inputFecha" class="w-full p-2 rounded bg-[#222] text-white pl-10">
-            <svg xmlns="http://www.w3.org/2000/svg" class="absolute left-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-white pointer-events-none" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
-            </svg>
+            <input type="date" id="inputFecha" 
+                  class="w-full p-2 rounded bg-[#222] text-white cursor-pointer"
+                  style="color-scheme: dark;">
           </div>
         </div>
       </div>
-
-      <!-- Paso 4: Horario -->
+      
       <div class="border border-gray-700 rounded">
         <button class="w-full flex justify-between items-center px-4 py-2 bg-gray-900 text-white font-semibold accordion-btn">
           4. Elige horario disponible
@@ -185,7 +173,6 @@
 
     </div>
 
-    <!-- Footer del modal -->
     <div class="mt-6 flex justify-end gap-3">
       <button id="btnCancelarTurno" class="bg-gray-700 hover:bg-gray-800 text-white px-4 py-2 rounded">Cancelar</button>
       <button id="btnConfirmarTurno" class="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded">Confirmar Turno</button>
@@ -200,7 +187,7 @@
 <footer class="bg-[#111] text-center py-10 text-gray-400 text-sm">
   <div class="max-w-5xl mx-auto px-4">
     <div class="flex flex-col sm:flex-row justify-center items-center text-center space-y-4 sm:space-y-0">
-      <p>&copy; 2025 Barber Studio. Todos los derechos reservados.</p>
+      <p>© 2025 Barber Studio. Todos los derechos reservados.</p>
     </div>
   </div>
 </footer>
@@ -239,6 +226,7 @@
     setInterval(nextSlide, 5000);
 
   });
+
   document.addEventListener('DOMContentLoaded', async () => {
     try {
       const response = await fetch('api/servicios/');
@@ -259,13 +247,14 @@
       console.error('Error al cargar los servicios:', error);
     }
   });
+
    document.addEventListener('DOMContentLoaded', async () => {
     try {
       const response = await fetch('api/productos/');
       const productos = await response.json();
       const container = document.getElementById('productos-container');
 
-      // Mezcla aleatoria (algoritmo de Fisher–Yates)
+      // Mezcla aleatoria
       for (let i = productos.length - 1; i > 0; i--) {
         const j = Math.floor(Math.random() * (i + 1));
         [productos[i], productos[j]] = [productos[j], productos[i]];
@@ -295,27 +284,31 @@
     }
   });
 </script>
+
 <script>
 let serviciosSeleccionados = [];
 
 const modal = document.getElementById('modalTurno');
-const btnReservar = document.getElementById('btnReservar');
+const btnsReservar = document.querySelectorAll('.btn-reservar-trigger'); // Selecciona TODOS los botones
 const btnCerrar = document.getElementById('cerrarModal');
 const btnCancelar = document.getElementById('btnCancelarTurno');
 
-btnReservar.addEventListener('click', () => {
-    // Chequear si el usuario está logueado
-    const estaLogueado = "{{ user.is_authenticated|yesno:'true,false'}}" === "true";
-  
-    if(!estaLogueado){
-        // Redirige al login y luego vuelve a la página actual
-        window.location.href = "{% url 'login' %}?next={{ request.path }}";
-        return;
-    }
+// ASIGNAR EVENTO A CADA BOTÓN ENCONTRADO (CORRECCIÓN JS)
+btnsReservar.forEach(btn => {
+    btn.addEventListener('click', () => {
+        // Chequear si el usuario está logueado
+        const estaLogueado = "{{ user.is_authenticated|yesno:'true,false'}}" === "true";
+      
+        if(!estaLogueado){
+            // Redirige al login y luego vuelve a la página actual
+            window.location.href = "{% url 'login' %}?next={{ request.path }}";
+            return;
+        }
 
-    modal.classList.remove('hidden');
-    cargarServicios();
-    cargarBarberos();
+        modal.classList.remove('hidden');
+        cargarServicios();
+        cargarBarberos();
+    });
 });
 
 // Cerrar modal
@@ -444,7 +437,6 @@ document.getElementById('btnConfirmarTurno').addEventListener('click', function(
 });
 
 // Fecha mínima
-// document.getElementById('inputFecha').min = new Date().toISOString().split('T')[0];
 const hoy = new Date();
 hoy.setMinutes(hoy.getMinutes() - hoy.getTimezoneOffset());
 document.getElementById('inputFecha').min = hoy.toISOString().split('T')[0];
