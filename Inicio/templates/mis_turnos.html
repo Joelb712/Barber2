@@ -7,9 +7,16 @@
 <div class="flex flex-col items-center mt-10 px-4">
     <h2 class="text-2xl font-semibold text-yellow-400 mb-6">Mis Turnos</h2>
 
+
     <!-- Turnos activos -->
     <div class="w-full max-w-4xl mb-8">
+        <div class="flex justify-end bottom-4 mb-4">
+            <button id="btnReservar" class="bg-yellow-500 hover:bg-yellow-600 text-black px-6 py-2 rounded font-semibold text-sm transition duration-200">
+                Solicitar Turno
+            </button>
+        </div>
         <h3 class="text-xl font-semibold text-white mb-4">Turnos Activos</h3>
+    
         {% if turnos_activos %}
             <div class="space-y-4">
                 {% for turno in turnos_activos %}
@@ -39,25 +46,47 @@
         {% endif %}
     </div>
 
-    <!-- Historial de turnos -->
-    <div class="w-full max-w-4xl">
+    <!-- Historial de Turnos -->
+    <div class="w-full max-w-5xl mt-10">
         <h3 class="text-xl font-semibold text-white mb-4">Historial de Turnos</h3>
+
         {% if turnos_historial %}
-            <div class="space-y-4">
-                {% for turno in turnos_historial %}
-                    <div class="glass p-4 rounded-xl shadow-md">
-                        <p><strong>Fecha:</strong> {{ turno.fecha }}</p>
-                        <p><strong>Horario:</strong> {{ turno.horario }}</p>
-                        <p><strong>Empleado:</strong> {{ turno.empleado }}</p>
-                        <p><strong>Servicios:</strong>
+        <div class="overflow-x-auto rounded-xl border border-white/10 backdrop-blur-md bg-[#111]/50">
+            <table class="min-w-full text-sm text-white">
+                <thead class="bg-slate-800 border-b border-white/10">
+                    <tr>
+                        <th class="px-4 py-3 text-left">Fecha</th>
+                        <th class="px-4 py-3 text-left">Horario</th>
+                        <th class="px-4 py-3 text-left">Empleado</th>
+                        <th class="px-4 py-3 text-left">Servicios</th>
+                        <th class="px-4 py-3 text-left">Estado</th>
+                    </tr>
+                </thead>
+
+                <tbody id="tablaHistorial">
+                    {% for turno in turnos_historial %}
+                    <tr class="border-b border-white/5 hover:bg-white/5 transition">
+                        <td class="px-4 py-3">{{ turno.fecha }}</td>
+                        <td class="px-4 py-3">{{ turno.horario }}</td>
+                        <td class="px-4 py-3">{{ turno.empleado }}</td>
+                        <td class="px-4 py-3">
                             {% for sxt in turno.servicios_turno.all %}
                                 {{ sxt.servicio.nombre }}{% if not forloop.last %}, {% endif %}
                             {% endfor %}
-                        </p>
-                        <p><strong>Estado:</strong> {{ turno.estado.nombre }}</p>
-                    </div>
-                {% endfor %}
-            </div>
+                        </td>
+                        <td class="px-3 py-2">
+                            {% if turno.estado.nombre == "completado" %}
+                                <span class="text-green-400 font-semibold">{{ turno.estado.nombre }}</span>
+                            {% else %}
+                                <span class="text-red-400 font-semibold">{{ turno.estado.nombre }}</span>
+                            {% endif %}
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+
         {% else %}
             <p class="text-white/70">No hay turnos en tu historial.</p>
         {% endif %}
@@ -85,6 +114,70 @@
     </div>
   </div>
 </div>
+<div id="modalTurno" class="fixed inset-0 bg-black/50 backdrop-blur-sm hidden flex justify-center items-center z-50 p-4">
+  <div class="bg-[#111] glass rounded-xl w-full max-w-3xl p-6 relative">
+    <button id="cerrarModal" class="absolute top-4 right-4 text-white text-xl font-bold">&times;</button>
+
+    <h2 class="text-2xl font-bold text-yellow-400 mb-4">Solicitar Turno</h2>
+
+    <div id="accordionTurno" class="space-y-3">
+        <!-- Paso 1: Servicios -->
+      <div class="border border-gray-700 rounded">
+        <button class="w-full flex justify-between items-center px-4 py-2 bg-gray-900 text-white font-semibold accordion-btn">
+          1. Selecciona tus servicios
+          <span class="text-xl">+</span>
+        </button>
+        <div class="accordion-content hidden px-4 py-3 text-white" id="step1">
+          <div id="servicios-list" class="space-y-2"></div>
+        </div>
+      </div>
+
+      <!-- Paso 2: Barbero -->
+      <div class="border border-gray-700 rounded">
+        <button class="w-full flex justify-between items-center px-4 py-2 bg-gray-900 text-white font-semibold accordion-btn">
+          2. Elige un barbero
+          <span class="text-xl">+</span>
+        </button>
+        <div class="accordion-content hidden px-4 py-3 text-white" id="step2">
+          <select id="selectBarbero" class="w-full p-2 rounded bg-[#222] text-white"></select>
+        </div>
+      </div>
+
+      <!-- Paso 3: Fecha -->
+      <div class="border border-gray-700 rounded">
+        <button class="w-full flex justify-between items-center px-4 py-2 bg-gray-900 text-white font-semibold accordion-btn">
+          3. Selecciona fecha
+          <span class="text-xl">+</span>
+        </button>
+        <div class="accordion-content hidden px-4 py-3 text-white" id="step3">
+          <div class="relative">
+            <input type="date" id="inputFecha" class="w-full p-2 rounded bg-[#222] text-white pl-10">
+            <svg xmlns="http://www.w3.org/2000/svg" class="absolute left-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-white pointer-events-none" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+            </svg>
+          </div>
+        </div>
+      </div>
+
+      <!-- Paso 4: Horario -->
+      <div class="border border-gray-700 rounded">
+        <button class="w-full flex justify-between items-center px-4 py-2 bg-gray-900 text-white font-semibold accordion-btn">
+          4. Elige horario disponible
+          <span class="text-xl">+</span>
+        </button>
+        <div class="accordion-content hidden px-4 py-3 text-white" id="step4">
+          <div id="horarios-disponibles" class="flex flex-wrap gap-2"></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="mt-6 flex justify-end gap-3">
+      <button id="btnCancelarTurno" class="bg-gray-700 hover:bg-gray-800 text-white px-4 py-2 rounded">Cancelar</button>
+      <button id="btnConfirmarTurno" class="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded">Confirmar Turno</button>
+    </div>
+
+  </div>
+</div>
 
 <script>
     function abrirModal(turnoId) {
@@ -96,5 +189,216 @@
     function cerrarModal() {
         document.getElementById('modalCancelar').classList.add('hidden');
     }
+</script>
+<script>
+    let serviciosSeleccionados = [];
+
+const modal = document.getElementById('modalTurno');
+const btnReservar = document.getElementById('btnReservar');
+const btnCerrar = document.getElementById('cerrarModal');
+const btnCancelar = document.getElementById('btnCancelarTurno');
+
+btnReservar.addEventListener('click', () => {
+    // Chequear si el usuario está logueado
+    const estaLogueado = "{{ user.is_authenticated|yesno:'true,false'}}" === "true";
+  
+    if(!estaLogueado){
+        // Redirige al login y luego vuelve a la página actual
+        window.location.href = "{% url 'login' %}?next={{ request.path }}";
+        return;
+    }
+
+    modal.classList.remove('hidden');
+    cargarServicios();
+    cargarBarberos();
+});
+
+// Cerrar modal
+btnCerrar.addEventListener('click', () => modal.classList.add('hidden'));
+btnCancelar.addEventListener('click', () => modal.classList.add('hidden'));
+
+// Acordeón
+document.querySelectorAll('.accordion-btn').forEach((btn, idx) => {
+  btn.addEventListener('click', () => {
+    const content = btn.nextElementSibling;
+    const icon = btn.querySelector('span');
+    content.classList.toggle('hidden');
+    icon.textContent = content.classList.contains('hidden') ? '+' : '−';
+  });
+});
+
+// Paso 1: Cargar servicios
+function cargarServicios() {
+  fetch('{% url "get_servicios" %}')
+    .then(r => r.json())
+    .then(servicios => {
+      const cont = document.getElementById('servicios-list');
+      cont.innerHTML = servicios.map(s => `
+        <div class="flex items-center gap-2">
+          <input type="checkbox" value="${s.id}" id="serv-${s.id}" class="accent-yellow-500">
+          <label for="serv-${s.id}" class="text-white">${s.nombre} - $${s.precio} (${s.duracion} min)</label>
+        </div>
+      `).join('');
+
+      servicios.forEach(s => {
+        document.getElementById(`serv-${s.id}`).addEventListener('change', (e) => {
+          if(e.target.checked){
+            serviciosSeleccionados.push(s.id);
+          } else {
+            serviciosSeleccionados = serviciosSeleccionados.filter(id => id !== s.id);
+          }
+        });
+      });
+    });
+}
+
+// Paso 2: Cargar barberos
+function cargarBarberos() {
+  fetch('{% url "get_barberos" %}')
+    .then(r => r.json())
+    .then(barberos => {
+      const sel = document.getElementById('selectBarbero');
+      sel.innerHTML = '<option value="">-- Selecciona --</option>';
+      barberos.forEach(b => {
+        const opt = document.createElement('option');
+        opt.value = b.id;
+        opt.textContent = b.nombre;
+        sel.appendChild(opt);
+      });
+    });
+}
+
+// Paso 3: Al cambiar fecha, cargar horarios
+document.getElementById('inputFecha').addEventListener('change', function() {
+  const empleadoId = document.getElementById('selectBarbero').value;
+  const fecha = this.value;
+  if(empleadoId && fecha){
+    fetch(`{% url "get_horarios_disponibles" %}?empleado_id=${empleadoId}&fecha=${fecha}`)
+      .then(r => r.json())
+      .then(horarios => {
+        const cont = document.getElementById('horarios-disponibles');
+        if(horarios.length === 0){
+          cont.innerHTML = '<p class="text-yellow-400">No hay horarios disponibles.</p>';
+        } else {
+          cont.innerHTML = horarios.map(h => `
+            <button class="px-3 py-1 border border-yellow-400 text-yellow-400 rounded horario-btn" data-id="${h.id}">
+              ${h.hora}
+            </button>
+          `).join('');
+          document.querySelectorAll('.horario-btn').forEach(btn => {
+            btn.addEventListener('click', function() {
+                document.querySelectorAll('.horario-btn').forEach(b => {
+                b.classList.remove('bg-yellow-400','text-black');
+                b.classList.add('border','border-yellow-400','text-yellow-400');
+                });
+                this.classList.add('bg-yellow-400','text-black');
+                this.classList.remove('border','border-yellow-400','text-yellow-400');
+                });
+            });
+        }
+      });
+  }
+});
+
+// Recalcular horarios si cambia barbero
+document.getElementById('selectBarbero').addEventListener('change', function() {
+  const fecha = document.getElementById('inputFecha').value;
+  if(fecha){
+    document.getElementById('inputFecha').dispatchEvent(new Event('change'));
+  }
+});
+
+// Confirmar turno
+document.getElementById('btnConfirmarTurno').addEventListener('click', function(){
+  const empleadoId = document.getElementById('selectBarbero').value;
+  const fecha = document.getElementById('inputFecha').value;
+  const horarioBtn = document.querySelector('.horario-btn.bg-yellow-400');
+
+  if(!serviciosSeleccionados.length){ alert('Selecciona al menos un servicio'); return; }
+  if(!empleadoId){ alert('Selecciona un barbero'); return; }
+  if(!fecha){ alert('Selecciona una fecha'); return; }
+  if(!horarioBtn){ alert('Selecciona un horario'); return; }
+
+  const horarioId = horarioBtn.dataset.id;
+
+  fetch('{% url "crear_turno" %}', {
+    method: 'POST',
+    headers: { 'Content-Type':'application/json','X-CSRFToken':'{{ csrf_token }}' },
+    body: JSON.stringify({ servicios: serviciosSeleccionados, empleado_id: empleadoId, fecha: fecha, horario_id: horarioId })
+  })
+  .then(r => r.json())
+  .then(data => {
+    if(data.success){
+      alert('¡Turno solicitado con éxito!');
+      modal.classList.add('hidden');
+      serviciosSeleccionados = [];
+      window.location.reload();
+    } else {
+      alert('Error: ' + (data.error || 'No se pudo crear el turno'));
+    }
+  });
+});
+
+// Fecha mínima
+// document.getElementById('inputFecha').min = new Date().toISOString().split('T')[0];
+const hoy = new Date();
+hoy.setMinutes(hoy.getMinutes() - hoy.getTimezoneOffset());
+document.getElementById('inputFecha').min = hoy.toISOString().split('T')[0];
+
+/* ================================
+   PAGINACIÓN JS PARA HISTORIAL
+   ================================ */
+document.addEventListener("DOMContentLoaded", function () {
+    const rowsPerPage = 10; // 👈 CANTIDAD DE FILAS POR PÁGINA
+    const tableBody = document.getElementById("tablaHistorial");
+    if (!tableBody) return;
+
+    const rows = Array.from(tableBody.querySelectorAll("tr"));
+    const totalPages = Math.ceil(rows.length / rowsPerPage);
+    let currentPage = 1;
+
+    function renderPage(page) {
+        tableBody.innerHTML = "";
+        const start = (page - 1) * rowsPerPage;
+        const end = start + rowsPerPage;
+
+        rows.slice(start, end).forEach(r => tableBody.appendChild(r));
+
+        renderPagination();
+    }
+
+    function renderPagination() {
+        let container = document.getElementById("paginationContainer");
+
+        if (!container) {
+            container = document.createElement("div");
+            container.id = "paginationContainer";
+            container.className = "flex justify-center mt-4 gap-2";
+            tableBody.parentElement.parentElement.after(container);
+        }
+
+        container.innerHTML = "";
+
+        for (let i = 1; i <= totalPages; i++) {
+            const btn = document.createElement("button");
+            btn.textContent = i;
+            btn.className =
+                "px-3 py-1 rounded " +
+                (i === currentPage
+                    ? "bg-yellow-500 text-black"
+                    : "bg-gray-800 text-white");
+
+            btn.addEventListener("click", () => {
+                currentPage = i;
+                renderPage(i);
+            });
+
+            container.appendChild(btn);
+        }
+    }
+
+    // iniciar paginación
+    renderPage(currentPage);
+});
 </script>
 {% endblock %}

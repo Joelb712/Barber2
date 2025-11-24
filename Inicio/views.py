@@ -26,7 +26,13 @@ def dash(request):
     return render(request,'dash.html',{'empleadito': empleadito})
 
 def contacto(request):
-    return render(request,'contacto.html',{"es_index": False})
+    cliente = None
+    if request.user.is_authenticated:
+        try:
+            cliente = Cliente.objects.get(user=request.user)
+        except Cliente.DoesNotExist:
+            cliente = None
+    return render(request,'contacto.html',{'cliente': cliente,"es_index": False})
 
 def mis_turnos(request):
     cliente = get_object_or_404(Cliente, user=request.user)
@@ -50,6 +56,7 @@ def mis_turnos(request):
     return render(request, 'mis_turnos.html', {
         'turnos_activos': turnos_activos,
         'turnos_historial': turnos_historial,
+        'cliente': cliente,
     })
 
 def perfil_cliente(request):
