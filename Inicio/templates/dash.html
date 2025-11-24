@@ -615,6 +615,28 @@
       });
     });
 
+    $(document).on('submit', '.ajax-form-emp', function(e) {
+      e.preventDefault();
+
+      const form = $(this)[0];  
+      const formData = new FormData(form);  // incluye archivos sí o sí
+
+      $.ajax({
+          url: $(form).attr('action'),
+          method: $(form).attr('method'),
+          data: formData,
+          processData: false,   // necesario para archivos
+          contentType: false,   // necesario para archivos
+          success: function() {
+              cerrarModalAjax();  // tu función para cerrar modal + refrescar tablas
+          },
+          error: function(xhr) {
+              // si hay errores de validación, los muestra en el modal
+              $('#modalBody').html(xhr.responseText);
+          }
+        });
+    });
+
     $(document).on('click', '#home', function(e) {
         e.preventDefault();
         const url = $(this).data('url');

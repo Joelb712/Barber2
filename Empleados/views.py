@@ -26,7 +26,8 @@ def tabla_empleados(request):
 @user_passes_test(es_gerente)
 def crear_empleado(request):
     if request.method == 'POST':
-        form = EmpleadoCreateForm(request.POST)
+        print("FILES:", request.FILES)
+        form = EmpleadoCreateForm(request.POST, request.FILES)
         if form.is_valid():
             form.save()
             # Enviamos éxito para que el modal se cierre y la tabla se recargue
@@ -44,7 +45,7 @@ def crear_empleado(request):
 def editar_empleado(request, pk):
     empleado = get_object_or_404(Empleado, pk=pk)
     if request.method == 'POST':
-        form = EmpleadoEditarForm(request.POST, instance=empleado, user_instance=empleado.user)
+        form = EmpleadoEditarForm(request.POST,request.FILES, instance=empleado, user_instance=empleado.user)
         if form.is_valid():
             form.save()
              # Avisar al iframe que debe cerrarse:

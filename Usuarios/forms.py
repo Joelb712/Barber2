@@ -230,11 +230,17 @@ class EmpleadoCreateForm(forms.ModelForm):
         widget=forms.TextInput(attrs={'class': estilos_Empleado})
     )
 
+    foto = forms.ImageField(
+        required=False,
+        label='Foto',
+        widget=forms.FileInput(attrs={})
+    )
+
     class Meta:
         model = Empleado
         fields = [
             'username', 'password', 'first_name', 'last_name',
-            'especialidad', 'email', 'dni', 'telefono'
+            'especialidad', 'email', 'dni', 'telefono', 'foto'
         ]
         widgets = {
             'especialidad': forms.Select(attrs={'class': estilos_Empleado}),
@@ -255,8 +261,13 @@ class EmpleadoCreateForm(forms.ModelForm):
             user=user,
             dni=self.cleaned_data['dni'],
             telefono=self.cleaned_data['telefono'],
-            especialidad=self.cleaned_data['especialidad']
+            especialidad=self.cleaned_data['especialidad'],
         )
+        foto = self.files.get('foto')  # ← ESTA ES LA CLAVE
+        if foto:
+            empleado.foto = foto
+        if commit:
+            empleado.save()
 
         grupo_name = (
             'Barbero' if self.cleaned_data['especialidad'] == 'barbero'
@@ -294,10 +305,15 @@ class EmpleadoEditarForm(forms.ModelForm):
         validators=[validator_dni],
         widget=forms.TextInput(attrs={'class': estilos_Empleado})
     )
+    foto = forms.ImageField(
+        required=False,
+        label='Foto',
+        widget=forms.FileInput(attrs={'class': 'text-white'})
+    )
 
     class Meta:
         model = Empleado
-        fields = ['telefono', 'dni', 'especialidad', 'email', 'activo']
+        fields = ['telefono', 'dni', 'especialidad', 'email', 'foto', 'activo']
         widgets = {
             'especialidad': forms.Select(attrs={'class': estilos_Empleado}),
         }
@@ -311,6 +327,9 @@ class EmpleadoEditarForm(forms.ModelForm):
 
     def save(self, commit=True):
         empleado = super().save(commit=False)
+
+        if self.cleaned_data.get('foto'):
+            empleado.foto = self.cleaned_data['foto']
 
         if self.user_instance:
             self.user_instance.email = self.cleaned_data['email']

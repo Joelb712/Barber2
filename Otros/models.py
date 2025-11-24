@@ -10,7 +10,6 @@ class Cliente(models.Model):
     last_name = models.CharField(max_length=50)
     telefono = models.CharField(max_length=20, blank=True, null=True)
     dni = models.CharField(max_length=20, blank=True, null=True)
-    notas = models.TextField(blank=True, null=True)
     activo = models.BooleanField(default=True)
     foto = models.ImageField(upload_to='clientes/', blank=True, null=True)
     fecha_registro = models.DateTimeField(auto_now_add=True)
@@ -101,7 +100,6 @@ class EstadoTurno(models.Model):
         ('cancelado', 'Cancelado'),
     ]
     nombre = models.CharField(max_length=50,choices=choices  , unique=True)
-    descripcion = models.TextField(blank=True, null=True)
     activo = models.BooleanField(default=True)
 
     def __str__(self):

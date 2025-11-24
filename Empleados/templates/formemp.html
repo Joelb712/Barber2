@@ -1,7 +1,7 @@
 {% load static %}
 <div class="form-container">
     <p class="text-yellow-500 mb-3">Los campos con * son obligarios</p>
-    <form id="form-empleado" class="ajax-form" action="{% if empleado %}{% url 'editar_empleado' empleado.pk %}{% else %}{% url 'formemp' %}{% endif %}" method="post" novalidate>
+    <form id="form-empleado" class="ajax-form-emp" action="{% if empleado %}{% url 'editar_empleado' empleado.pk %}{% else %}{% url 'formemp' %}{% endif %}" method="post" enctype="multipart/form-data" novalidate>
         {% csrf_token %}
         <div class="{% if empleado %}gap-3 grid grid-cols-1 {% else %} grid grid-cols-1 md:grid-cols-2 gap-4 {% endif %}">
 
@@ -15,6 +15,18 @@
                 </label>
                 <p class="text-red-500 text-xs mt-1" id="error_{{ field.name }}"></p>
             </div>
+            {# --- CAMPO FOTO (ESPECIAL) --- #}
+            {% elif field.name == 'foto' %}
+                <div class="text-yellow-400 {% if field.name == 'foto' %}md:col-span-2{% endif %}">
+                    <label for="{{ field.id_for_label }}" class="block text-sm font-medium mb-1">{{ field.label }}</label>
+                    {{ field }}
+
+                    {% if field.errors %}
+                    <div class="text-red-500 mt-1 text-xs">
+                        {% for error in field.errors %}{{ error }}{% endfor %}
+                    </div>
+                    {% endif %}
+                </div>
             {% else %}
             <div class="text-yellow-400">
                 <label for="{{ field.id_for_label }}" class="block text-sm font-medium mb-1">
@@ -108,7 +120,8 @@ function togglePassword() {
     email: "email",
     dni: "dni",
     telefono: "telefono",
-    especialidad: "especialidad"
+    especialidad: "especialidad",
+    foto: "foto",
   };
 
   // función que inicializa validaciones sobre un form DOMElement
@@ -162,7 +175,7 @@ function togglePassword() {
         if (!regex.telefono.test(val)) { setError(name, "Teléfono inválido (solo números)."); return false; }
       } else if (tipo === "especialidad") {
         if (!val) { setError(name, ""); return false; }
-      }
+      } else if (tipo === "foto") { setError(name, "");return true;}
 
       setError(name, "");
       return true;
