@@ -212,7 +212,7 @@ class EmpleadoCreateForm(forms.ModelForm):
 
     password = forms.CharField(
         required=False,
-        label="Contraseña (opcional)",
+        label="Contraseña (Por defecto es 'cambiame123')",
         widget=forms.PasswordInput(attrs={'class': estilos_Empleado})
     )
 

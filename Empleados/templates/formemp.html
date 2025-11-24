@@ -1,5 +1,6 @@
 {% load static %}
 <div class="form-container">
+    <p class="text-yellow-500 mb-3">Los campos con * son obligarios</p>
     <form id="form-empleado" class="ajax-form" action="{% if empleado %}{% url 'editar_empleado' empleado.pk %}{% else %}{% url 'formemp' %}{% endif %}" method="post" novalidate>
         {% csrf_token %}
         <div class="{% if empleado %}gap-3 grid grid-cols-1 {% else %} grid grid-cols-1 md:grid-cols-2 gap-4 {% endif %}">
@@ -12,44 +13,39 @@
                 <label for="{{ field.id_for_label }}" class="ml-2 block text-sm font-medium">
                     {{ field.label }}
                 </label>
-                
-                {% if field.errors %}
-                <div class="text-red-500 mt-1 text-xs">
-                    {% for error in field.errors %}{{ error }}{% endfor %}
-                </div>
-                {% endif %}
+                <p class="text-red-500 text-xs mt-1" id="error_{{ field.name }}"></p>
             </div>
             {% else %}
-            
             <div class="text-yellow-400">
                 <label for="{{ field.id_for_label }}" class="block text-sm font-medium mb-1">
                     {{ field.label }}
+                    {% if field.field.required %}
+                        <span class="text-white font-semibold">*</span>
+                    {% endif %}
                 </label>
-                
+
                 <div class="relative">
-                    
                     {{ field }}
-                    
-                    {# Icono posicionado absolutamente dentro del input #}
+
                     <span class="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none text-yellow-400">
-                        {% if field.name == 'username' %} <i class="fas fa-user"></i> 
-                        {% elif field.name == 'password' %} <i class="fas fa-lock"></i> 
-                        {% elif field.name == 'first_name' %} <i class="fas fa-file-signature"></i> 
-                        {% elif field.name == 'last_name' %} <i class="fas fa-file-signature"></i> 
-                        {% elif field.name == 'email' %} <i class="fas fa-envelope"></i> 
-                        {% elif field.name == 'dni' %} <i class="fas fa-id-card"></i> 
-                        {% elif field.name == 'telefono' %} <i class="fas fa-phone"></i> 
-                        {% elif field.name == 'especialidad' %} <i class="fas fa-briefcase"></i> 
+                        {% if field.name == 'username' %} <i class="fas fa-user"></i>
+                        {% elif field.name == 'password' %} <i class="fas fa-lock"></i>
+                        {% elif field.name == 'first_name' %} <i class="fas fa-file-signature"></i>
+                        {% elif field.name == 'last_name' %} <i class="fas fa-file-signature"></i>
+                        {% elif field.name == 'email' %} <i class="fas fa-envelope"></i>
+                        {% elif field.name == 'dni' %} <i class="fas fa-id-card"></i>
+                        {% elif field.name == 'telefono' %} <i class="fas fa-phone"></i>
+                        {% elif field.name == 'especialidad' %} <i class="fas fa-briefcase"></i>
                         {% endif %}
                     </span>
-                    
+                    {% if field.name == 'password' %}
+                        <button type="button" onclick="togglePassword()" class="absolute inset-y-0 right-0 flex items-center pr-3 text-yellow-400 hover:text-white cursor-pointer focus:outline-none z-10">
+                            <i id="toggleIcon" class="fas fa-eye-slash"></i>
+                        </button>
+                    {% endif %}
                 </div>
-                
-                {% if field.errors %}
-                <div class="text-red-500 mt-1 text-xs">
-                    {% for error in field.errors %}{{ error }}{% endfor %}
-                </div>
-                {% endif %}
+
+                <p class="text-red-500 text-xs mt-1" id="error_{{ field.name }}"></p>
             </div>
             {% endif %}
             
@@ -60,13 +56,172 @@
             <button type="button" class="bg-gray-600 hover:bg-gray-700 text-white font-bold py-2 px-6 rounded-lg transition duration-150 ease-in-out " onclick="cerrarModalAjax();">
                 Cancelar
             </button>
-            <button type="submit" class="bg-green-500 hover:bg-green-600 text-black hover:text-white font-bold py-2 px-6 rounded-lg transition duration-150 ease-in-out">
-                {% if empleado %}
-                    Guardar Cambios
-                {% else %}
-                    Guardar
-                {% endif %}
+            <button id="btnGuardar" type="submit" class="bg-green-500 hover:bg-green-600 text-black hover:text-white font-bold py-2 px-6 rounded-lg transition duration-150 ease-in-out">
+                {% if empleado %} Guardar Cambios {% else %} Guardar {% endif %}
             </button>
         </div>
     </form>
 </div>
+
+<script>
+/*
+  Validador del formulario de Empleado.
+  - Se ejecuta inmediatamente al inyectar el HTML.
+  - Expone window.initEmpleadoValidation(form) por si querés reinicializar desde tu JS externo.
+  - Deshabilita el botón Guardar mientras haya errores.
+*/
+function togglePassword() {
+        // Django por defecto usa id_nombrecampo
+        const passInput = document.getElementById("id_password"); 
+        const icon = document.getElementById("toggleIcon");
+
+        if (passInput && icon) { // Verificamos que existan para evitar errores
+            if (passInput.type === "password") {
+                passInput.type = "text";
+                icon.classList.remove("fa-eye-slash");
+                icon.classList.add("fa-eye");
+            } else {
+                passInput.type = "password";
+                icon.classList.remove("fa-eye");
+                icon.classList.add("fa-eye-slash");
+            }
+        }
+    }
+(function () {
+
+  // regex y reglas
+  const regex = {
+    username: /^[A-Za-z0-9]+$/,                 // letras y números, sin espacios
+    password: /^.{4,}$/,                        // mínimo 4 chars (ajustá si querés)
+    nombre: /^[A-Za-zÁÉÍÓÚáéíóúñÑ ]+$/,         // letras, acentos y espacios
+    apellido: /^[A-Za-zÁÉÍÓÚáéíóúñÑ ]+$/,
+    email: /^[^\s@]+@[^\s@]+\.[^\s@]+$/,
+    dni: /^[0-9]{8,9}$/,                        // 7 u 8 dígitos
+    telefono: /^[0-9]{7,15}$/                  // 7 a 15 dígitos
+  };
+
+  const fieldMap = {
+    username: "username",
+    password: "password",
+    first_name: "nombre",
+    last_name: "apellido",
+    email: "email",
+    dni: "dni",
+    telefono: "telefono",
+    especialidad: "especialidad"
+  };
+
+  // función que inicializa validaciones sobre un form DOMElement
+  function initEmpleadoValidation(form) {
+    if (!form) return;
+
+    const btnGuardar = form.querySelector("#btnGuardar");
+
+    // helpers
+    function setError(name, msg) {
+      const el = form.querySelector("#error_" + name);
+      if (el) el.textContent = msg || "";
+      // marcar input (si existe) con clase de error
+      const input = form.querySelector(`[name="${name}"]`);
+      if (input) {
+        input.classList.toggle(!!msg);
+      }
+    }
+
+    function validarCampoDOM(input) {
+      if (!input) return true;
+      const name = input.name;
+      const val = (input.value || "").trim();
+
+      // si no está mapeado, lo consideramos válido por defecto
+      if (!fieldMap.hasOwnProperty(name)) {
+        setError(name, "");
+        return true;
+      }
+
+      const tipo = fieldMap[name];
+
+      // reglas
+      if (tipo === "username") {
+        if (!val) { setError(name, ""); return false; }
+        if (!regex.username.test(val)) { setError(name, "Solo letras y números, sin espacios."); return false; }
+      } else if (tipo === "password") {
+        // contraseña opcional en edición: si está vacía, OK
+        if (val && !regex.password.test(val)) { setError(name, "Mínimo 4 caracteres."); return false; }
+      } else if (tipo === "nombre" || tipo === "apellido") {
+        if (!val) { setError(name, ""); return false; }
+        if (!regex.nombre.test(val)) { setError(name, "Solo letras, acentos y espacios."); return false; }
+      } else if (tipo === "email") {
+        if (!val) { setError(name, ""); return false; }
+        if (!regex.email.test(val)) { setError(name, "Formato de correo inválido."); return false; }
+      } else if (tipo === "dni") {
+        if (!val) { setError(name, ""); return false; }
+        if (!regex.dni.test(val)) { setError(name, "DNI inválido (8 o 9 números)."); return false; }
+      } else if (tipo === "telefono") {
+        if (!val) { setError(name, ""); return false; }
+        if (!regex.telefono.test(val)) { setError(name, "Teléfono inválido (solo números)."); return false; }
+      } else if (tipo === "especialidad") {
+        if (!val) { setError(name, ""); return false; }
+      }
+
+      setError(name, "");
+      return true;
+    }
+
+    function validarTodo() {
+      const inputs = Array.from(form.querySelectorAll("input, select, textarea"));
+      let ok = true;
+      inputs.forEach(i => {
+        const res = validarCampoDOM(i);
+        if (!res) ok = false;
+      });
+      // boton
+      if (btnGuardar) {
+        btnGuardar.disabled = !ok;
+        btnGuardar.classList.toggle("opacity-50", !ok);
+      }
+      return ok;
+    }
+
+    // attach listeners: input + blur (para selects y cambios)
+    const watchables = form.querySelectorAll("input, select, textarea");
+    watchables.forEach(inp => {
+      // input: validación en tiempo real
+      inp.addEventListener("input", () => {
+        validarCampoDOM(inp);
+        validarTodo();
+      });
+      // blur: revalidar y mostrar mensaje si dejó vacío/erróneo
+      inp.addEventListener("blur", () => {
+        validarCampoDOM(inp);
+        validarTodo();
+      });
+    });
+
+    // Al submit: si no válido, prevenir y mostrar mensajes
+    form.addEventListener("submit", function (e) {
+      const ok = validarTodo();
+      if (!ok) {
+        e.preventDefault();
+        // enfocar primer campo con error
+        const firstError = form.querySelector(".border-red-500, p[id^='error_']:not(:empty)");
+        if (firstError) {
+          const input = form.querySelector("input.border-red-500, select.border-red-500");
+          if (input) input.focus();
+        }
+      }
+    });
+
+    // Inicial: ejecutar validación (por ejemplo al editar, para deshabilitar botón si hay errores)
+    validarTodo();
+  }
+
+  // Hacer disponible globalmente por si tu flujo AJAX quiere re-inicializar
+  window.initEmpleadoValidation = initEmpleadoValidation;
+
+  // Intento automático: si el formulario ya está en el DOM (inyectado), inicializarlo ahora.
+  const f = document.getElementById("form-empleado");
+  if (f) initEmpleadoValidation(f);
+
+})();
+</script>
