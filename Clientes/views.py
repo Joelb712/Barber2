@@ -1,7 +1,7 @@
 from django.http import JsonResponse
 from django.shortcuts import render,get_object_or_404
 from django.contrib.auth.decorators import user_passes_test,login_required
-from Otros.models import Cliente
+from Otros.models import Cliente,Empleado
 from .forms import ClienteAltaForm,ClienteEditarForm
 
 
@@ -11,15 +11,17 @@ def es_gerente(user):
 @login_required
 @user_passes_test(es_gerente)
 def lista_clientes(request):
+    empleadito = get_object_or_404(Empleado, user=request.user)
     clientes = Cliente.objects.all()
     # Siempre render completo para la primera carga
-    return render(request, 'clientes.html', {'clientes': clientes})
+    return render(request, 'clientes.html', {'clientes': clientes,'empleadito': empleadito})
 
 @login_required
 @user_passes_test(es_gerente)
 def tabla_clientes(request):
+    empleadito = get_object_or_404(Empleado, user=request.user)
     clientes = Cliente.objects.all()
-    return render(request, 'clientes_tabla.html', {'clientes': clientes})
+    return render(request, 'clientes_tabla.html', {'clientes': clientes, 'empleadito': empleadito})
 
 
 

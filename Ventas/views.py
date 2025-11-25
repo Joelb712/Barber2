@@ -7,81 +7,6 @@ from Otros.models import Venta,Cliente,Servicio, DetalleVenta, Pago, MovimientoS
 import json
 from django.core.serializers.json import DjangoJSONEncoder
 
-# @login_required
-# @transaction.atomic
-# def crear_venta(request):
-#     try:
-#         caja = Caja.objects.get(estado=True)
-#     except Caja.DoesNotExist:
-#         messages.error(request, "No hay una caja abierta. Debe abrir caja primero.")
-#         return redirect("apertura_caja")
-
-#     if request.method == 'POST':
-#         cliente_id = request.POST.get('cliente')
-#         productos_data = request.POST.getlist('productos[]')
-#         servicios_data = request.POST.getlist('servicios[]')
-
-#         cliente = get_object_or_404(Cliente, id=cliente_id)
-#         empleado = request.user.empleado
-
-#         venta = Venta.objects.create(cliente=cliente, empleado=empleado, caja=caja, total=0)
-
-#         total = 0
-
-#         # Procesar productos
-#         for item in productos_data:
-#             prod_id, cantidad = item.split('-')
-#             producto = get_object_or_404(Producto, id=prod_id)
-#             cantidad = int(cantidad)
-
-#             if producto.stock_actual < cantidad:
-#                 messages.error(request, f"Stock insuficiente para {producto.nombre}")
-#                 venta.delete()
-#                 return redirect("crear_venta")
-
-#             DetalleVenta.objects.create(
-#                 venta=venta,
-#                 producto=producto,
-#                 cantidad=cantidad,
-#                 precio_unitario=producto.precio,
-#                 subtotal=producto.precio * cantidad
-#             )
-
-#             # Descontar stock
-#             producto.stock_actual -= cantidad
-#             producto.save()
-
-#             # Movimiento de stock
-#             MovimientoStock.objects.create(
-#                 producto=producto,
-#                 tipo='SALIDA',
-#                 cantidad=cantidad,
-#                 motivo='Venta',
-#                 empleado=empleado,
-#             )
-
-#             total += producto.precio * cantidad
-
-#         # Procesar servicios
-#         for serv_id in servicios_data:
-#             servicio = get_object_or_404(Servicio, id=serv_id)
-#             total += servicio.precio
-#             # Podrías guardar DetalleServicio si tuvieras ese modelo
-
-#         # Actualizar total
-#         venta.total = total
-#         venta.save()
-
-#         # 🚀 En este punto NO registramos pagos todavía
-#         # Mandamos a la vista de "registrar pago"
-#         return redirect("registrar_pago", venta_id=venta.id)
-
-#     context = {
-#         'productos': Producto.objects.filter(stock_actual__gt=0),
-#         'servicios': Servicio.objects.all(),
-#         'clientes': Cliente.objects.all(),
-#     }
-#     return render(request, 'crear_venta.html', context)
 
 def es_gerente(user):
     return user.groups.filter(name="Gerente").exists() or user.groups.filter(name="Recepcionista").exists() or user.is_superuser
@@ -258,10 +183,9 @@ def cobrar_turno(request, turno_id):
 
         # 5️⃣ Cambiar estado del turno a "Completado"
         try:
-            estado_completado = EstadoTurno.objects.get(nombre='completado')
-            turno.estado = estado_completado
-        except EstadoTurno.DoesNotExist:
-            turno.estado = None  # fallback
+            turno.pagado = True
+        except:
+            turno.pagado = None  # fallback
         turno.save()
 
         # 6️⃣ Redirigir al registro de pago
@@ -281,6 +205,18 @@ def cobrar_turno(request, turno_id):
         ),
         # ✅ IDs de servicios del turno para filtrar en el template
         'servicios_turno_ids': list(servicios_turno_qs.values_list('servicio__id', flat=True)),
+        # ✅ Servicios disponibles para agregar (id, nombre, precio)
+        'servicios_json': json.dumps(
+            list(Servicio.objects.filter(activo=True)
+                .values('id', 'nombre', 'precio')),
+            cls=DjangoJSONEncoder
+        ),
+        # ✅ Productos disponibles para agregar (id, nombre, precio, stock_actual)
+        'productos_json': json.dumps(
+            list(Producto.objects.filter(activo=True, stock_actual__gt=0)
+                .values('id', 'nombre', 'precio', 'stock_actual')),
+            cls=DjangoJSONEncoder
+        ),
     }
     return render(request, 'cobrar_turno.html', context)
 

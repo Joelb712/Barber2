@@ -18,24 +18,7 @@
     <!-- Servicios Extra -->
     <div>
       <label class="block text-sm font-medium mb-2 text-yellow-400">Servicios Extra</label>
-      <div id="servicios-extra-container" class="space-y-2">
-        <div class="grid grid-cols-12 gap-2 servicio-item">
-          <div class="col-span-10">
-            <select name="servicios_extra[]" class="w-full rounded-lg bg-neutral-700 text-gray-100 border border-neutral-600 p-2">
-              <option value="" disabled selected hidden>Seleccione servicio</option>
-              {% for s in servicios %}
-                {% if s.id not in servicios_turno_ids %}
-                <option value="{{ s.id }}" data-precio="{{ s.precio }}">{{ s.nombre }} - ${{ s.precio }}</option>
-                {% endif %}
-              {% endfor %}
-            </select>
-          </div>
-          <div class="col-span-2 flex items-center justify-center">
-            <button type="button" onclick="removeServicio(this)"
-                    class="bg-red-600 hover:bg-red-700 text-white px-3 py-2 rounded text-sm font-semibold">X</button>
-          </div>
-        </div>
-      </div>
+      <div id="servicios-extra-container" class="space-y-2"></div>
       <button type="button" onclick="addServicio()"
               class="mt-2 bg-neutral-700 hover:bg-neutral-600 text-yellow-400 font-medium px-4 py-2 rounded">
         + Agregar servicio
@@ -45,25 +28,7 @@
     <!-- Productos -->
     <div>
       <label class="block text-sm font-medium mb-2 text-yellow-400">Productos</label>
-      <div id="productos-container" class="space-y-2">
-        <div class="grid grid-cols-12 gap-2 producto-item">
-          <div class="col-span-6">
-            <select name="productos[]" class="w-full rounded-lg bg-neutral-700 text-gray-100 border border-neutral-600">
-              <option value="" disabled selected hidden>Seleccione producto</option>
-              {% for p in productos %}
-              <option value="{{ p.id }}" data-precio="{{ p.precio }}">{{ p.nombre }} (Stock: {{ p.stock_actual }})</option>
-              {% endfor %}
-            </select>
-          </div>
-          <div class="col-span-4">
-            <input type="number" min="1" value="1" name="cantidades[]" class="w-full rounded-lg bg-neutral-700 text-gray-100 border border-neutral-600 text-center prod-cant">
-          </div>
-          <div class="col-span-2 flex items-center justify-center">
-            <button type="button" onclick="removeProducto(this)"
-                    class="bg-red-600 hover:bg-red-700 text-white px-3 py-2 rounded text-sm font-semibold">X</button>
-          </div>
-        </div>
-      </div>
+      <div id="productos-container" class="space-y-2"></div>
       <button type="button" onclick="addProducto()"
               class="mt-2 bg-neutral-700 hover:bg-neutral-600 text-yellow-400 font-medium px-4 py-2 rounded">
         + Agregar producto
@@ -84,63 +49,139 @@
   </form>
 </div>
 
+<!-- Script auto-ejecutable: se ejecuta cuando el HTML se inserta -->
 <script>
-const preciosTurno = JSON.parse('{{ precios_servicios_json|escapejs }}');
+(function () {
+  // Si el formulario no está presente (safety), salir.
+  const form = document.getElementById("form-cobro-turno");
+  if (!form) return;
 
-// Función para calcular total
-function calcularTotal() {
-  let total = 0;
-  preciosTurno.forEach(precio => total += precio);
+  // Parseo de datos que vienen desde Django (seguro gracias a escapejs)
+  let preciosTurno = [];
+  let servicios = [];
+  let productos = [];
+  try {
+    preciosTurno = JSON.parse('{{ precios_servicios_json|escapejs }}') || [];
+    servicios = JSON.parse('{{ servicios_json|escapejs }}') || [];
+    productos = JSON.parse('{{ productos_json|escapejs }}') || [];
+  } catch (err) {
+    console.warn("Error parseando JSON en cobrarturno:", err);
+  }
 
-  // Servicios extra
-  document.querySelectorAll('#servicios-extra-container select').forEach(sel => {
-    const precio = parseFloat(sel.selectedOptions[0]?.dataset.precio || 0);
-    total += precio;
+  // cálculo del total (protegiendo elementos nulos)
+  function calcularTotal() {
+    const totalSpan = document.getElementById("totalTurno");
+    if (!totalSpan) return; // evita errores si el modal cambió
+
+    let total = 0;
+    preciosTurno.forEach(p => total += Number(p) || 0);
+
+    // servicios extra
+    document.querySelectorAll('#servicios-extra-container select').forEach(sel => {
+      const precio = parseFloat(sel.selectedOptions[0]?.dataset.precio || 0);
+      total += precio;
+    });
+
+    // productos
+    document.querySelectorAll('#productos-container .producto-item').forEach(item => {
+      const sel = item.querySelector('select');
+      const cantInput = item.querySelector('.prod-cant');
+      if (!sel || !cantInput) return;
+
+      const precio = parseFloat(sel.selectedOptions[0]?.dataset.precio || 0) || 0;
+      const cantidad = parseInt(cantInput.value) || 0;
+      total += precio * cantidad;
+    });
+
+    totalSpan.innerText = `$${total.toFixed(2)}`;
+  }
+
+  // Exponer funciones globales que usan los botones inline onclick
+  window.addServicio = function () {
+    const container = document.getElementById("servicios-extra-container");
+    if (!container) return;
+    const div = document.createElement("div");
+    div.className = "grid grid-cols-12 gap-2 servicio-item";
+    div.innerHTML = `
+      <div class="col-span-10">
+        <select name="servicios_extra[]" class="w-full rounded-lg bg-neutral-700 text-gray-100 border border-neutral-600 p-2">
+          <option value="" disabled selected hidden>Seleccione servicio</option>
+          ${servicios.map(s => `<option value="${s.id}" data-precio="${s.precio}">${s.nombre} - $${s.precio}</option>`).join('')}
+        </select>
+      </div>
+      <div class="col-span-2 flex items-center justify-center">
+        <button type="button" onclick="removeServicio(this)"
+                class="bg-red-600 hover:bg-red-700 text-white px-3 py-2 rounded text-sm font-semibold">X</button>
+      </div>
+    `;
+    container.appendChild(div);
+    // opcional: enfocar el select nuevo
+    const sel = div.querySelector('select');
+    if (sel) sel.focus();
+  };
+
+  window.removeServicio = function(btn) {
+    const item = btn && btn.closest && btn.closest('.servicio-item');
+    if (item) item.remove();
+    calcularTotal();
+  };
+
+  window.addProducto = function () {
+    const container = document.getElementById("productos-container");
+    if (!container) return;
+    const div = document.createElement("div");
+    div.className = "grid grid-cols-12 gap-2 producto-item";
+    div.innerHTML = `
+      <div class="col-span-6">
+        <select name="productos[]" class="w-full rounded-lg bg-neutral-700 text-gray-100 border border-neutral-600">
+          <option value="" disabled selected hidden>Seleccione producto</option>
+          ${productos.map(p => `<option value="${p.id}" data-precio="${p.precio}" data-stock="${p.stock_actual}">${p.nombre} (Stock: ${p.stock_actual})</option>`).join('')}
+        </select>
+      </div>
+      <div class="col-span-4">
+        <input type="number" min="1" value="1" name="cantidades[]" class="w-full rounded-lg bg-neutral-700 text-gray-100 border border-neutral-600 text-center prod-cant">
+      </div>
+      <div class="col-span-2 flex items-center justify-center">
+        <button type="button" onclick="removeProducto(this)"
+                class="bg-red-600 hover:bg-red-700 text-white px-3 py-2 rounded text-sm font-semibold">X</button>
+      </div>
+    `;
+    container.appendChild(div);
+    // enfocar cantidad por usabilidad
+    const input = div.querySelector('.prod-cant');
+    if (input) input.focus();
+  };
+
+  window.removeProducto = function(btn) {
+    const item = btn && btn.closest && btn.closest('.producto-item');
+    if (item) item.remove();
+    calcularTotal();
+  };
+
+  // Delegación de eventos dentro del modal/form (más eficiente)
+  form.addEventListener('change', function(e){
+    if (e.target && e.target.tagName === 'SELECT') calcularTotal();
   });
 
-  // Productos
-  document.querySelectorAll('#productos-container .producto-item').forEach(item => {
-    const cant = parseInt(item.querySelector('.prod-cant').value) || 0;
-    const precio = parseFloat(item.querySelector('select option:selected')?.dataset.precio || 0);
-    total += cant * precio;
-  });
+  // Validación en blur para evitar la sobrescritura durante tipeo (resolvía problema anterior)
+  form.addEventListener('blur', function(e) {
+    if (e.target && e.target.classList && e.target.classList.contains('prod-cant')) {
+      const input = e.target;
+      const item = input.closest('.producto-item');
+      if (!item) { calcularTotal(); return; }
+      const sel = item.querySelector('select');
+      const stock = parseInt(sel?.selectedOptions[0]?.dataset.stock || 1);
+      let val = parseInt(input.value);
+      if (isNaN(val) || val < 1) val = 1;
+      if (val > stock) val = stock;
+      input.value = val;
+      calcularTotal();
+    }
+  }, true);
 
-  document.getElementById('totalTurno').innerText = `$${total.toFixed(2)}`;
-}
+  // Al insertar el modal por AJAX puede que haya selects ya presentes: recalculamos
+  calcularTotal();
 
-// Servicios extra
-function addServicio() {
-  const container = document.getElementById("servicios-extra-container");
-  const row = container.querySelector(".servicio-item").cloneNode(true);
-  row.querySelector("select").value = "";
-  container.appendChild(row);
-}
-
-function removeServicio(btn) {
-  const container = document.getElementById("servicios-extra-container");
-  if(container.querySelectorAll(".servicio-item").length > 1){
-    btn.closest('.servicio-item').remove();
-  }
-}
-
-// Productos
-function addProducto() {
-  const container = document.getElementById("productos-container");
-  const row = container.querySelector(".producto-item").cloneNode(true);
-  row.querySelector("select").value = "";
-  row.querySelector(".prod-cant").value = 1;
-  container.appendChild(row);
-}
-
-function removeProducto(btn) {
-  const container = document.getElementById("productos-container");
-  if(container.querySelectorAll(".producto-item").length > 1){
-    btn.closest('.producto-item').remove();
-  }
-}
-
-// Listeners
-document.addEventListener('change', calcularTotal);
-document.addEventListener('input', calcularTotal);
-calcularTotal();
+  // Fin IIFE
+})();
 </script>

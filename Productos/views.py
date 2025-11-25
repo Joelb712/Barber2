@@ -1,5 +1,6 @@
 from django.shortcuts import render, get_object_or_404
 from .models import Producto
+from Otros.models import Empleado
 from .forms import ProductoForm
 from django.contrib import messages
 from django.contrib.auth.decorators import user_passes_test,login_required
@@ -13,13 +14,15 @@ def es_gerente(user):
 @user_passes_test(es_gerente)
 def lista_productos(request):
     productos = Producto.objects.all()
-    return render(request, 'productos.html', {'productos': productos})
+    empleadito = get_object_or_404(Empleado, user=request.user)
+    return render(request, 'productos.html', {'productos': productos, 'empleadito': empleadito})
 
 @login_required
 @user_passes_test(es_gerente)
 def tabla_productos(request):
+    empleadito = get_object_or_404(Empleado, user=request.user)
     productos = Producto.objects.all()
-    return render(request, 'productos_tabla.html', {'productos': productos})
+    return render(request, 'productos_tabla.html', {'productos': productos, 'empleadito': empleadito})
 
 
 @login_required

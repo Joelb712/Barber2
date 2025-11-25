@@ -72,6 +72,7 @@ class Turno(models.Model):
     fecha = models.DateField()
     horario = models.ForeignKey("Horario", on_delete=models.CASCADE)
     estado = models.ForeignKey("EstadoTurno", on_delete=models.CASCADE, default=1)
+    pagado = models.BooleanField(default=False)
 
     duracion_real = models.PositiveIntegerField(default=30, help_text="En minutos")
     created_at = models.DateTimeField(auto_now_add=True)

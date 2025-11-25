@@ -1,5 +1,5 @@
 from django.shortcuts import render, get_object_or_404
-from Otros.models import Servicio
+from Otros.models import Servicio, Empleado
 from .forms import ServicioForm
 from django.contrib import messages
 from django.contrib.auth.decorators import user_passes_test,login_required
@@ -12,14 +12,16 @@ def es_gerente(user):
 @login_required
 @user_passes_test(es_gerente)
 def lista_servicios(request):
+    empleadito = get_object_or_404(Empleado, user=request.user)
     servicios = Servicio.objects.all()
-    return render(request, 'servicios.html', {'servicios': servicios})
+    return render(request, 'servicios.html', {'servicios': servicios, 'empleadito': empleadito})
 
 @login_required
 @user_passes_test(es_gerente)
 def tabla_servicios(request):
+    empleadito = get_object_or_404(Empleado, user=request.user)
     servicios = Servicio.objects.all()
-    return render(request, 'servicios_tabla.html', {'servicios': servicios})
+    return render(request, 'servicios_tabla.html', {'servicios': servicios, 'empleadito': empleadito})
 
 @login_required
 @user_passes_test(es_gerente)

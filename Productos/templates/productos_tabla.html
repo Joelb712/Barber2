@@ -38,10 +38,12 @@
                 <p class="text-gray-300">Stock: {{ producto.stock_actual }}</p>
 
                 <!-- Botones Editar / Eliminar -->
+                {% if empleadito and empleadito.especialidad == 'gerente' %}
                 <div class="mt-4 flex justify-between">
                     <button class="btnEditar bg-yellow-400 hover:bg-yellow-500 text-gray-900 px-3 py-1 rounded-md text-sm">Editar</button> 
                     <button class="btnEliminar bg-red-500 hover:bg-red-600 text-white px-3 py-1 rounded-md text-sm">Eliminar</button>
                 </div>
+                {% endif %}
             </div>
             {% endfor %}
         </div>
@@ -94,7 +96,9 @@
                             </svg>
                         </div>
                     </th>
+                    {% if empleadito and empleadito.especialidad == 'gerente' %}
                     <th class="py-2 px-4 text-left">Acciones</th>
+                    {% endif %}
                 </tr>
             </thead>
 
@@ -107,10 +111,12 @@
                     <td class="py-2 px-4 text-white">{{ producto.descripcion }}</td>
                     <td class="py-2 px-4 text-white">💲 {{ producto.precio }}</td>
                     <td class="py-2 px-4 text-white">{{ producto.stock_actual }}</td>
+                    {% if empleadito and empleadito.especialidad == 'gerente' %}
                     <td class="py-2 px-4 text-white">
                         <button class="btnEditar bg-yellow-400 hover:bg-yellow-500 text-gray-900 px-3 py-1 rounded-md text-sm">Editar</button>
                         <button class="btnEliminar bg-red-500 hover:bg-red-600 text-white px-3 py-1 rounded-md text-sm">Eliminar</button>
                     </td>
+                    {% endif %}
                 </tr>
                 {% endfor %}
             </tbody>

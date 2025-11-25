@@ -1,5 +1,5 @@
 from django.shortcuts import render, get_object_or_404,HttpResponse
-from Otros.models import Horario,Turno,Servicio,Empleado,EstadoTurno, ServiciosXTurno,Cliente
+from Otros.models import Horario,Turno,Servicio,Empleado,EstadoTurno, ServiciosXTurno,Cliente,Empleado
 from .forms import HorarioForm, TurnoForm
 from django.contrib import messages
 from django.contrib.auth.decorators import user_passes_test,login_required
@@ -174,14 +174,16 @@ def crear_turno(request):
 @login_required
 @user_passes_test(es_gerente)
 def turnos_general(request):
+    empleadito = get_object_or_404(Empleado, user=request.user)
     turnos = Turno.objects.all()
-    return render(request, 'turnos_general.html', {'turnos': turnos})
+    return render(request, 'turnos_general.html', {'turnos': turnos, 'empleadito': empleadito})
 
 @login_required
 @user_passes_test(es_gerente)
 def tabla_turnos(request):
+    empleadito = get_object_or_404(Empleado, user=request.user)
     turnos = Turno.objects.all()
-    return render(request, 'turnos_tabla.html', {'turnos': turnos})
+    return render(request, 'turnos_tabla.html', {'turnos': turnos, 'empleadito': empleadito})
 
 
 @login_required

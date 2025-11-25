@@ -1,7 +1,7 @@
 from django.shortcuts import render,redirect,get_object_or_404
 from django.contrib.auth.decorators import login_required, user_passes_test
 from django.utils import timezone
-from Otros.models import Caja, MovimientoCaja, Venta, MetodoPago
+from Otros.models import Caja, MovimientoCaja, Venta, MetodoPago, Empleado
 from .forms import AperturaCajaForm, MetodoForm
 from django.contrib import messages
 from django.db import models
@@ -17,14 +17,16 @@ def es_gerente(user):
 @login_required
 @user_passes_test(es_gerente)
 def lista_cajas(request):
+    empleadito = get_object_or_404(Empleado, user=request.user)
     cajas= Caja.objects.all()
-    return render(request, 'cajas.html', {'cajas': cajas})
+    return render(request, 'cajas.html', {'cajas': cajas, 'empleadito': empleadito})
 
 @login_required
 @user_passes_test(es_gerente)
 def tabla_cajas(request):
+    empleadito = get_object_or_404(Empleado, user=request.user)
     cajas = Caja.objects.all()
-    return render(request, 'cajas_tabla.html', {'cajas': cajas})
+    return render(request, 'cajas_tabla.html', {'cajas': cajas,'empleadito': empleadito})
 
 
 # @login_required

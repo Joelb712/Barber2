@@ -1,6 +1,6 @@
 {% load static %}
 <div class="card">
-<div id="inicio-container" class="p-6 space-y-6">
+<div id="inicio-container" class="p-6 space-y-6" data-url="{% url 'home' %}">
 
   <!-- Sección general -->
   <div class="text-center">
@@ -158,49 +158,53 @@
             <span class="text-xs text-neutral-400">{{hoy}}</span>
             </div>
 
-            <div class="overflow-x-auto">
-            <table class="min-w-full text-sm text-gray-300">
-                <thead class="bg-neutral-700">
-                    <tr>
-                        <th class="px-3 py-2 text-left">Hora</th>
-                        <th class="px-3 py-2 text-left">Cliente</th>
-                        <th class="px-3 py-2 text-left">Peluquero</th>
-                        <th class="px-3 py-2 text-left">Estado</th>
-                        <th class="px-3 py-2 text-left">Cobrar</th> <!-- Nueva columna -->
-                    </tr>
-                </thead>
-                <tbody>
-                    {% for turno in turnostodos %}
-                    <tr class="border-b border-neutral-800">
-                        <td class="px-3 py-2">{{ turno.horario.hora_inicio|time:"H:i" }}</td>
-                        <td class="px-3 py-2">{{ turno.cliente }}</td>
-                        <td class="px-3 py-2">{{ turno.empleado }}</td>
-                        <td class="px-3 py-2">{{ turno.estado.nombre }}</td>
-                        <td class="px-3 py-2">
-                            {% if turno.estado.nombre != "completado" and turno.estado.nombre != "cancelado" %}
-                            <button 
-                                class="btn-ajax-form bg-green-600 text-black py-1 px-3 rounded"
-                                data-url="{% url 'cobrar_turno' turno.id %}"
-                                data-titulo="Cobrar Turno">
-                                Cobrar
-                            </button>
-                            {% else %}
-                            <span class="text-neutral-400">--</span>
-                            {% endif %}
-                        </td>
-                    </tr>
-                    {% empty %}
-                    <tr>
-                        <td colspan="5" class="text-center">No hay turnos para hoy</td>
-                    </tr>
-                    {% endfor %}
-                </tbody>
-            </table>
+            <div id="tablaturnosrecep" class="overflow-x-auto">
+                <table class="min-w-full text-sm text-gray-300">
+                    <thead class="bg-neutral-700">
+                        <tr>
+                            <th class="px-3 py-2 text-left">Hora</th>
+                            <th class="px-3 py-2 text-left">Cliente</th>
+                            <th class="px-3 py-2 text-left">Peluquero</th>
+                            <th class="px-3 py-2 text-left">Estado</th>
+                            <th class="px-3 py-2 text-left">Cobrar</th> <!-- Nueva columna -->
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for turno in turnostodos %}
+                        <tr class="border-b border-neutral-800">
+                            <td class="px-3 py-2">{{ turno.horario.hora_inicio|time:"H:i" }}</td>
+                            <td class="px-3 py-2">{{ turno.cliente }}</td>
+                            <td class="px-3 py-2">{{ turno.empleado }}</td>
+                            <td class="px-3 py-2">{{ turno.estado.nombre }}</td>
+                            <td class="px-3 py-2">
+                                {% if turno.estado.nombre == 'cancelado' %}
+                                    <span class="text-gray-400 font-semibold">---</span>
+
+                                {% elif not turno.pagado %}
+                                    <button 
+                                        class="btn-ajax-form bg-green-600 text-black py-1 px-3 rounded"
+                                        data-url="{% url 'cobrar_turno' turno.id %}"
+                                        data-titulo="Cobrar Turno">
+                                        Cobrar
+                                    </button>
+
+                                {% else %}
+                                    <span class="text-green-400 font-semibold">Pagado</span>
+                                {% endif %}
+                            </td>
+                        </tr>
+                        {% empty %}
+                        <tr>
+                            <td colspan="5" class="text-center">No hay turnos para hoy</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
             </div>
         </div>
         </section>
     </div>
-</div>
+    </div>
   {% endif %}
 
   <!-- Sección Gerente -->
