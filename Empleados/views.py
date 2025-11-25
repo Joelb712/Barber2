@@ -31,10 +31,10 @@ def crear_empleado(request):
         if form.is_valid():
             form.save()
             # Enviamos éxito para que el modal se cierre y la tabla se recargue
-            return JsonResponse({'success': True})
+            return JsonResponse({'success': True,'message': '¡Empleado registrado correctamente!'})
         else:
             # Enviamos el formulario con errores de validación
-            return render(request, 'formemp.html', {'form': form}) 
+            return render(request, 'formemp.html', {'form': form}, status=400) 
     else:
         form = EmpleadoCreateForm()
         return render(request, 'formemp.html', {'form': form})
@@ -49,9 +49,9 @@ def editar_empleado(request, pk):
         if form.is_valid():
             form.save()
              # Avisar al iframe que debe cerrarse:
-            return JsonResponse({'success': True})
+            return JsonResponse({'success': True,'message': 'Datos del empleado actualizados.'})
         else:
-            return render(request, 'formemp.html', {'form': form, 'empleado': empleado})
+            return render(request, 'formemp.html', {'form': form, 'empleado': empleado}, status=400)
     else:
         form = EmpleadoEditarForm(instance=empleado, user_instance=empleado.user)
         return render(request,('formemp.html'),{'form':form , 'empleado':empleado})
@@ -64,5 +64,5 @@ def eliminar_empleado(request, pk):
     if request.method == 'POST':
         empleado.activo= False
         empleado.save()
-        return JsonResponse({'success': True})
+        return JsonResponse({'success': True,'message': 'Empleado dado de baja correctamente.'})
     return render(request, 'eliminaremp.html', {'empleado': empleado})

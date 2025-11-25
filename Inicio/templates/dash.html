@@ -216,6 +216,9 @@
     </div>
   </div>
 
+  <!-- Contenedor de alertas -->
+  <div id="alert-container" class="fixed top-5 right-5 z-[9999] flex flex-col gap-2 w-full max-w-sm pointer-events-none"></div>
+
 
   <!-- SCRIPTS -->
   <script>
@@ -560,7 +563,10 @@
             $('#modalBody').html(data);
           }
         },
-        error: function(xhr) { $('#modalBody').html(xhr.responseText); }
+        error: function(xhr) { 
+          $('#modalBody').html(xhr.responseText);
+          showAlert('error', 'Revisa los errores en el formulario');
+         }
       });
     });
 
@@ -607,11 +613,20 @@
         data: formData,
         processData: false,   // ⚠️ necesario para FormData
         contentType: false,   // ⚠️ necesario para FormData
-        success: function() {
+        success: function(data) {
           cerrarModalAjax();
+          // Verificamos si data es un objeto JSON con mensaje (como hicimos en las views)
+          if (data && data.message) {
+              showAlert('success', data.message);
+          } else {
+              // Fallback por si la vista no devuelve mensaje
+              showAlert('success', 'Producto guardado correctamente');
+          }
         },
         error: function(xhr) {
           $('#modalBody').html(xhr.responseText);
+          // Lanzamos la alerta flotante
+          showAlert('error', 'No se pudo guardar el producto. Revisa los errores.');
         }
       });
     });
@@ -628,12 +643,21 @@
           data: formData,
           processData: false,   // necesario para archivos
           contentType: false,   // necesario para archivos
-          success: function() {
+          success: function(data) {
               cerrarModalAjax();  // tu función para cerrar modal + refrescar tablas
+              // 2. Verificamos si Django envió un mensaje (JSON)
+              if (data.message) {
+                  showAlert('success', data.message);
+              } else {
+                  // Mensaje por defecto si tu vista no devolvió JSON
+                  showAlert('success', 'Operación realizada con éxito');
+              }
           },
           error: function(xhr) {
               // si hay errores de validación, los muestra en el modal
               $('#modalBody').html(xhr.responseText);
+              // 3. Agregamos alerta visual de error
+              showAlert('error', 'Revisa los errores en el formulario')
           }
         });
     });
@@ -661,6 +685,58 @@
         const urlHome = "{% url 'home' %}";
         cargarContenido(urlHome, "Home", "fa-house");
     });
+
+    function showAlert(type, message) {
+        const container = document.getElementById("alert-container");
+
+        // Definimos colores e iconos para cada tipo
+        const config = {
+            success: {
+                bg: "bg-green-500",
+                icon: `<svg class="w-6 h-6 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>`
+            },
+            error: {
+                bg: "bg-red-500",
+                icon: `<svg class="w-6 h-6 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>`
+            },
+            warning: {
+                bg: "bg-yellow-500",
+                icon: `<svg class="w-6 h-6 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path></svg>`
+            },
+            info: {
+                bg: "bg-blue-500",
+                icon: `<svg class="w-6 h-6 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>`
+            }
+        };
+
+        const style = config[type] || config.info;
+
+        // Crear el elemento
+        const alert = document.createElement("div");
+        
+        // Clases bases + Animación de entrada (Translate y Opacity)
+        alert.className = `${style.bg} text-white px-4 py-3 rounded-lg shadow-lg flex items-center transform transition-all duration-500 translate-x-full opacity-0 pointer-events-auto`;
+        
+        alert.innerHTML = `${style.icon} <span class="font-medium">${message}</span>`;
+
+        container.appendChild(alert);
+
+        // Forzar un reflow para que la animación de entrada funcione
+        setTimeout(() => {
+            alert.classList.remove("translate-x-full", "opacity-0");
+        }, 10);
+
+        // Remover después de 3.5 segundos
+        setTimeout(() => {
+            // Animación de salida
+            alert.classList.add("opacity-0", "translate-x-full");
+            
+            // Eliminar del DOM cuando termine la animación css (500ms)
+            setTimeout(() => {
+                alert.remove();
+            }, 500);
+        }, 3500);
+    }
   </script>
 
   {% block extra_js %}
