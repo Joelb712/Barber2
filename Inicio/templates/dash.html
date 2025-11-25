@@ -550,6 +550,7 @@
     $(document).on('submit', '.ajax-form', function(e) {
       e.preventDefault();
       const form = $(this);
+
       $.ajax({
         url: form.attr('action'),
         method: form.attr('method'),
@@ -557,10 +558,17 @@
         success: function(data) {
           if (data.success) {
             cerrarModalAjax();
+            // 2. Mostramos la alerta si hay mensaje, sino una por defecto
+            if (data.message) {
+              showAlert('success', data.message);
+            } else {
+              showAlert('success', 'Operación exitosa');
+            }
           } else if (data.next_url) {
             abrirModalAjax(data.next_url, 'Registrar Pago');
           } else {
             $('#modalBody').html(data);
+            showAlert('error', 'Verifica los datos ingresados');
           }
         },
         error: function(xhr) { 

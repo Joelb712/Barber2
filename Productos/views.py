@@ -48,9 +48,9 @@ def crear_producto(request):
         if form.is_valid():
             form.save()
             # Enviamos éxito para que el modal se cierre y la tabla se recargue
-            return JsonResponse({'success': True})
+            return JsonResponse({'success': True,'message':'Producto creado correctamente'})
         else:
-            return render(request, 'formprod.html', {'form': form})
+            return render(request, 'formprod.html', {'form': form}, status=400)
     else:
         form = ProductoForm()
         return render(request, 'formprod.html', {'form': form})
@@ -63,10 +63,9 @@ def editar_producto(request, pk):
         form = ProductoForm(request.POST, request.FILES , instance=producto)
         if form.is_valid():
             form.save()
-            messages.success(request, 'Producto actualizado correctamente.')
-            return JsonResponse({'success': True})
+            return JsonResponse({'success': True, 'message':'Producto actualizado correctamente'})
         else:
-            return render(request, 'formprod.html', {'form': form, 'producto': producto})
+            return render(request, 'formprod.html', {'form': form, 'producto': producto}, status=400)
     else:
         form = ProductoForm(instance=producto)
         return render(request, 'formprod.html', {'form': form, 'producto': producto})
@@ -78,8 +77,7 @@ def eliminar_producto(request, pk):
     if request.method == 'POST':
         producto.activo= False
         producto.save()
-        messages.success(request, 'Se dió de baja el producto correctamente.')
-        return JsonResponse({'success': True})
+        return JsonResponse({'success': True, 'message':'Producto desactivado correctamente'})
     return render(request, 'eliminarprod.html', {'producto': producto})
 
 #=======================

@@ -33,10 +33,10 @@ def crear_horario(request):
         form = HorarioForm(request.POST)
         if form.is_valid():
             form.save()
-            return JsonResponse({'success': True})
+            return JsonResponse({'success': True,'message':'Horario creado correctamente'})
         else:
             # Enviamos el formulario con errores de validación
-            return render(request, 'formhora.html', {'form': form})  
+            return render(request, 'formhora.html', {'form': form}, status=400)  
     else:
         form = HorarioForm()
         return render(request, 'formhora.html', {'form': form})
@@ -49,9 +49,9 @@ def editar_horario(request, pk):
         form = HorarioForm(request.POST, instance=horario)
         if form.is_valid():
             form.save()
-            return JsonResponse({'success': True})
+            return JsonResponse({'success': True, 'message':'Horario actualizado correctamente'})
         else:
-            return render(request, 'formhora.html', {'form': form, 'horarios': horario})
+            return render(request, 'formhora.html', {'form': form, 'horarios': horario}, status=400)
     else:  
         form = HorarioForm(instance=horario)
         return render(request, 'formhora.html', {'form': form, 'horarios': horario})
@@ -64,7 +64,7 @@ def eliminar_horario(request, pk):
         horario.activo=False
         horario.save()
         # horario.delete()
-        return JsonResponse({'success': True})
+        return JsonResponse({'success': True, 'message':'Horario desactivado correctamente'})
     return render(request, 'eliminarhora.html', {'horario':horario})
 
 
@@ -193,10 +193,10 @@ def dar_turno(request):
         form = TurnoForm(request.POST)
         if form.is_valid():
             form.save()
-            return JsonResponse({'success': True})
+            return JsonResponse({'success': True,'message':'Turno creado correctamente'})
         else:
             # Enviamos el formulario con errores de validación
-            return render(request, 'formturno.html', {'form': form})  
+            return render(request, 'formturno.html', {'form': form}, status=400)  
     else:
         form= TurnoForm()
         return render(request, 'formturno.html', {'form': form})
@@ -210,9 +210,9 @@ def editar_turno(request, pk):
         form = TurnoForm(request.POST, instance=turno)
         if form.is_valid():
             form.save()
-            return JsonResponse({'success': True})
+            return JsonResponse({'success': True, 'message':'Turno actualizado correctamente'})
         else:
-            return render(request, 'formturno.html', {'form': form, 'turno': turno})
+            return render(request, 'formturno.html', {'form': form, 'turno': turno}, status=400)
     else:
         form = TurnoForm(instance=turno)
         return render(request,('formturno.html'),{'form':form , 'turno':turno})
@@ -226,5 +226,5 @@ def eliminar_turno(request, pk):
     if request.method == 'POST':
         turno.estado = cancelado
         turno.save()
-        return JsonResponse({'success': True})
+        return JsonResponse({'success': True, 'message':'Turno cancelado correctamente'})
     return render(request, 'eliminarturno.html', {'turno': turno})

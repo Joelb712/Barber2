@@ -33,10 +33,10 @@ def crear_cliente(request):
         if form.is_valid():
             form.save()
             # Enviamos éxito para que el modal se cierre y la tabla se recargue
-            return JsonResponse({'success': True})
+            return JsonResponse({'success': True,'message': 'Cliente registrado correctamente!'})
         else:
             # Enviamos el formulario con errores de validación
-            return render(request, 'formcli.html', {'form': form})     
+            return render(request, 'formcli.html', {'form': form}, status=400)     
     else:
         form = ClienteAltaForm()
         return render(request, 'formcli.html', {'form': form})
@@ -50,9 +50,9 @@ def editar_cliente(request, pk):
         form = ClienteEditarForm(request.POST, instance=cliente)
         if form.is_valid():
             form.save()
-            return JsonResponse({'success': True})
+            return JsonResponse({'success': True,'message': 'Datos del cliente actualizados.'})
         else:
-            return render(request, 'formcli.html', {'form': form, 'cliente': cliente})
+            return render(request, 'formcli.html', {'form': form, 'cliente': cliente}, status=400)
     else:
         form = ClienteEditarForm(instance=cliente)
         return render(request, 'formcli.html', {'form': form, 'cliente': cliente})
@@ -65,5 +65,5 @@ def eliminar_cliente(request, pk):
     if request.method == 'POST':
         cliente.activo= False   # borrado logico
         cliente.save()       
-        return JsonResponse({'success': True})
+        return JsonResponse({'success': True,'message': 'Cliente dado de baja correctamente.'})
     return render(request, 'eliminarcli.html', {'cliente': cliente})

@@ -66,9 +66,9 @@ def crear_servicio(request):
         if form.is_valid():
             form.save()
             # Avisar al iframe que debe cerrarse:
-            return JsonResponse({'success': True})
+            return JsonResponse({'success': True,'message':'Servicio creado correctamente'})
         else:
-            return render(request, 'formserv.html', {'form': form})
+            return render(request, 'formserv.html', {'form': form}, status=400)
     else:
         form = ServicioForm()
         return render(request, 'formserv.html', {'form': form})
@@ -81,10 +81,9 @@ def editar_servicio(request, pk):
         form = ServicioForm(request.POST, instance=servicio)
         if form.is_valid():
             form.save()
-            messages.success(request, 'Servicio actualizado correctamente.')
-            return JsonResponse({'success': True})
+            return JsonResponse({'success': True, 'message':'Servicio actualizado correctamente'})
         else:
-            return render(request, 'formserv.html', {'form': form, 'servicio': servicio})
+            return render(request, 'formserv.html', {'form': form, 'servicio': servicio}, status=400)
     else:
         form = ServicioForm(instance=servicio)
         return render(request, 'formserv.html', {'form': form, 'servicio': servicio})
@@ -95,7 +94,6 @@ def eliminar_servicio(request, pk):
     servicio = get_object_or_404(Servicio, pk=pk)
     if request.method == 'POST':
         servicio.activo = False
-        servicio.save()
-        messages.success(request, 'Servicio eliminado correctamente.')
-        return JsonResponse({'success': True})
+        servicio.save()    
+        return JsonResponse({'success': True, 'message':'Servicio desactivado correctamente'})
     return render(request, 'eliminarserv.html', {'servicio': servicio})
