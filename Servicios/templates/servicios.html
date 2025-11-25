@@ -13,6 +13,39 @@
       <h2 class="text-2xl font-bold text-yellow-400">Gestión de Servicios</h2>
   </div>
 
+  {% if empleadito and empleadito.especialidad == 'gerente' %}
+  <div class="card grid grid-cols-1 md:grid-cols-3 gap-8 max-w-6xl mx-auto">
+    <div class="bg-zinc-800 p-6 rounded-xl text-center shadow hover:scale-105 transition duration-300">
+        <p class="font-semibold text-white">
+          
+          {{nombre_servicio_mas_solicitado}} :  {{cantidad_servicio_mas_solicitado}}   
+        </p>
+        <p class="text-yellow-500 mt-4 font-bold">
+          Servicio más solicitado en el mes
+        </p>
+    </div>
+    <div class="bg-zinc-800 p-6 rounded-xl text-center shadow hover:scale-105 transition duration-300">
+        <p class="font-semibold text-white">
+          
+          {{servicios_disponibles}}
+        </p>
+        <p class="text-yellow-500 mt-4 font-bold">
+          Servicios Disponibles
+        </p>
+    </div>
+    <div class="bg-zinc-800 p-6 rounded-xl text-center shadow hover:scale-105 transition duration-300">
+        <p class="font-semibold text-white">
+          
+          {{servicios_inactivos}}
+        </p>
+        <p class="text-yellow-500 mt-4 font-bold">
+          Servicios Inactivos
+        </p>
+    </div>
+
+  </div>
+  {% endif %}
+
   <div class="p-6 space-y-6">
     <div class="bg-zinc-800 backdrop-blur-sm rounded-xl p-5 shadow">
       <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-4">

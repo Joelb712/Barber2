@@ -6,6 +6,9 @@ from django.db import transaction
 from Otros.models import Venta,Cliente,Servicio, DetalleVenta, Pago, MovimientoStock, MovimientoCaja, MetodoPago,Producto,Caja,ServiciosXTurno,Turno,EstadoTurno, Empleado
 import json
 from django.core.serializers.json import DjangoJSONEncoder
+from django.db.models import Sum
+from django.utils.timezone import now,make_aware
+from datetime import timedelta,datetime
 
 
 def es_gerente(user):
@@ -15,12 +18,44 @@ def es_gerente(user):
 @user_passes_test(es_gerente)
 def lista_ventas(request):
     empleadito = get_object_or_404(Empleado, user=request.user)
+
+    hoy = now()
+    inicio_semana = hoy - timedelta(days=hoy.weekday())  # lunes
+    inicio_semana = inicio_semana.replace(hour=0, minute=0, second=0, microsecond=0)
+    
+    inicio_mes = hoy.replace(day=1, hour=0, minute=0, second=0, microsecond=0)
+    
+    # --- 1) VENTA DE PRODUCTOS (semana) ---
+    ventaproductos = DetalleVenta.objects.filter(
+        activo=True,
+        producto__isnull=False,
+        venta__activo=True,
+        venta__fecha__gte=inicio_semana,
+    ).aggregate(total=Sum("subtotal"))["total"] or 0
+
+    # --- 2) VENTA DE SERVICIOS (semana) ---
+    ventaservicios = DetalleVenta.objects.filter(
+        activo=True,
+        servicio__isnull=False,
+        venta__activo=True,
+         venta__fecha__gte=inicio_semana,
+    ).aggregate(total=Sum("subtotal"))["total"] or 0
+
+    # --- 3) TOTAL DE VENTAS MENSUALES ---
+    ventasmensual = Venta.objects.filter(
+        activo=True,
+        fecha__gte=inicio_mes,
+    ).aggregate(total=Sum("total"))["total"] or 0
+
     ventas = Venta.objects.all()
+
     total=0
     for v in ventas:
         if v.activo:
             total += v.total
-    return render(request, 'ventas.html', {'ventas': ventas, 'total': total, 'empleadito': empleadito})
+    return render(request, 'ventas.html', {'ventas': ventas, 'total': total, 'empleadito': empleadito,"ventaproductos": ventaproductos,
+        "ventaservicios": ventaservicios,
+        "ventasmensual": ventasmensual,})
 
 @login_required
 @user_passes_test(es_gerente)
@@ -307,17 +342,20 @@ def cancelar_venta(request, venta_id):
         # Revertir stock
         detalles = DetalleVenta.objects.filter(venta=venta)
         for detalle in detalles:
-            producto = detalle.producto
-            producto.stock_actual += detalle.cantidad
-            producto.save()
 
-            MovimientoStock.objects.create(
-                producto=producto,
-                tipo='ENTRADA',
-                cantidad=detalle.cantidad,
-                motivo=f"Cancelación de venta #{venta.id}",
-                empleado=request.user.empleado,
-            )
+            # SOLO revertir stock si es un producto
+            if detalle.producto is not None:
+                producto = detalle.producto
+                producto.stock_actual += detalle.cantidad
+                producto.save()
+
+                MovimientoStock.objects.create(
+                    producto=producto,
+                    tipo='ENTRADA',
+                    cantidad=detalle.cantidad,
+                    motivo=f"Cancelación de venta #{venta.id}",
+                    empleado=request.user.empleado,
+                )
             detalle.activo=False
             detalle.save()
 

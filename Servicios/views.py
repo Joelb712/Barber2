@@ -1,10 +1,12 @@
 from django.shortcuts import render, get_object_or_404
-from Otros.models import Servicio, Empleado
+from Otros.models import Servicio, Empleado, DetalleVenta
 from .forms import ServicioForm
 from django.contrib import messages
 from django.contrib.auth.decorators import user_passes_test,login_required
 from django.http import JsonResponse
-
+from django.db.models import Count, Sum
+from django.utils.timezone import now
+from datetime import timedelta
 
 def es_gerente(user):
     return user.groups.filter(name="Gerente").exists() or user.groups.filter(name="Recepcionista").exists() or user.is_superuser
@@ -14,7 +16,40 @@ def es_gerente(user):
 def lista_servicios(request):
     empleadito = get_object_or_404(Empleado, user=request.user)
     servicios = Servicio.objects.all()
-    return render(request, 'servicios.html', {'servicios': servicios, 'empleadito': empleadito})
+
+    servicios_disponibles = Servicio.objects.filter(activo=True).count()
+
+    # Fechas
+    hoy = now()
+    inicio_mes = hoy.replace(day=1, hour=0, minute=0, second=0, microsecond=0)
+
+    # 2) Servicio más solicitado del mes
+    servicio_mas_solicitado = (
+        DetalleVenta.objects.filter(
+            activo=True,
+            servicio__isnull=False,
+            venta__activo=True,
+            venta__fecha__gte=inicio_mes
+        )
+        .values("servicio__nombre")
+        .annotate(total_solicitudes=Sum("cantidad"))
+        .order_by("-total_solicitudes")
+        .first()
+    )
+    if servicio_mas_solicitado:
+        nombre_servicio_mas_solicitado = servicio_mas_solicitado["servicio__nombre"]
+        cantidad_servicio_mas_solicitado = servicio_mas_solicitado["total_solicitudes"]
+    else:
+        nombre_servicio_mas_solicitado = "Sin datos"
+        cantidad_servicio_mas_solicitado = 0
+
+    # 3) Servicios inactivos
+    servicios_inactivos = Servicio.objects.filter(activo=False).count()
+
+    return render(request, 'servicios.html', {'servicios': servicios, 'empleadito': empleadito,"servicios_disponibles": servicios_disponibles,
+        "nombre_servicio_mas_solicitado": nombre_servicio_mas_solicitado,
+        "cantidad_servicio_mas_solicitado": cantidad_servicio_mas_solicitado,
+        "servicios_inactivos": servicios_inactivos,})
 
 @login_required
 @user_passes_test(es_gerente)

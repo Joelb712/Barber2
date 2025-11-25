@@ -8,6 +8,9 @@ from django.db import models
 from django.http import JsonResponse
 from django.template.loader import render_to_string
 from django.views.decorators.csrf import csrf_exempt
+from django.db.models import Sum
+from django.utils.timezone import now
+from datetime import timedelta
 
 # Create your views here.
 def es_gerente(user):
@@ -18,8 +21,38 @@ def es_gerente(user):
 @user_passes_test(es_gerente)
 def lista_cajas(request):
     empleadito = get_object_or_404(Empleado, user=request.user)
+    hoy = now()
+    inicio_semana = hoy - timedelta(days=hoy.weekday())
+    inicio_semana = inicio_semana.replace(hour=0, minute=0, second=0, microsecond=0)
+    inicio_mes = hoy.replace(day=1, hour=0, minute=0, second=0, microsecond=0)
+
+    # INGRESOS
+    ingresos_semanal = Venta.objects.filter(
+        activo=True,
+        fecha__gte=inicio_semana
+    ).aggregate(total=Sum("total"))["total"] or 0
+
+    ingresos_mensual = Venta.objects.filter(
+        activo=True,
+        fecha__gte=inicio_mes
+    ).aggregate(total=Sum("total"))["total"] or 0
+
+    caja_abierta = Caja.objects.filter(estado=True).first()
+    if caja_abierta:
+        ingresos_caja_actual = (
+            Venta.objects.filter(
+                activo=True,
+                caja=caja_abierta
+            ).aggregate(total=Sum("total"))["total"] or 0
+        )
+    else:
+        ingresos_caja_actual = "No hay caja abierta"
+
+
     cajas= Caja.objects.all()
-    return render(request, 'cajas.html', {'cajas': cajas, 'empleadito': empleadito})
+    return render(request, 'cajas.html', {'cajas': cajas, 'empleadito': empleadito,'ingresos_semanal': ingresos_semanal,
+        'ingresos_mensual': ingresos_mensual,
+        'ingresos_caja_actual': ingresos_caja_actual,})
 
 @login_required
 @user_passes_test(es_gerente)
