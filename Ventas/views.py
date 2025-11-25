@@ -3,7 +3,7 @@ from django.http import JsonResponse
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required,user_passes_test
 from django.db import transaction
-from Otros.models import Venta,Cliente,Servicio, DetalleVenta, Pago, MovimientoStock, MovimientoCaja, MetodoPago,Producto,Caja,ServiciosXTurno,Turno,EstadoTurno
+from Otros.models import Venta,Cliente,Servicio, DetalleVenta, Pago, MovimientoStock, MovimientoCaja, MetodoPago,Producto,Caja,ServiciosXTurno,Turno,EstadoTurno, Empleado
 import json
 from django.core.serializers.json import DjangoJSONEncoder
 
@@ -14,12 +14,13 @@ def es_gerente(user):
 @login_required
 @user_passes_test(es_gerente)
 def lista_ventas(request):
+    empleadito = get_object_or_404(Empleado, user=request.user)
     ventas = Venta.objects.all()
     total=0
     for v in ventas:
         if v.activo:
             total += v.total
-    return render(request, 'ventas.html', {'ventas': ventas, 'total': total})
+    return render(request, 'ventas.html', {'ventas': ventas, 'total': total, 'empleadito': empleadito})
 
 @login_required
 @user_passes_test(es_gerente)
