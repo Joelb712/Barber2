@@ -39,6 +39,13 @@ def tabla_productos(request):
     productos = Producto.objects.all()
     return render(request, 'productos_tabla.html', {'productos': productos, 'empleadito': empleadito})
 
+@login_required
+@user_passes_test(es_gerente)
+def tarjetas_productos(request):
+    empleadito = get_object_or_404(Empleado, user=request.user)
+    productos = Producto.objects.all()
+    return render(request, 'productos_tarjetas.html', {'productos': productos, 'empleadito': empleadito})
+
 
 @login_required
 @user_passes_test(es_gerente)

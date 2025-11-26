@@ -1,0 +1,59 @@
+<div class="container mx-auto p-6">
+<!-- 🔍 CAMPO DE BÚSQUEDA -->
+    <!-- Permite filtrar por nombre, precio o stock tanto en la tabla como en las tarjetas -->
+    <div class="mb-4 flex justify-end">
+        <input id="buscarNombre" type="text" placeholder="🔍 Buscar producto..." 
+            class="border border-yellow-400 bg-gray-800 text-white rounded-lg px-3 py-2 w-1/3 focus:ring focus:ring-yellow-300">
+    </div>
+
+    <!-- 🧱 SECCIÓN PRINCIPAL: LISTA DE PRODUCTOS -->
+    {% if productos %}
+    
+    <!-- 🟨 Vista tipo TARJETAS -->
+    <div id="vistaTarjetas">
+        <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
+            {% for producto in productos %}
+            <div class="bg-gray-800 border-2 border-yellow-400 p-4 rounded-xl shadow-md hover:shadow-yellow-300 hover:scale-105 transition-transform duration-200 {% if not producto.activo %} inactivo opacity-40 {% endif %}"" data-pk="{{ producto.pk }}">
+                <!-- Imagen del producto (si no hay, muestra "Sin imagen") -->
+                {% if producto.imagen %}
+                    <img src="{{ producto.imagen.url }}" alt="{{ producto.nombre }}" class="w-full h-48 object-cover rounded-lg mb-3 border border-yellow-400">
+                {% else %}
+                    <div class="w-full h-48 bg-gray-700 flex items-center justify-center rounded-lg mb-3 border border-yellow-400">
+                        <span class="text-gray-400">Sin imagen</span>
+                    </div>
+                {% endif %}
+
+                <!-- Datos del producto -->
+                <h2 class="text-lg font-semibold text-white">{{ producto.nombre }}</h2>
+                <p class="text-yellow-300 mt-1">💲 {{ producto.precio }}</p>
+                <p class="text-gray-300">Stock: {{ producto.stock_actual }}</p>
+
+                <!-- Botones Editar / Eliminar -->
+                {% if empleadito and empleadito.especialidad == 'gerente' %}
+                <div class="mt-4 flex justify-between">
+                    <button class="btnEditar bg-yellow-400 hover:bg-yellow-500 text-gray-900 px-3 py-1 rounded-md text-sm">Editar</button> 
+                    <button class="btnEliminar bg-red-500 hover:bg-red-600 text-white px-3 py-1 rounded-md text-sm">Eliminar</button>
+                </div>
+                {% endif %}
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+    {% else %}
+        <p class="text-white">No hay productos disponibles.</p>
+    {% endif %}
+
+</div>
+<script>
+    $(document).ready(function() {
+
+        // 🔍 Filtro general (busca tanto en tabla como en tarjetas)
+        $("#buscarNombre").on("keyup", function() {
+            var valor = $(this).val().toLowerCase();
+            $("#vistaTarjetas .bg-gray-800").filter(function() {
+                $(this).toggle($(this).text().toLowerCase().indexOf(valor) > -1);
+            });
+        });
+
+    });
+</script>

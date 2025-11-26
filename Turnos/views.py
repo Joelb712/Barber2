@@ -106,7 +106,7 @@ def get_horarios_disponibles(request):
     ocupados = Turno.objects.filter(
         empleado_id=empleado_id,
         fecha=fecha
-    ).values_list('horario_id', flat=True)
+    ).exclude( estado__nombre='cancelado').values_list('horario_id', flat=True)
 
     # ⬅️ NUEVO: si la fecha es hoy, excluir horarios anteriores a la hora actual
     ahora = now().time()
@@ -137,15 +137,22 @@ def crear_turno(request):
             return JsonResponse({'error': 'Faltan datos'}, status=400)
         
         fecha = parse_date(fecha_str)
-        
-        # Validar que el horario esté disponible
-        if Turno.objects.filter(
+
+        # --- Estado turno
+        estado_cancelado = EstadoTurno.objects.get(nombre='cancelado')
+        estado_pendiente = EstadoTurno.objects.get(nombre='pendiente')
+
+        # --- Buscar turno existente (mismo empleado, fecha y horario)
+        turno_existente = Turno.objects.filter(
             empleado_id=empleado_id,
             fecha=fecha,
             horario_id=horario_id
-        ).exists():
+        ).first()
+
+        # --- Caso 1: EXISTE pero NO está cancelado → NO disponible
+        if turno_existente and turno_existente.estado != estado_cancelado:
             return JsonResponse({'error': 'Horario no disponible'}, status=400)
-        
+
         # Obtener o crear cliente
         cliente, _ = Cliente.objects.get_or_create(
             user=request.user,
@@ -154,11 +161,24 @@ def crear_turno(request):
                 'last_name': request.user.last_name,
             }
         )
-        
-        # Estado "pendiente"
-        estado_pendiente = EstadoTurno.objects.get(nombre='pendiente')
-        
-        # Crear turno
+
+        # --- Caso 2: EXISTE y está cancelado → REUTILIZARLO
+        if turno_existente and turno_existente.estado == estado_cancelado:
+            turno = turno_existente
+            turno.cliente = cliente
+            turno.estado = estado_pendiente
+            turno.pagado = False
+            turno.created_at = now()     # actualizar registro
+            turno.save()
+
+            # Borramos servicios anteriores y cargamos los nuevos
+            ServiciosXTurno.objects.filter(turno=turno).delete()
+            for sid in servicio_ids:
+                ServiciosXTurno.objects.create(turno=turno, servicio_id=sid)
+
+            return JsonResponse({'success': True, 'turno_id': turno.id})
+
+        # --- Caso 3: NO existe → CREAR turno nuevo
         turno = Turno.objects.create(
             cliente=cliente,
             empleado_id=empleado_id,
@@ -166,15 +186,15 @@ def crear_turno(request):
             horario_id=horario_id,
             estado=estado_pendiente
         )
-        
-        # Relacionar servicios
+
         for sid in servicio_ids:
             ServiciosXTurno.objects.create(turno=turno, servicio_id=sid)
-        
+
         return JsonResponse({'success': True, 'turno_id': turno.id})
     
     except Exception as e:
         return JsonResponse({'error': str(e)}, status=500)
+
     
 
 @login_required

@@ -55,6 +55,11 @@
   $(document).ready(function () {
     $('#btnMostrarInactivos').click(function() {
       $('.inactivo').toggle();
+      if ($(".inactivo:visible").length > 0) {
+          $(this).text("Ocultar Inactivos");
+      } else {
+          $(this).text("Mostrar Inactivos");
+      }
     });
   });
 

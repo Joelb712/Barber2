@@ -13,36 +13,36 @@
     <h2 class="text-2xl font-bold text-yellow-400">Gestión de Productos</h2>
   </div>
   {% if empleadito and empleadito.especialidad == 'gerente' %}
-  <div class="card grid grid-cols-1 md:grid-cols-3 gap-8 max-w-6xl mx-auto">
-    <div class="bg-zinc-800 p-6 rounded-xl text-center shadow hover:scale-105 transition duration-300">
-        <p class="font-semibold text-white">
-          
-          {{productos_inventario}}      
-        </p>
-        <p class="text-yellow-500 mt-4 font-bold">
-          Productos en Inventario
-        </p>
-    </div>
-    <div class="bg-zinc-800 p-6 rounded-xl text-center shadow hover:scale-105 transition duration-300">
-        <p class="font-semibold text-white">
-          <i class="text-green-500 text-center fa-dollar-sign"></i>
-          {{valor_inventario}}
-        </p>
-        <p class="text-yellow-500 mt-4 font-bold">
-          Valor Inventario
-        </p>
-    </div>
-    <div class="bg-zinc-800 p-6 rounded-xl text-center shadow hover:scale-105 transition duration-300">
-        <p class="font-semibold text-white">
-          
-          {{productos_stock_bajo}}
-        </p>
-        <p class="text-yellow-500 mt-4 font-bold">
-          Productos con Stock Bajo
-        </p>
-    </div>
+    <div class="card grid grid-cols-1 md:grid-cols-3 gap-8 max-w-6xl mx-auto">
+      <div class="bg-zinc-800 p-6 rounded-xl text-center shadow hover:scale-105 transition duration-300">
+          <p class="font-semibold text-white">
+            
+            {{productos_inventario}}      
+          </p>
+          <p class="text-yellow-500 mt-4 font-bold">
+            Productos en Inventario
+          </p>
+      </div>
+      <div class="bg-zinc-800 p-6 rounded-xl text-center shadow hover:scale-105 transition duration-300">
+          <p class="font-semibold text-white">
+            <i class="text-green-500 text-center fa-dollar-sign"></i>
+            {{valor_inventario}}
+          </p>
+          <p class="text-yellow-500 mt-4 font-bold">
+            Valor Inventario
+          </p>
+      </div>
+      <div class="bg-zinc-800 p-6 rounded-xl text-center shadow hover:scale-105 transition duration-300">
+          <p class="font-semibold text-white">
+            
+            {{productos_stock_bajo}}
+          </p>
+          <p class="text-yellow-500 mt-4 font-bold">
+            Productos con Stock Bajo
+          </p>
+      </div>
 
-  </div>
+    </div>
   {% endif %}
 
   <div class="p-6 space-y-6">
@@ -60,11 +60,18 @@
         <button id="btnMostrarInactivos" class="px-4 py-2 bg-indigo-500 hover:bg-blue-700 text-black font-medium rounded-lg transition">
           Mostrar Inactivos
         </button>
+        <!-- Botón para cambiar vista entre tarjetas 🧱 y tabla 📋 -->
+        <button id="btnCambiarVista" class="bg-blue-400 hover:bg-blue-500 text-gray-900 px-4 py-2 rounded-lg shadow">
+            📋 Ver como tabla
+        </button>
       </div>
     </div>
 
-    <div id="tablaProductos" class="bg-zinc-800 backdrop-blur-sm rounded-xl p-5 shadow overflow-x-auto" data-url="{% url 'tabla_productos' %}">
+    <div id="tablaProductos" style="display: none;" class="bg-zinc-800 backdrop-blur-sm rounded-xl p-5 shadow overflow-x-auto" data-url="{% url 'tabla_productos' %}">
       {% include 'productos_tabla.html' %}
+    </div>
+    <div id="tarjetasProductos" class="bg-zinc-800 backdrop-blur-sm rounded-xl p-5 shadow overflow-x-auto" data-url="{% url 'tarjetas_productos' %}">
+      {% include 'productos_tarjetas.html' %}
     </div>
 
   </div>
@@ -82,5 +89,49 @@
     const id = $(this).closest('[data-pk]').data('pk');
     abrirModalAjax(`/productos/eliminar/${id}/`, 'Eliminar Producto');
   });
+  $('#tarjetasProductos').on('click', '.btnEditar', function() {
+    const id = $(this).closest('[data-pk]').data('pk');
+    abrirModalAjax(`/productos/editar/${id}/`, 'Editar Producto');
+  });
+  $('#tarjetasProductos').on('click', '.btnEliminar', function() {
+    const id = $(this).closest('[data-pk]').data('pk');
+    abrirModalAjax(`/productos/eliminar/${id}/`, 'Eliminar Producto');
+  });
+
+  $(document).ready(function () {
+
+    const tabla = $("#tablaProductos");
+    const tarjetas = $("#tarjetasProductos");
+    const btn = $("#btnCambiarVista");
+
+    // Vista inicial = tarjetas
+    tarjetas.show();
+    tabla.hide();
+
+    btn.on("click", function () {
+        if (tarjetas.is(":visible")) {
+            // Cambiar a tabla
+            tarjetas.hide();
+            tabla.show();
+            btn.text("🧱 Ver como tarjetas");
+        } else {
+            // Cambiar a tarjetas
+            tabla.hide();
+            tarjetas.show();
+            btn.text("📋 Ver como tabla");
+        }
+    });
+
+    // Mostrar/Ocultar inactivos
+    $("#btnMostrarInactivos").click(function () {
+      $(".inactivo").toggle();
+      // Si los inactivos están visibles → cambiar texto a "Ocultar Inactivos"
+      if ($(".inactivo:visible").length > 0) {
+          $(this).text("Ocultar Inactivos");
+      } else {
+          $(this).text("Mostrar Inactivos");
+      }
+    });
+});
 
 </script>

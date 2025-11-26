@@ -1,11 +1,4 @@
 {% load static %}
-<style>
-  label {
-    color: white;
-  }
-  .inactivo {
-  display: none;  /* Oculta las filas inactivas */}
-</style>
 
 <div class="card">
   <div class="p-6 text-white text-center">
@@ -57,9 +50,6 @@
         <button data-url="{% url 'crear_venta' %}" data-titulo="Nuevo Venta" class="btn-ajax-form px-4 py-2 bg-yellow-500 hover:bg-blue-700 text-black font-medium rounded-lg transition">
           <i class="fas fa-plus mr-2"></i> Nueva Venta
         </button>
-        <button id="btnMostrarInactivos" class="px-4 py-2 bg-indigo-500 hover:bg-blue-700 text-black font-medium rounded-lg transition">
-          Mostrar Inactivos
-        </button>
       </div>
     </div>
 
@@ -75,13 +65,6 @@
   $('#tablaVentas').on('click', '.btnEliminar', function() {
     const id = $(this).closest('tr').data('pk');
     abrirModalAjax(`/ventas/cancelar/${id}/`, 'Cancelar Venta');
-  });
-
-  // Mostrar/Ocultar inactivos
-  $(document).ready(function () {
-    $('#btnMostrarInactivos').click(function() {
-      $('.inactivo').toggle();
-    });
   });
 
 </script>

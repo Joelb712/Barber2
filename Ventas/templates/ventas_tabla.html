@@ -13,7 +13,7 @@
         </thead>
         <tbody class="bg-gray-300 divide-y divide-gray-200">
           {% for v in ventas %}
-          <tr data-pk="{{ v.pk }}" class="{% if not v.activo %}inactivo{% endif %}   hover:bg-amber-100">
+          <tr data-pk="{{ v.pk }}" class="hover:bg-amber-100">
             <td class="px-4 py-3 whitespace-nowrap text-sm font-medium text-black">{{ v.id }}</td>
             <td class="px-4 py-3 whitespace-nowrap text-sm font-medium text-black">{{ v.fecha }}</td>
             <td class="px-4 py-3 whitespace-nowrap text-sm font-medium text-black">{{ v.cliente }}</td>
