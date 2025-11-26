@@ -4,7 +4,8 @@ from .forms import HorarioForm, TurnoForm
 from django.contrib import messages
 from django.contrib.auth.decorators import user_passes_test,login_required
 from django.http import JsonResponse
-from datetime import datetime
+from datetime import datetime,time
+from django.utils.timezone import now
 from django.db.models import Q
 from django.views.decorators.csrf import csrf_exempt
 from django.views.decorators.http import require_http_methods
@@ -106,6 +107,11 @@ def get_horarios_disponibles(request):
         empleado_id=empleado_id,
         fecha=fecha
     ).values_list('horario_id', flat=True)
+
+    # ⬅️ NUEVO: si la fecha es hoy, excluir horarios anteriores a la hora actual
+    ahora = now().time()
+    if fecha == now().date():
+        todos_horarios = todos_horarios.filter(hora_inicio__gte=ahora)
     
     disponibles = [
         {'id': h.id, 'hora': h.hora_inicio.strftime('%H:%M')}
