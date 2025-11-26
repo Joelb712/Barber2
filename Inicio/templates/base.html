@@ -142,9 +142,25 @@
   <main class="flex-grow pt-24"> <!-- pt-24 para compensar el header fijo (~96px) -->
     <div class="content-area" id="main-content">
       {% block content %}{% endblock %}
+      
+      <!-- BLOQUE DE MENSAJES DJANGO → TOASTS -->
+      {% if messages %}
+      <script>
+      // --- Bloque Django dentro del script (Evita errores JS) ---
+      document.addEventListener("DOMContentLoaded", function () {
+
+          /* {% for message in messages %} */
+          mostrarAlerta("{{ message|escapejs }}","{{ message.tags }}");
+          /* {% endfor %} */
+
+      });
+      </script>
+      {% endif %}
     </div>
   </main>
 
+  <!-- Contenedor de alertas -->
+  <div id="toast-container" class="fixed top-5 right-5 z-[9999] space-y-3"></div>
   <!-- Footer global opcional -->
   {% block footer %}{% endblock %}
 
@@ -156,6 +172,29 @@
   <!-- Si usás modales de Bootstrap en otras vistas, deberás reemplazarlos por modales en Tailwind o Alpine.js -->
 
   <script>
+    function mostrarAlerta(mensaje, tipo = "success") {
+      const colores = {
+          success: "bg-green-500/80 border-green-300",
+          error: "bg-red-500/80 border-red-300",
+          warning: "bg-yellow-500/80 border-yellow-300",
+          info: "bg-blue-500/80 border-blue-300"
+      };
+
+      const toast = document.createElement("div");
+      toast.className = `
+          glass text-white px-4 py-3 rounded-xl shadow-lg border
+          ${colores[tipo] || colores.success}
+          animate-fade-in-up
+      `;
+      toast.innerHTML = `<span>${mensaje}</span>`;
+
+      document.getElementById("toast-container").appendChild(toast);
+
+      setTimeout(() => {
+          toast.classList.add("opacity-0", "transition");
+          setTimeout(() => toast.remove(), 500);
+      }, 3000);
+    }
     /* ------------------------------ */
     /* MENÚ MÓVIL                     */
     /* ------------------------------ */

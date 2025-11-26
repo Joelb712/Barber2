@@ -164,10 +164,10 @@
         </button>
         <div class="accordion-content hidden px-4 py-3 text-white" id="step3">
           <div class="relative">
-            <input type="date" id="inputFecha" class="w-full p-2 rounded bg-[#222] text-white pl-10">
-            <svg xmlns="http://www.w3.org/2000/svg" class="absolute left-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-white pointer-events-none" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <input type="date" id="inputFecha" class="w-full p-2 rounded bg-[#222] text-white pl-10" style="color-scheme: dark;">
+            <!-- <svg xmlns="http://www.w3.org/2000/svg" class="absolute left-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-white pointer-events-none" fill="none" viewBox="0 0 24 24" stroke="currentColor">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
-            </svg>
+            </svg> -->
           </div>
         </div>
       </div>
@@ -419,10 +419,10 @@ document.getElementById('btnConfirmarTurno').addEventListener('click', function(
   const fecha = document.getElementById('inputFecha').value;
   const horarioBtn = document.querySelector('.horario-btn.bg-yellow-400');
 
-  if(!serviciosSeleccionados.length){ alert('Selecciona al menos un servicio'); return; }
-  if(!empleadoId){ alert('Selecciona un barbero'); return; }
-  if(!fecha){ alert('Selecciona una fecha'); return; }
-  if(!horarioBtn){ alert('Selecciona un horario'); return; }
+  if(!serviciosSeleccionados.length){ mostrarAlerta('Selecciona al menos un servicio','error'); return; }
+  if(!empleadoId){ mostrarAlerta('Selecciona un barbero','error'); return; }
+  if(!fecha){ mostrarAlerta('Selecciona una fecha','error'); return; }
+  if(!horarioBtn){ mostrarAlerta('Selecciona un horario','error'); return; }
 
   const horarioId = horarioBtn.dataset.id;
 
@@ -434,11 +434,11 @@ document.getElementById('btnConfirmarTurno').addEventListener('click', function(
   .then(r => r.json())
   .then(data => {
     if(data.success){
-      alert('¡Turno solicitado con éxito!');
+      mostrarAlerta('¡Turno solicitado con éxito!','success');
       modal.classList.add('hidden');
       serviciosSeleccionados = [];
     } else {
-      alert('Error: ' + (data.error || 'No se pudo crear el turno'));
+      mostrarAlerta(data.error || 'Error, No se pudo crear el turno','error');
     }
   });
 });

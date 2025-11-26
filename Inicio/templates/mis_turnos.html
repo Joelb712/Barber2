@@ -314,10 +314,10 @@ document.getElementById('btnConfirmarTurno').addEventListener('click', function(
   const fecha = document.getElementById('inputFecha').value;
   const horarioBtn = document.querySelector('.horario-btn.bg-yellow-400');
 
-  if(!serviciosSeleccionados.length){ alert('Selecciona al menos un servicio'); return; }
-  if(!empleadoId){ alert('Selecciona un barbero'); return; }
-  if(!fecha){ alert('Selecciona una fecha'); return; }
-  if(!horarioBtn){ alert('Selecciona un horario'); return; }
+  if(!serviciosSeleccionados.length){ mostrarAlerta('Selecciona al menos un servicio','error'); return; }
+  if(!empleadoId){ mostrarAlerta('Selecciona un barbero','error'); return; }
+  if(!fecha){ mostrarAlerta('Selecciona una fecha','error'); return; }
+  if(!horarioBtn){ mostrarAlerta('Selecciona un horario','error'); return; }
 
   const horarioId = horarioBtn.dataset.id;
 
@@ -329,12 +329,14 @@ document.getElementById('btnConfirmarTurno').addEventListener('click', function(
   .then(r => r.json())
   .then(data => {
     if(data.success){
-      alert('¡Turno solicitado con éxito!');
+      mostrarAlerta('¡Turno solicitado con éxito!','success');
       modal.classList.add('hidden');
       serviciosSeleccionados = [];
-      window.location.reload();
+      setTimeout(() => {
+        window.location.reload();
+      }, 3000);
     } else {
-      alert('Error: ' + (data.error || 'No se pudo crear el turno'));
+      mostrarAlerta(data.error || 'Error, No se pudo crear el turno','error');
     }
   });
 });

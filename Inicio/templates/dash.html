@@ -564,16 +564,27 @@
             } else {
               showAlert('success', 'Operación exitosa');
             }
-          } else if (data.next_url) {
+          } 
+          else if (data.next_url) {
+            // ⬅️⬅️ MOSTRAR ALERTA ANTES DE CAMBIAR EL MODAL
+            showAlert('success', 'Operación exitosa');
             abrirModalAjax(data.next_url, 'Registrar Pago');
-          } else {
+          } 
+          else {
             $('#modalBody').html(data);
             showAlert('error', 'Verifica los datos ingresados');
           }
         },
         error: function(xhr) { 
-          $('#modalBody').html(xhr.responseText);
-          showAlert('error', 'Revisa los errores en el formulario');
+          // Si la vista devolvió JSON (errores personalizados)
+          if (xhr.responseJSON && xhr.responseJSON.message) {
+              showAlert('error', xhr.responseJSON.message);
+          }
+          else {
+              // Error general (HTML con errores de formulario)
+              $('#modalBody').html(xhr.responseText);
+              showAlert('error', 'Revisa los errores del formulario');
+          }
          }
       });
     });

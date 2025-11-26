@@ -62,52 +62,6 @@ def tabla_cajas(request):
     return render(request, 'cajas_tabla.html', {'cajas': cajas,'empleadito': empleadito})
 
 
-# @login_required
-# def apertura_caja(request):
-#     if Caja.objects.filter(estado=True).exists():
-#         # ya hay una caja abierta
-#         return render(request, "caja_abierta.html")
-
-#     if request.method == "POST":
-#         form = AperturaCajaForm(request.POST)
-#         if form.is_valid():
-#             monto_inicial = form.cleaned_data["monto_inicial"]
-#             empleado = request.user.empleado  # o como relaciones tu modelo
-
-#             Caja.objects.create(
-#                 empleado=empleado,
-#                 monto_inicial=monto_inicial,
-#                 estado=True
-#             )
-#             return JsonResponse({'success': True})
-#             # return redirect("cajas")  # donde quieras redirigir
-#         else:
-#             return render(request, "apertura_caja.html", {"form": form})
-#     else:
-#         form = AperturaCajaForm()
-#         return render(request, "apertura_caja.html", {"form": form})
-
-# @login_required
-# def cierre_caja(request):
-#     try:
-#         caja = Caja.objects.get(estado=True)
-#     except Caja.DoesNotExist:
-#         messages.error(request, "No hay ninguna caja abierta.")
-#         return redirect("vista.html")
-
-#     if request.method == "POST":
-#         # calcular total ventas de esta caja
-#         total_ventas = Venta.objects.filter(caja=caja).aggregate(total=models.Sum("total"))["total"] or 0
-#         caja.monto_final = caja.monto_inicial + total_ventas
-#         caja.fecha_cierre = timezone.now()
-#         caja.estado = False
-#         caja.save()
-
-#         messages.success(request, f"Caja cerrada. Total final: ${caja.monto_final}")
-#         return redirect("cajas")
-
-#     return render(request, "cierre.html", {"caja": caja})
-
 @login_required
 def apertura_caja(request):
     """Muestra modal de apertura o mensaje si ya hay caja abierta"""
@@ -134,7 +88,7 @@ def apertura_caja(request):
                 monto_inicial=monto_inicial,
                 estado=True
             )
-            return JsonResponse({'success': True})
+            return JsonResponse({'success': True, 'message': 'Caja abierta correctamente'})
         else:
             html = render_to_string('apertura_caja.html', {'form': form}, request=request)
             return JsonResponse({'html': html, 'success': False})
@@ -160,7 +114,7 @@ def cierre_caja(request):
             caja.fecha_cierre = timezone.now()
             caja.estado = False
             caja.save()
-            return JsonResponse({'success': True})
+            return JsonResponse({'success': True, 'message': 'Caja cerrada correctamente'})
         except Caja.DoesNotExist:
             return JsonResponse({'error': 'No hay ninguna caja abierta'}, status=400)
         
@@ -187,7 +141,7 @@ def crear_metodo(request):
         if form.is_valid():
             form.save()
             # Enviamos éxito para que el modal se cierre y la tabla se recargue
-            return JsonResponse({'success': True})
+            return JsonResponse({'success': True, 'message': 'Método de pago agregado correctamente'})
         else:
             # Enviamos el formulario con errores de validación
             return render(request, 'formMetodo.html', {'form': form})     
@@ -204,10 +158,10 @@ def estado_metodo(request, pk):
         if request.method == 'POST':
             metodo.activo = True # activado
             metodo.save()
-            return JsonResponse({'success': True})
+            return JsonResponse({'success': True, 'message':'Método de pago habilitado correctamente'})
     else:
         if request.method == 'POST':
             metodo.activo= False   # desactivado
             metodo.save()       
-            return JsonResponse({'success': True})
+            return JsonResponse({'success': True, 'message':'Método de pago deshabilitado correctamente'})
     return render(request, 'estadometodo.html', {'metodo': metodo})

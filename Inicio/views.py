@@ -90,6 +90,7 @@ def cancelar_turno(request, turno_id):
     cancelado = EstadoTurno.objects.get(nombre='cancelado')
     turno.estado = cancelado
     turno.save()
+    messages.success(request, "✅ El turno ha sido cancelado correctamente.")   
     return redirect('mis_turnos')
 
 @login_required

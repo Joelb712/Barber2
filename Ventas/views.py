@@ -66,7 +66,6 @@ def tabla_ventas(request):
 
 #=========================================================================
 # HACER QUE EL CANCELAR VENTA TAMBIEN CAMBIE EL ESTADO DEL PAGO ASOCIADO A ESA VENTA
-# HACER QUE VENTA PUEDA REGISTRAR UN SERVICIO
 #=========================================================================
 
 # --- CREAR VENTA ---
@@ -257,41 +256,6 @@ def cobrar_turno(request, turno_id):
     return render(request, 'cobrar_turno.html', context)
 
 
-#@login_required
-#@transaction.atomic
-# def registrar_pago(request, venta_id):
-#     venta = get_object_or_404(Venta, id=venta_id)
-
-#     if request.method == 'POST':
-#         pagos_data = request.POST.getlist('pagos[]')
-
-#         for pago_data in pagos_data:
-#             metodo_id, monto = pago_data.split('-')
-#             Pago.objects.create(
-#                 venta=venta,
-#                 metodo_pago_id=metodo_id,
-#                 monto=float(monto)
-#             )
-
-#             # Registrar movimiento en caja
-#             MovimientoCaja.objects.create(
-#                 caja=venta.caja,
-#                 tipo='INGRESO',
-#                 monto=float(monto),
-#                 descripcion=f"Pago de venta #{venta.id}",
-#                 empleado=request.user.empleado,
-#             )
-
-#         messages.success(request, f"Venta #{venta.id} cobrada correctamente.")
-#         return redirect("lista_ventas")
-
-#     context = {
-#         'venta': venta,
-#         'metodos_pago': MetodoPago.objects.all(),
-#     }
-#     return render(request, 'registrar_pago.html', context)
-
-
 # --- REGISTRAR PAGO ---
 @login_required
 @user_passes_test(es_gerente)
@@ -317,8 +281,7 @@ def registrar_pago(request, venta_id):
                     descripcion=f"Pago de venta #{venta.id}",
                     empleado=request.user.empleado,
                 )
-        messages.success(request, "✅ El pago se registro correctamente.")
-        return JsonResponse({'success': True})
+        return JsonResponse({'success': True, 'message': '✅️ Pago registrado correctamente'})
 
     context = {
         'venta': venta,
@@ -372,6 +335,5 @@ def cancelar_venta(request, venta_id):
         venta.activo = False
         venta.save()
 
-        messages.success(request, f"La venta #{venta.id} fue cancelada correctamente.")
-        return JsonResponse({'success': True})
+        return JsonResponse({'success': True, 'message': f"La venta #{venta.id} fue cancelada correctamente."})
     return render(request, 'cancelar_venta.html',{'venta': venta})

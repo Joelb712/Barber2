@@ -191,12 +191,13 @@ def tabla_turnos(request):
 def dar_turno(request):
     if request.method == 'POST':
         form = TurnoForm(request.POST)
-        if form.is_valid():
+        if form.is_valid():         
             form.save()
+
             return JsonResponse({'success': True,'message':'Turno creado correctamente'})
         else:
             # Enviamos el formulario con errores de validación
-            return render(request, 'formturno.html', {'form': form}, status=400)  
+            return JsonResponse({'success': False,'message': 'El horario seleccionado ya esta ocupado.'}, status=400)  
     else:
         form= TurnoForm()
         return render(request, 'formturno.html', {'form': form})
