@@ -5,11 +5,13 @@ from django.utils import timezone
 from django.utils.timezone import now
 from Otros.models import Cliente,Turno,EstadoTurno,Empleado,Caja,Pago,Venta,MovimientoCaja,DetalleVenta
 from datetime import date, timedelta
-from django.db.models import Sum, Q, F
+from django.db import models
 from django.http import JsonResponse
 from decimal import Decimal
 from collections import OrderedDict 
-from django.db.models import Sum, Case, When, Value, IntegerField
+from django.db.models import Sum, Q, F, Case, When, Value, IntegerField, DecimalField,Count,ExpressionWrapper,Subquery, OuterRef
+from django.db.models.functions import Coalesce, Cast
+import datetime     
 
 # Create your views here.
 def Inicio(request):
@@ -447,7 +449,102 @@ def datos_turnos(request):
     
     return JsonResponse(data)
 
+def datos_barberos_hoy_ajax(request):
+    hoy = timezone.localdate()
+    
+    try:
+        estado_completado = EstadoTurno.objects.get(nombre='Completado')
+        id_estado_completado = estado_completado.id
+    except EstadoTurno.DoesNotExist:
+        return JsonResponse({'error': 'Estado "Completado" no encontrado.'}, status=500)
+    
+    # 1. Filtro base para TURNOS COMPLETADOS HOY (funciona correctamente)
+    q_turnos_completados_hoy = Q(
+        turno__fecha=hoy, 
+        turno__estado_id=id_estado_completado
+    )
+    
+    # 2. Filtro base para INGRESOS y SERVICIOS
+    # Queremos sumar los detalles de venta (detalles) de las ventas (venta_set)
+    # que están asociadas a los turnos del barbero.
+    q_ingresos_servicios_hoy = Q(
+        # Filtramos por Turnos Completados hoy:
+        turno__fecha=hoy,
+        turno__estado_id=id_estado_completado,
+        # Filtramos la Venta asociada al Turno:
+        turno__venta__activo=True, # La venta debe estar activa
+        # Opcional, si sabes que la venta siempre se relaciona con el turno
+        # turno__venta__turno__isnull=False 
+    )
 
+    barberos_data = Empleado.objects.filter(
+        especialidad='Barbero',
+        activo=True
+    ).annotate(
+        # A. Cantidad de Turnos "Completados" hoy (USAMOS EL Q_TURNOS)
+        turnos_completados_hoy=Coalesce(
+            Count(
+                'turno',
+                filter=q_turnos_completados_hoy
+            ),
+            0,
+            output_field=IntegerField()
+        ),
+        
+        # B. Ingresos (Suma de subtotales) - Partimos del Empleado, vamos a Turno, luego a Venta, luego a DetalleVenta
+        # NOTA: Como la Venta NO tiene related_name, usamos el nombre del modelo: 'venta'
+        ingresos_hoy=Coalesce(
+            Sum(
+                # Partimos del turno del empleado actual ('turno'), 
+                # saltamos a la venta asociada ('venta'), 
+                # y luego a los detalles ('detalles')
+                'turno__venta__detalles__subtotal',
+                filter=Q(
+                    turno__fecha=hoy,
+                    turno__estado_id=id_estado_completado,
+                    turno__venta__activo=True
+                )
+            ),
+            Decimal('0.00'),
+            output_field=DecimalField(max_digits=10, decimal_places=2)
+        )
+    ).annotate(
+        # C. Ganancia y A pagar (cálculo directo)
+        ganancia_hoy=F('ingresos_hoy') * Decimal('0.40'),
+        a_pagar_hoy=F('ingresos_hoy') - (F('ingresos_hoy') * Decimal('0.40'))
+    ).annotate(
+        # D. Cantidad de Servicios realizados hoy 
+        servicios_realizados_hoy=Coalesce(
+            Count(
+                'turno__venta__detalles', 
+                filter=Q(
+                    turno__fecha=hoy,
+                    turno__estado_id=id_estado_completado,
+                    turno__venta__activo=True,
+                    turno__venta__detalles__servicio__isnull=False # Solo servicios
+                ),
+                distinct=True
+            ),
+            0,
+            output_field=IntegerField()
+        )
+    ).order_by('user__first_name')
+
+    # ... (El resto del código de JsonResponse es el mismo)
+    data_list = []
+    for barbero in barberos_data:
+        nombre_completo = f"{barbero.user.first_name} {barbero.user.last_name}"
+        
+        data_list.append({
+            'nombre_completo': nombre_completo,
+            'turnos_completados': barbero.turnos_completados_hoy,
+            'detalles_count': barbero.servicios_realizados_hoy,
+            'ingresos': str(barbero.ingresos_hoy),
+            'ganancia': str(barbero.ganancia_hoy),
+            'a_pagar': str(barbero.a_pagar_hoy),
+        })
+
+    return JsonResponse(data_list, safe=False)
 
 @login_required
 def mi_perfil(request):

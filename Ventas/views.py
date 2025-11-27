@@ -87,7 +87,7 @@ def crear_venta(request):
         cliente = get_object_or_404(Cliente, id=cliente_id)
         empleado = request.user.empleado
 
-        venta = Venta.objects.create(cliente=cliente, empleado=empleado, caja=caja, total=0)
+        venta = Venta.objects.create(cliente=cliente, empleado=empleado, caja=caja, total=0,turno=None)
         total = 0
 
         for prod_id, cantidad in zip(productos, cantidades):
@@ -149,7 +149,7 @@ def cobrar_turno(request, turno_id):
         empleado = request.user.empleado
 
         # Crear venta base
-        venta = Venta.objects.create(cliente=cliente, empleado=empleado, caja=caja, total=0)
+        venta = Venta.objects.create(cliente=cliente, empleado=empleado, caja=caja, total=0, turno=turno)
         total = 0
 
         # 1️⃣ Agregar servicios del turno (puede tener varios)
@@ -219,6 +219,7 @@ def cobrar_turno(request, turno_id):
         # 5️⃣ Cambiar estado del turno a "Completado"
         try:
             turno.pagado = True
+            turno.estado = EstadoTurno.objects.get(nombre='Completado')
         except:
             turno.pagado = None  # fallback
         turno.save()

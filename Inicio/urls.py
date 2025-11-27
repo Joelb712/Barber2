@@ -15,4 +15,5 @@ urlpatterns=[
     path('datos-torta/', datos_torta, name='datos_torta'),
     path('datos-lineal/', datos_lineal, name='datos_lineal'),
     path('datos-turnos/', datos_turnos, name='datos_turnos'),
+    path('datos-barberos/', datos_barberos_hoy_ajax, name='datos_barberos'),
 ]

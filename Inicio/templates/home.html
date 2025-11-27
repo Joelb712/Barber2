@@ -339,49 +339,31 @@
             </div>
         </section>
 
-        <!-- Fila 3: Ingresos y pagos -->
+        <!-- Fila 4: Ingresos y pagos -->
         <section class="grid grid-cols-1 lg:grid-cols-3 gap-4">
-        <!-- Ingresos por empleado -->
         <div class="bg-neutral-800 p-4 rounded-lg lg:col-span-2">
             <div class="flex items-center justify-between mb-3">
-            <h3 class="text-lg font-semibold text-yellow-400">Ingresos por empleado y Monto a pagar (hoy)</h3>
-            <span class="text-xs text-neutral-400">Datos demo</span>
+                <h3 class="text-lg font-semibold text-yellow-400">Ingresos por empleado y Monto a pagar (hoy)</h3>
+                <span class="text-xs text-neutral-400">Datos Actualizados</span>
             </div>
             <div class="overflow-x-auto">
-            <table class="min-w-full text-sm">
-                <thead class="bg-neutral-700 text-gray-200">
-                <tr>
-                    <th class="px-3 py-2 text-left">Empleado</th>
-                    <th class="px-3 py-2 text-left">Servicios</th>
-                    <th class="px-3 py-2 text-left">Ingresos</th>
-                    <th class="px-3 py-2 text-left">A pagar</th>
-                </tr>
-                </thead>
-                <tbody>
-                <tr class="border-b border-neutral-800">
-                    <td class="px-3 py-2">Fede</td>
-                    <td class="px-3 py-2">22</td>
-                    <td class="px-3 py-2 text-green-400">$ 38.500</td>
-                    <td class="px-3 py-2 text-green-400">$ 1.750</td>
-                </tr>
-                <tr class="border-b border-neutral-800">
-                    <td class="px-3 py-2">Lautaro</td>
-                    <td class="px-3 py-2">18</td>
-                    <td class="px-3 py-2 text-green-400">$ 30.200</td>
-                    <td class="px-3 py-2 text-green-400">$ 1.678</td>
-                </tr>
-                <tr class="border-b border-neutral-800">
-                    <td class="px-3 py-2">Brisa</td>
-                    <td class="px-3 py-2">14</td>
-                    <td class="px-3 py-2 text-green-400">$ 24.400</td>
-                    <td class="px-3 py-2 text-green-400">$ 1.742</td>
-                </tr>
-                </tbody>
-            </table>
+                <table id="tabla-rendimiento-barberos" class="min-w-full text-sm"> 
+                    <thead class="bg-neutral-700 text-gray-200">
+                    <tr>
+                        <th class="px-3 py-2 text-left">Empleado</th>
+                        <th class="px-3 py-2 text-left">Turnos</th>
+                        <th class="px-3 py-2 text-left">Servicios</th>
+                        <th class="px-3 py-2 text-left">Ingresos</th>
+                        <th class="px-3 py-2 text-left">Ganancia</th>
+                        <th class="px-3 py-2 text-left">A pagar</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                        </tbody>
+                </table>
             </div>
         </div>
-
-        </section>
+    </section>
     </div>
     </div>
   {% endif %}
@@ -677,6 +659,62 @@
                 console.error("Error al obtener datos del gráfico de turnos:", error);
             });
     }
+
+    function cargarTablaRendimientoBarberos() {
+        // 1. URL de la API (Asegúrate que esta URL coincida con tu urls.py)
+        const apiUrl = "{% url 'datos_barberos' %}"; 
+        
+        // 2. Contenedor del cuerpo de la tabla (tbody) donde insertaremos las filas
+        const $tbody = $('#tabla-rendimiento-barberos tbody');
+        
+        // Opcional: Mostrar un loader mientras se cargan los datos
+        $tbody.html('<tr><td colspan="6" class="text-center py-4 text-neutral-400">Cargando datos...</td></tr>');
+
+        $.ajax({
+            url: apiUrl,
+            method: 'GET',
+            dataType: 'json',
+            success: function(data) {
+                $tbody.empty(); // Limpiar el contenido previo del tbody
+
+                if (data.length === 0) {
+                    // Si no hay barberos o datos hoy
+                    $tbody.append('<tr><td colspan="6" class="text-center py-4 text-neutral-400">No hay datos de barberos completados hoy.</td></tr>');
+                    return;
+                }
+
+                // Iterar sobre cada objeto de datos devuelto por la vista Django
+                data.forEach(function(barbero, index) {
+                    // Asegurar que los valores monetarios sean números para darles formato de moneda
+                    const ingresos = parseFloat(barbero.ingresos_hoy).toFixed(2);
+                    const ganancia = parseFloat(barbero.ganancia_hoy).toFixed(2);
+                    const a_pagar = parseFloat(barbero.a_pagar_hoy).toFixed(2);
+
+                    // Determinar si es la última fila para no poner el border-b
+                    const isLastRow = index === data.length - 1;
+                    const rowClass = isLastRow ? '' : 'border-b border-neutral-800';
+
+                    // Crear la fila HTML
+                    const fila = `
+                        <tr class="${rowClass}">
+                            <td class="px-3 py-2">${barbero.nombre_completo}</td>
+                            <td class="px-3 py-2">${barbero.turnos_completados_hoy}</td>
+                            <td class="px-3 py-2">${barbero.servicios_realizados_hoy}</td>
+                            <td class="px-3 py-2 text-green-400">$ ${ingresos}</td>
+                            <td class="px-3 py-2 text-green-400">$ ${ganancia}</td>
+                            <td class="px-3 py-2 text-green-400">$ ${a_pagar}</td>
+                        </tr>
+                    `;
+                    
+                    $tbody.append(fila); // Agregar la fila al cuerpo de la tabla
+                });
+            },
+            error: function(xhr, status, error) {
+                console.error('Error al cargar los datos de rendimiento:', error);
+                $tbody.html('<tr><td colspan="6" class="text-center py-4 text-red-400">❌ Error al cargar los datos.</td></tr>');
+            }
+        });
+    }
     
     // Llamamos a ambas funciones en la carga del DOM y directamente (para AJAX/HTMX)
     document.addEventListener("DOMContentLoaded", iniciarGraficoIngresos);
@@ -687,5 +725,10 @@
     iniciarGraficoIngresos();
     iniciarGraficoLineal();
     iniciarGraficoTurnos();
+
+    // Ejecutar la función cuando el documento esté listo
+    $(document).ready(function() {
+        cargarTablaRendimientoBarberos();
+    });
 
 </script>
