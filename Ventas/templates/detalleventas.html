@@ -1,0 +1,29 @@
+{% load static %}
+<table id="listavent" class="min-w-full divide-y divide-gray-200">
+    <thead class="bg-slate-700">
+        <tr>
+            <th class="px-4 py-3 text-left text-xs font-medium text-white uppercase tracking-wider">Producto / Servicio</th>
+            <th class="px-4 py-3 text-left text-xs font-medium text-white uppercase tracking-wider">Cantidad</th>
+            <th class="px-4 py-3 text-left text-xs font-medium text-white uppercase tracking-wider">Precio Unitario</th>
+            <th class="px-4 py-3 text-left text-xs font-medium text-white uppercase tracking-wider">Subtotal</th>
+        </tr>
+    </thead>
+    <tbody class="bg-gray-300 divide-y divide-gray-200">
+        {% for v in detalleventas %}
+        <tr data-pk="{{ v.pk }}" class="hover:bg-amber-100">
+            <td class="px-4 py-3 whitespace-nowrap text-sm font-medium text-black">
+                {% if v.producto %}
+                    {{ v.producto.nombre }}
+                {% elif v.servicio %}
+                    {{ v.servicio.nombre }}
+                {% else %}
+                    N/A
+                {% endif %}
+            </td>
+            <td class="px-4 py-3 whitespace-nowrap text-sm font-medium text-black">{{ v.cantidad}}</td>
+            <td class="px-4 py-3 whitespace-nowrap text-sm font-medium text-black">{{ v.precio_unitario|floatformat:2}}</td>
+            <td class="px-4 py-3 whitespace-nowrap text-sm font-medium text-black">{{ v.subtotal|floatformat:2 }}</td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>

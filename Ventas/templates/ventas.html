@@ -67,4 +67,9 @@
     abrirModalAjax(`/ventas/cancelar/${id}/`, 'Cancelar Venta');
   });
 
+   $('#tablaVentas').on('click', '.btnVerDet', function() {
+    const id = $(this).closest('tr').data('pk');
+    abrirModalAjax(`/detalleventas/${id}/`, 'Detalles de la Venta');
+  });
+
 </script>

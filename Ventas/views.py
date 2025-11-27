@@ -338,3 +338,10 @@ def cancelar_venta(request, venta_id):
 
         return JsonResponse({'success': True, 'message': f"La venta #{venta.id} fue cancelada correctamente."})
     return render(request, 'cancelar_venta.html',{'venta': venta})
+
+@login_required
+@user_passes_test(es_gerente)
+def detalleventas(request, pk):
+    venta = get_object_or_404(Venta, pk=pk)
+    detalleventas = DetalleVenta.objects.filter(venta=venta)
+    return render(request, 'detalleventas.html', {'detalleventas': detalleventas, 'venta': venta})

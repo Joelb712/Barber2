@@ -45,7 +45,7 @@
         <li><a href="#productos" class="hover:text-yellow-500 transition {% if not es_index %}text-gray-400 cursor-not-allowed pointer-events-none{% endif %}">Productos</a></li>
         <li><a href="#nosotros" class="hover:text-yellow-500 transition {% if not es_index %}text-gray-400 cursor-not-allowed pointer-events-none{% endif %}">Nosotros</a></li>
         <li><a href="#reserva" class="hover:text-yellow-500 transition {% if not es_index %}text-gray-400 cursor-not-allowed pointer-events-none{% endif %}">Reserva</a></li>
-        <li><a id="divContacto" href="{% url 'contacto' %}" class="hover:text-yellow-500 transition">Contacto</a></li>
+        
 
         {% if user.is_authenticated %}
           <!-- <li><a href="{% url 'dash' %}" class="hover:text-yellow-500 transition">Dash</a></li> -->
@@ -112,7 +112,6 @@
       <li><a href="#productos" data-target="productos" class="mobile-link hover:text-yellow-400 transition">Productos</a></li>
       <li><a href="#nosotros" data-target="nosotros" class="mobile-link hover:text-yellow-400 transition">Nosotros</a></li>
       <li><a href="#reserva" data-target="reserva" class="mobile-link hover:text-yellow-400 transition">Reserva</a></li>
-      <li><a id="divmobileContacto" href="{% url 'contacto' %}" class="mobile-link hover:text-yellow-400 transition">Contacto</a></li>
 
       {% if user.is_authenticated %}
         <li><a href="{% url 'dash' %}" class="hover:text-yellow-400 transition">Dash</a></li>
@@ -261,10 +260,6 @@
     /* ------------------------------ */
     /* EVENTOS PARA CARGAR VISTAS     */
     /* ------------------------------ */
-    $(document).on("click", "#divContacto, #divmobileContacto", function(e) {
-        e.preventDefault();
-        cargarContenido("{% url 'contacto' %}");
-    });
 
     $(document).on("click", "#divPerfil", function(e) {
         e.preventDefault();
@@ -276,37 +271,7 @@
         cargarContenido("{% url 'mis_turnos' %}");
     });
 
-    /* ------------------------------ */
-    /* VALIDACIONES FORMULARIO CONTACTO */
-    /* ------------------------------ */
-    document.addEventListener("input", function (e) {
-        const id = e.target.id;
-
-        const reglas = {
-            nombre: /^[A-Za-zÁÉÍÓÚáéíóúÑñ ]+$/,
-            apellido: /^[A-Za-zÁÉÍÓÚáéíóúÑñ ]+$/,
-            email: /^[^\s@]+@[^\s@]+\.[^\s@]+$/,
-            telefono: /^[0-9]*$/
-        };
-
-        if (reglas[id]) {
-            validarCampo(e.target, reglas[id], `error-${id}`, "Formato no válido.");
-        }
-
-        if (id === "mensaje") {
-            const error = document.getElementById("error-mensaje");
-            error.textContent = e.target.value.trim() === "" ? "El mensaje es obligatorio." : "";
-        }
-    });
-
-    function validarCampo(input, regex, errorId, mensaje) {
-        const error = document.getElementById(errorId);
-        if (input.value === "") {
-            error.textContent = "";
-            return;
-        }
-        error.textContent = regex.test(input.value) ? "" : mensaje;
-    }
+    
   </script>
 
 </body>

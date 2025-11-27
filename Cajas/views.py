@@ -193,3 +193,10 @@ def estado_metodo(request, pk):
             metodo.save()       
             return JsonResponse({'success': True, 'message':'Método de pago deshabilitado correctamente'})
     return render(request, 'estadometodo.html', {'metodo': metodo})
+
+@login_required
+@user_passes_test(es_gerente)
+def ventas_de_caja(request, pk):
+    caja = get_object_or_404(Caja, pk=pk)
+    ventas = Venta.objects.filter(caja=caja, activo=True)
+    return render(request, 'ventasdecaja.html', {'caja': caja, 'ventas': ventas})

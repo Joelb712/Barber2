@@ -1,0 +1,25 @@
+{% load static %}
+<table id="listavent" class="min-w-full divide-y divide-gray-200">
+    <thead class="bg-slate-700">
+        <tr>
+            <th class="px-4 py-3 text-left text-xs font-medium text-white uppercase tracking-wider">Nro Venta</th>
+            <th class="px-4 py-3 text-left text-xs font-medium text-white uppercase tracking-wider">Fecha</th>
+            <th class="px-4 py-3 text-left text-xs font-medium text-white uppercase tracking-wider">Cliente</th>
+            <th class="px-4 py-3 text-left text-xs font-medium text-white uppercase tracking-wider">Empleado</th>
+            <th class="px-4 py-3 text-left text-xs font-medium text-white uppercase tracking-wider">Caja</th>
+            <th class="px-4 py-3 text-left text-xs font-medium text-white uppercase tracking-wider">Total</th>
+        </tr>
+    </thead>
+    <tbody class="bg-gray-300 divide-y divide-gray-200">
+        {% for v in ventas %}
+        <tr data-pk="{{ v.pk }}" class="hover:bg-amber-100">
+            <td class="px-4 py-3 whitespace-nowrap text-sm font-medium text-black">{{ v.id }}</td>
+            <td class="px-4 py-3 whitespace-nowrap text-sm font-medium text-black">{{ v.fecha|date:"d/m/Y" }}</td>
+            <td class="px-4 py-3 whitespace-nowrap text-sm font-medium text-black">{{ v.cliente|default:"N/A" }}</td>
+            <td class="px-4 py-3 whitespace-nowrap text-sm font-medium text-black">{{ v.empleado }}</td>
+            <td class="px-4 py-3 whitespace-nowrap text-sm font-medium text-black">{{ v.caja }}</td>
+            <td class="px-4 py-3 whitespace-nowrap text-sm font-medium text-black">$ {{ v.total|floatformat:2 }}</td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>

@@ -40,5 +40,8 @@
 </div>
 
 <script>
-
+ $('#tablaCajas').on('click', '.btnVer', function() {
+    const id = $(this).closest('tr').data('pk');
+    abrirModalAjax(`/ventasdecaja/${id}/`, 'Ventas de la Caja');
+  });
 </script>
