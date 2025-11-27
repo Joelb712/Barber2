@@ -139,8 +139,8 @@ def crear_turno(request):
         fecha = parse_date(fecha_str)
 
         # --- Estado turno
-        estado_cancelado = EstadoTurno.objects.get(nombre='cancelado')
-        estado_pendiente = EstadoTurno.objects.get(nombre='pendiente')
+        estado_cancelado = EstadoTurno.objects.get(nombre='Cancelado')
+        estado_pendiente = EstadoTurno.objects.get(nombre='Pendiente')
 
         # --- Buscar turno existente (mismo empleado, fecha y horario)
         turno_existente = Turno.objects.filter(

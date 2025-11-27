@@ -9,7 +9,7 @@ class Cliente(models.Model):
     first_name = models.CharField(max_length=50)
     last_name = models.CharField(max_length=50)
     telefono = models.CharField(max_length=20, blank=True, null=True)
-    dni = models.CharField(max_length=20, blank=True, null=True)
+    dni = models.CharField(max_length=20, unique=True, blank=True, null=True)
     activo = models.BooleanField(default=True)
     foto = models.ImageField(upload_to='clientes/', blank=True, null=True)
     fecha_registro = models.DateTimeField(auto_now_add=True)
@@ -21,17 +21,17 @@ class Cliente(models.Model):
 class Empleado(models.Model):
     user = models.OneToOneField(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
     telefono = models.CharField(max_length=20, blank=True, null=True)
-    dni = models.CharField(max_length=20, blank=True, null=True)
+    dni = models.CharField(max_length=20, unique=True, blank=True, null=True)
     especialidad = models.CharField(
         max_length=50,
-        choices=[('barbero', 'Barbero'), ('recepcionista', 'Recepcionista'), ('gerente', 'Gerente')]
+        choices=[('Barbero', 'Barbero'), ('Recepcionista', 'Recepcionista'), ('Gerente', 'Gerente')]
     )
     fecha_registro = models.DateTimeField(auto_now_add=True)
     foto = models.ImageField(upload_to='empleados/', blank=True, null=True)
     activo = models.BooleanField(default=True)
 
     def __str__(self):
-        return f"{self.user.username} ({self.get_especialidad_display()})"
+        return f"{self.user.first_name} {self.user.last_name}"
 
 # --- PRODUCTOS ---
 class Producto(models.Model):
@@ -95,12 +95,11 @@ class ServiciosXTurno(models.Model):
 # --- ESTADO DE TURNOS ---
 class EstadoTurno(models.Model):
     choices = [
-        ('pendiente', 'Pendiente'),
-        ('confirmado', 'Confirmado'),
-        ('completado', 'Completado'),
-        ('cancelado', 'Cancelado'),
+        ('Pendiente', 'Pendiente'),
+        ('Completado', 'Completado'),
+        ('Cancelado', 'Cancelado'),
     ]
-    nombre = models.CharField(max_length=50,choices=choices  , unique=True)
+    nombre = models.CharField(max_length=20,choices=choices  , unique=True)
     activo = models.BooleanField(default=True)
 
     def __str__(self):
@@ -142,6 +141,7 @@ class Venta(models.Model):
     caja = models.ForeignKey("Caja", on_delete=models.CASCADE)  # debe estar abierta
     fecha = models.DateTimeField(auto_now_add=True)
     total = models.DecimalField(max_digits=10, decimal_places=2)
+    turno = models.ForeignKey("Turno", on_delete=models.SET_NULL, null=True, blank=True)
     activo = models.BooleanField(default=True)
 
     def __str__(self):
@@ -187,7 +187,7 @@ class MovimientoStock(models.Model):
 class MetodoPago(models.Model):
     nombre = models.CharField(
         max_length=50,
-        choices=[('efectivo', 'Efectivo'), ('tranferencia', 'Transferencia'), ('tarjeta débito', 'Tarjeta Débito'),('tarjeta crédito','Tarjeta Crédito'),('qr','QR')]
+        choices=[('Efectivo', 'Efectivo'), ('Tranferencia', 'Transferencia'), ('Tarjeta Débito', 'Tarjeta Débito'),('Tarjeta Crédito','Tarjeta Crédito'),('QR','QR')]
     )
     activo = models.BooleanField(default=True)
 

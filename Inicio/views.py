@@ -42,8 +42,8 @@ def mis_turnos(request):
     cliente = get_object_or_404(Cliente, user=request.user)
     
     # Estado 'cancelado'
-    estado_cancelado = EstadoTurno.objects.get(nombre='cancelado')
-    estado_completado = EstadoTurno.objects.get(nombre='completado')
+    estado_cancelado = EstadoTurno.objects.get(nombre='Cancelado')
+    estado_completado = EstadoTurno.objects.get(nombre='Completado')
     # Turnos activos: futuros y no cancelados
     turnos_activos = Turno.objects.filter(
         cliente=cliente,
@@ -133,11 +133,11 @@ def home_empleado(request):
     if caja:
         pagos = Pago.objects.filter(venta__caja=caja, estado=True)
 
-        efectivo = pagos.filter(metodo_pago__nombre__iexact='efectivo').aggregate(total=Sum('monto'))['total'] or 0
-        tarjeta = pagos.filter(metodo_pago__nombre__icontains='tarjeta').aggregate(total=Sum('monto'))['total'] or 0
+        efectivo = pagos.filter(metodo_pago__nombre__iexact='Efectivo').aggregate(total=Sum('monto'))['total'] or 0
+        tarjeta = pagos.filter(metodo_pago__nombre__icontains='Tarjeta').aggregate(total=Sum('monto'))['total'] or 0
         otros = pagos.exclude(
-            Q(metodo_pago__nombre__iexact='efectivo') |
-            Q(metodo_pago__nombre__icontains='tarjeta')
+            Q(metodo_pago__nombre__iexact='Efectivo') |
+            Q(metodo_pago__nombre__icontains='Tarjeta')
         ).aggregate(total=Sum('monto'))['total'] or 0
 
     total_caja = efectivo + tarjeta + otros
@@ -164,11 +164,11 @@ def home_empleado(request):
     turnos_todos_hoy = Turno.objects.filter(fecha=hoy)
 
     total_completados_hoy = turnos_todos_hoy.filter(
-        estado__nombre__iexact='completado'
+        estado__nombre__iexact='Completado'
     ).count()
 
     total_pendientes_hoy = turnos_todos_hoy.filter(
-        estado__nombre__iexact='pendiente'
+        estado__nombre__iexact='Pendiente'
     ).count()
 
     caja_abierta = Caja.objects.filter(estado=True).first()
@@ -386,7 +386,7 @@ def datos_turnos(request):
         fecha__gte=inicio_sem_dt,
         fecha__lt=inicio_sig_sem_dt,
         # 🚨 CORRECCIÓN: Filtramos por el campo 'nombre' del modelo EstadoTurno (FK)
-        estado__nombre__in=['completado', 'cancelado'] 
+        estado__nombre__in=['Completado', 'Cancelado'] 
     ).extra(
         # CORRECCIÓN PARA MySQL: Usamos WEEKDAY() (0=Lunes)
         select={'dia_semana': 'WEEKDAY(fecha)'}
@@ -396,7 +396,7 @@ def datos_turnos(request):
         # Contar turnos 'completados' (usando estado__nombre)
         completados_count=Sum(
             Case(
-                When(estado__nombre='completado', then=Value(1)),
+                When(estado__nombre='Completado', then=Value(1)),
                 default=Value(0),
                 output_field=IntegerField()
             )
@@ -404,7 +404,7 @@ def datos_turnos(request):
         # Contar turnos 'cancelados' (usando estado__nombre)
         cancelados_count=Sum(
             Case(
-                When(estado__nombre='cancelado', then=Value(1)),
+                When(estado__nombre='Cancelado', then=Value(1)),
                 default=Value(0),
                 output_field=IntegerField()
             )
