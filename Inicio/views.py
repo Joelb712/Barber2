@@ -2,10 +2,12 @@ from django.shortcuts import render,redirect,get_object_or_404
 from django.contrib.auth.decorators import login_required
 from django.contrib import messages
 from django.utils import timezone
-from Otros.models import Cliente,Turno,EstadoTurno,Empleado,Caja,Pago
+from django.utils.timezone import now
+from Otros.models import Cliente,Turno,EstadoTurno,Empleado,Caja,Pago,Venta,MovimientoCaja
 from datetime import date, timedelta
 from django.db.models import Sum, Q
 from django.http import JsonResponse
+from decimal import Decimal
 
 # Create your views here.
 def Inicio(request):
@@ -138,7 +140,79 @@ def home_empleado(request):
 
     total_caja = efectivo + tarjeta + otros
 
+    # Datos gerente
+    hoy_local = timezone.localtime(timezone.now()) 
 
+    # 2. Calcular el INICIO del día de hoy (en la zona horaria local)
+    # Esto asegura que el replace se haga al inicio del 26 de noviembre (si esa es tu fecha local).
+    inicio_hoy_filtro = hoy_local.replace(hour=0, minute=0, second=0, microsecond=0)
+
+    # 3. Calcular el INICIO del día de mañana
+    inicio_manana_filtro = inicio_hoy_filtro + timedelta(days=1)
+
+    ventas_del_dia = Venta.objects.filter(
+        fecha__gte=inicio_hoy_filtro,
+        fecha__lt=inicio_manana_filtro,
+        activo=True
+    ).aggregate(total_ventas=Sum('total'))
+
+    total_hoy = ventas_del_dia['total_ventas'] or Decimal(0)
+
+
+    turnos_todos_hoy = Turno.objects.filter(fecha=hoy)
+
+    total_completados_hoy = turnos_todos_hoy.filter(
+        estado__nombre__iexact='completado'
+    ).count()
+
+    total_pendientes_hoy = turnos_todos_hoy.filter(
+        estado__nombre__iexact='pendiente'
+    ).count()
+
+    caja_abierta = Caja.objects.filter(estado=True).first()
+    
+    monto_total_caja = 0.00
+    venta_mas_reciente_total = 0.00
+    
+    if caja_abierta:
+        # 1. TOTAL DE INGRESOS POR VENTAS
+        ingresos_ventas = Venta.objects.filter(
+            activo=True,
+            caja=caja_abierta
+        ).aggregate(
+            total_sum=Sum("total")
+        )["total_sum"] or 0
+
+        # 2. TOTAL DE MOVIMIENTOS DE CAJA (Ingresos - Egresos)
+        movimientos_caja = MovimientoCaja.objects.filter(
+            caja=caja_abierta,
+            activo=True
+        ).aggregate(
+            ingresos=Sum('monto', filter=Q(tipo='INGRESO')),
+            egresos=Sum('monto', filter=Q(tipo='EGRESO'))
+        )
+        
+        # Calcular el neto de los movimientos
+        neto_movimientos = (movimientos_caja['ingresos'] or 0) - (movimientos_caja['egresos'] or 0)
+        
+        # 3. MONTO TOTAL DE LA CAJA (Saldo Inicial + Ventas + Movimientos Netos)
+        monto_total_caja = caja_abierta.monto_inicial + ingresos_ventas + neto_movimientos
+        
+        # 4. VENTA MÁS RECIENTE
+        try:
+            # Filtra las ventas activas de esta caja, ordena por fecha descendente y toma la primera
+            venta_reciente = Venta.objects.filter(
+                caja=caja_abierta,
+                activo=True
+            ).latest('fecha')
+            
+            venta_mas_reciente_total = venta_reciente.total
+            
+        except Venta.DoesNotExist:
+            venta_mas_reciente_total = 0.00 # No hay ventas en esta caja
+    else:
+        monto_total_caja = 'No hay caja abierta'
+        venta_mas_reciente_total = 0.00
     context = {
         'empleado': empleado,
         'especialidad': especialidad,
@@ -157,6 +231,12 @@ def home_empleado(request):
         'tarjeta': tarjeta,
         'otros': otros,
         'total_caja': total_caja,
+        #gerente
+        'total_hoy': total_hoy,
+        'total_completados_hoy': total_completados_hoy,
+        'total_pendientes_hoy': total_pendientes_hoy,
+        'monto_total_caja': monto_total_caja,
+        'venta_mas_reciente_total': venta_mas_reciente_total,
 
     }
     return render(request, 'home.html', context)

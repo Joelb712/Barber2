@@ -223,8 +223,7 @@
         <div class="bg-neutral-800 p-4 rounded-lg flex items-center justify-between">
             <div>
             <p class="text-neutral-400 text-sm">Ventas del día</p>
-            <h2 class="text-3xl font-extrabold text-yellow-400">$ 128.450</h2>
-            <p class="text-xs text-neutral-400 mt-1">+12% vs. ayer</p>
+            <h2 class="text-3xl font-extrabold text-yellow-400">$ {{total_hoy}}</h2>
             </div>
             <i class="fa-solid fa-sack-dollar text-yellow-400 text-3xl"></i>
         </div>
@@ -233,8 +232,8 @@
         <div class="bg-neutral-800 p-4 rounded-lg flex items-center justify-between">
             <div>
             <p class="text-neutral-400 text-sm">Servicios completados</p>
-            <h2 class="text-3xl font-extrabold text-green-400">74</h2>
-            <p class="text-xs text-neutral-400 mt-1">Pendientes: 9</p>
+            <h2 class="text-3xl font-extrabold text-green-400">{{total_completados_hoy}}</h2>
+            <p class="text-xs text-neutral-400 mt-1">Pendientes: {{total_pendientes_hoy}}</p>
             </div>
             <i class="fa-solid fa-scissors text-green-400 text-3xl"></i>
         </div>
@@ -243,8 +242,8 @@
         <div class="bg-neutral-800 p-4 rounded-lg flex items-center justify-between">
             <div>
             <p class="text-neutral-400 text-sm">Caja actual</p>
-            <h2 class="text-3xl font-extrabold text-blue-400">$ 342.090</h2>
-            <p class="text-xs text-neutral-400 mt-1">Últ. mov.: +$18.000</p>
+            <h2 class="text-3xl font-extrabold text-blue-400">$ {{monto_total_caja}}</h2>
+            <p class="text-xs text-neutral-400 mt-1">Últ. mov.: +${{venta_mas_reciente_total}}</p>
             </div>
             <i class="fa-solid fa-cash-register text-blue-400 text-3xl"></i>
         </div>
