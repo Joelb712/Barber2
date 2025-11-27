@@ -11,39 +11,7 @@
   <div class="p-6 text-white text-center">
       <h2 class="text-2xl font-bold text-yellow-400">Cajas</h2>
   </div>
-  {% if empleadito and empleadito.especialidad == 'gerente' %}
-    <div class="card grid grid-cols-1 md:grid-cols-3 gap-8 max-w-6xl mx-auto">
-      <div class="bg-zinc-800 p-6 rounded-xl text-center shadow hover:scale-105 transition duration-300">
-          <p class="font-semibold text-white">
-            <i class="text-green-500 text-center fa-dollar-sign"></i>  
-            {{ingresos_caja_actual}}    
-          </p>
-          <p class="text-yellow-500 mt-4 font-bold">
-            Caja Actual
-          </p>
-      </div>
-      <div class="bg-zinc-800 p-6 rounded-xl text-center shadow hover:scale-105 transition duration-300">
-          <p class="font-semibold text-white">
-            <i class="text-green-500 text-center fa-dollar-sign"></i>
-            {{ingresos_semanal}}
-          </p>
-          <p class="text-yellow-500 mt-4 font-bold">
-            Ingresos Semanal
-          </p>
-      </div>
-      <div class="bg-zinc-800 p-6 rounded-xl text-center shadow hover:scale-105 transition duration-300">
-          <p class="font-semibold text-white">
-            <i class="text-green-500 text-center fa-dollar-sign"></i>
-            {{ingresos_mensual}}
-          </p>
-          <p class="text-yellow-500 mt-4 font-bold">
-            Ingresos Mensual
-          </p>
-      </div>
-
-    </div>
-  {% endif %}
-
+  
   <div class="p-6 space-y-6">
     <div class="bg-zinc-800 backdrop-blur-sm rounded-xl p-5 shadow">
       <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
@@ -51,25 +19,25 @@
           <h2 class="text-xl font-bold flex items-center gap-2 text-white">
             <i class="fas fa-cash-register"></i> Lista de Cajas
           </h2>
-          <p class="text-white">Aquí puedes ver todos las cajas de la Barberia</p>
+          <p class="text-white">Aquí puedes ver todas las cajas de la Barbería</p>
         </div>
-        <button data-url="{% url 'apertura_caja' %}"  class="btnAbrirCaja px-4 py-2 bg-yellow-500 hover:bg-blue-700 text-black font-medium rounded-lg transition">
+        
+        <button data-url="{% url 'apertura_caja' %}" data-titulo="Abrir Caja" class="btn-ajax-form px-4 py-2 bg-yellow-500 hover:bg-blue-700 text-black font-medium rounded-lg transition">
           <i class="fas fa-cash-register mr-2"></i> Abrir Caja
         </button>
-        <button data-url="{% url 'cierre_caja' %}" class="btnCerrarCaja px-4 py-2 bg-blue-500 hover:bg-blue-700 text-black font-medium rounded-lg transition">
+        
+        <button data-url="{% url 'cierre_caja' %}" data-titulo="Cerrar Caja" class="btn-ajax-form px-4 py-2 bg-blue-500 hover:bg-blue-700 text-black font-medium rounded-lg transition">
           <i class="fas fa-lock mr-2"></i> Cerrar Caja
         </button>
+        
       </div>
     </div>
 
     <div id="tablaCajas" class="bg-zinc-800 backdrop-blur-sm rounded-xl p-5 shadow overflow-x-auto" data-url="{% url 'tabla_cajas' %}">
       {% include 'cajas_tabla.html' %}
     </div>
-
-  
   </div>
 </div>
-
 
 <script>
 

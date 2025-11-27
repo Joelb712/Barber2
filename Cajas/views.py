@@ -65,21 +65,36 @@ def tabla_cajas(request):
 @login_required
 def apertura_caja(request):
     """Muestra modal de apertura o mensaje si ya hay caja abierta"""
+    caja_abierta = Caja.objects.filter(estado=True).exists()
+
     if request.method == 'GET':
-        caja_abierta = Caja.objects.filter(estado=True).exists()
-
         if caja_abierta:
-            html = render_to_string('caja_abierta.html', {}, request=request)
-            return JsonResponse({'html': html})
+            # --- CODIGO ORIGINAL COMENTADO (NO SIRVE PARA EL MODAL GENERICO) ---
+            # html = render_to_string('caja_abierta.html', {}, request=request)
+            # return JsonResponse({'html': html})
+            # -------------------------------------------------------------------
+            return render(request, 'caja_abierta.html')
 
+        # --- CODIGO ORIGINAL COMENTADO ---
+        # form = AperturaCajaForm()
+        # html = render_to_string('apertura_caja.html', {'form': form}, request=request)
+        # return JsonResponse({'html': html})
+        # ----------------------------------
         form = AperturaCajaForm()
-        html = render_to_string('apertura_caja.html', {'form': form}, request=request)
-        return JsonResponse({'html': html})
+        return render(request, 'apertura_caja.html', {'form': form})
 
     # Si viene un POST, procesamos el formulario
     elif request.method == 'POST':
         form = AperturaCajaForm(request.POST)
         if form.is_valid():
+            
+            # Validación extra por seguridad
+            if caja_abierta:
+                 return JsonResponse({'success': False, 'message': 'Ya existe una caja abierta.'}, status=400)
+            
+            if not hasattr(request.user, 'empleado'):
+                 return JsonResponse({'success': False, 'message': 'Usuario no es empleado.'}, status=403)
+
             monto_inicial = form.cleaned_data['monto_inicial']
             empleado = request.user.empleado
 
@@ -90,8 +105,13 @@ def apertura_caja(request):
             )
             return JsonResponse({'success': True, 'message': 'Caja abierta correctamente'})
         else:
-            html = render_to_string('apertura_caja.html', {'form': form}, request=request)
-            return JsonResponse({'html': html, 'success': False})
+            # --- CODIGO ORIGINAL COMENTADO ---
+            # html = render_to_string('apertura_caja.html', {'form': form}, request=request)
+            # return JsonResponse({'html': html, 'success': False})
+            # ----------------------------------
+            
+            # Devolvemos HTML directo (con status 400 opcional) para que se vea dentro del modal
+            return render(request, 'apertura_caja.html', {'form': form}, status=400)
 
 
 @login_required
@@ -100,16 +120,24 @@ def cierre_caja(request):
     if request.method == 'GET':
         try:
             caja = Caja.objects.get(estado=True)
-            html = render_to_string('cierre.html', {'caja': caja}, request=request)
-            return JsonResponse({'html': html})
+            # --- CODIGO ORIGINAL COMENTADO ---
+            # html = render_to_string('cierre.html', {'caja': caja}, request=request)
+            # return JsonResponse({'html': html})
+            # ----------------------------------
+            return render(request, 'cierre.html', {'caja': caja})
         except Caja.DoesNotExist:
-            html = render_to_string('sin_caja.html', {}, request=request)
-            return JsonResponse({'html': html})
+            # --- CODIGO ORIGINAL COMENTADO ---
+            # html = render_to_string('sin_caja.html', {}, request=request)
+            # return JsonResponse({'html': html})
+            # ----------------------------------
+            return render(request, 'sin_caja.html')
 
     elif request.method == 'POST':
         try:
             caja = Caja.objects.get(estado=True)
             total_ventas = Venta.objects.filter(caja=caja).aggregate(total=models.Sum("total"))["total"] or 0
+            
+            # Lógica de cierre
             caja.monto_final = caja.monto_inicial + total_ventas
             caja.fecha_cierre = timezone.now()
             caja.estado = False
