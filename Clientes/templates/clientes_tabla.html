@@ -1,6 +1,6 @@
 {% load static %}
-<div class="bg-zinc-800 backdrop-blur-sm rounded-xl p-5 shadow overflow-x-auto">
-    <table id="listacli" class="min-w-full divide-y divide-gray-200">
+
+<table id="listacli" class="min-w-full divide-y divide-gray-200">
         <thead class="bg-slate-700">
             <tr>
             <th class="px-4 py-3 text-left text-xs font-medium text-white uppercase tracking-wider">Nombre</th>
@@ -13,7 +13,7 @@
         </thead>
         <tbody class="bg-gray-300 divide-y divide-gray-200">
             {% for c in clientes %}
-            <tr data-pk="{{ c.pk }}" class="{% if not c.activo %}inactivo{% endif %}   hover:bg-amber-100">
+            <tr data-pk="{{ c.pk }}" class="{% if not c.activo %}inactivo{% endif %}  hover:bg-amber-100">
             <td class="px-4 py-3 whitespace-nowrap text-sm font-medium text-black">{{ c.first_name }}</td>
             <td class="px-4 py-3 whitespace-nowrap text-sm font-medium text-black">{{ c.last_name }}</td>
             <td class="px-4 py-3 whitespace-nowrap text-sm font-medium text-black">{{ c.dni }}</td>
@@ -36,4 +36,60 @@
             {% endfor %}
         </tbody>
     </table>
-</div>
+<script>
+   
+    $(document).ready(function () {
+        // 💡 Inicialización de DataTables 💡
+        $('#listacli').DataTable({
+            // Habilita la paginación, ordenación y búsqueda
+            paging: true,
+            searching: true,
+            ordering: true,
+
+            order: [[1, 'desc']], 
+            
+            // Opciones de paginación: (10, 20, 50 y All)
+            lengthMenu: [
+                [10, 20, 50, -1],
+                [10, 20, 50, "Todos"]
+            ],
+            
+            // Idioma en español
+            language: {
+                url: "//cdn.datatables.net/plug-ins/1.10.25/i18n/Spanish.json"
+            },
+            responsive: true,
+            dom: '<"flex justify-between items-center mb-4"Blf><"overflow-x-auto"rt><"flex justify-between items-center mt-4"ip>',
+            buttons: [
+            {
+                extend: 'excelHtml5',
+                text: 'Excel',
+                title: 'Reporte de Clientes',
+                exportOptions: {
+                    // Exporta columnas 0, 1, 2, 3, 4 (Excluye la Columna 5: Acciones)
+                    columns: [0, 1, 2, 3, 4] 
+                }
+            },
+            // Botón para PDF (requiere PDFMake)
+            {
+                extend: 'pdfHtml5',
+                text: 'PDF',
+                title: 'Reporte de Clientes',
+                orientation: 'landscape',
+                exportOptions: {
+                    // 🛑 Excluye la Columna 5 (Acciones) 🛑
+                    columns: [0, 1, 2, 3, 4] 
+                },
+                customize: function (doc) {
+                    doc.content[1].table.widths = Array(doc.content[1].table.body[0].length + 1).join('*').split('');
+                }
+            },
+        ]
+            
+            // Clase de tabla de Tailwind CSS para evitar conflicto de estilos.
+            // DataTables es inteligente y generalmente solo añade su funcionalidad.
+            // Asegúrate que tu CSS ya maneje el estilo de la tabla.
+            // La clase 'min-w-full' que ya tienes es suficiente.
+        });
+    });
+</script>

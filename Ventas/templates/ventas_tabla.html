@@ -1,7 +1,7 @@
- <div class="bg-zinc-800 backdrop-blur-sm rounded-xl p-5 shadow overflow-x-auto">
-      <table id="listavent" class="min-w-full divide-y divide-gray-200">
-        <thead class="bg-slate-700">
-          <tr>
+{% load static %}
+<table id="listavent" class="min-w-full divide-y divide-gray-200">
+    <thead class="bg-slate-700">
+        <tr>
             <th class="px-4 py-3 text-left text-xs font-medium text-white uppercase tracking-wider">Nro Venta</th>
             <th class="px-4 py-3 text-left text-xs font-medium text-white uppercase tracking-wider">Fecha</th>
             <th class="px-4 py-3 text-left text-xs font-medium text-white uppercase tracking-wider">Cliente</th>
@@ -9,24 +9,81 @@
             <th class="px-4 py-3 text-left text-xs font-medium text-white uppercase tracking-wider">Caja</th>
             <th class="px-4 py-3 text-left text-xs font-medium text-white uppercase tracking-wider">Total</th>
             <th class="px-4 py-3 text-left text-xs font-medium text-white uppercase tracking-wider">Acciones</th>
-          </tr>
-        </thead>
-        <tbody class="bg-gray-300 divide-y divide-gray-200">
-          {% for v in ventas %}
-          <tr data-pk="{{ v.pk }}" class="hover:bg-amber-100">
+        </tr>
+    </thead>
+    <tbody class="bg-gray-300 divide-y divide-gray-200">
+        {% for v in ventas %}
+        <tr data-pk="{{ v.pk }}" class="hover:bg-amber-100">
             <td class="px-4 py-3 whitespace-nowrap text-sm font-medium text-black">{{ v.id }}</td>
-            <td class="px-4 py-3 whitespace-nowrap text-sm font-medium text-black">{{ v.fecha }}</td>
-            <td class="px-4 py-3 whitespace-nowrap text-sm font-medium text-black">{{ v.cliente }}</td>
+            <td class="px-4 py-3 whitespace-nowrap text-sm font-medium text-black">{{ v.fecha|date:"d/m/Y" }}</td>
+            <td class="px-4 py-3 whitespace-nowrap text-sm font-medium text-black">{{ v.cliente|default:"N/A" }}</td>
             <td class="px-4 py-3 whitespace-nowrap text-sm font-medium text-black">{{ v.empleado }}</td>
             <td class="px-4 py-3 whitespace-nowrap text-sm font-medium text-black">{{ v.caja }}</td>
-            <td class="px-4 py-3 whitespace-nowrap text-sm font-medium text-black">{{ v.total }}</td>
+            <td class="px-4 py-3 whitespace-nowrap text-sm font-medium text-black">$ {{ v.total|floatformat:2 }}</td>
             <td class="px-4 py-3 whitespace-nowrap text-m font-medium">
-              <button class="btnEliminar text-red-600 hover:text-red-800">
-                <i class="fas fa-trash"></i>
-              </button>
+                <button class="btnVer text-blue-600 hover:text-blue-800 mr-2" title="Ver Detalles">
+                    <i class="fas fa-eye"></i>
+                </button>
+                <button class="btnEliminar text-red-600 hover:text-red-800" title="Anular Venta">
+                    <i class="fas fa-trash"></i>
+                </button>
             </td>
-          </tr>
-          {% endfor %}
-        </tbody>
-      </table>
-    </div>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+<script>
+    // 💡 INICIALIZACIÓN GARANTIZADA DE DATATABLES 💡
+    $(function() {
+        
+        // 1. Destruir DataTables anterior si existe (CLAVE para AJAX)
+        if ($.fn.DataTable.isDataTable('#listavent')) {
+            $('#listavent').DataTable().destroy();
+        }
+
+        // 2. Inicializar la tabla de VENTAS
+        $('#listavent').DataTable({
+            paging: true,
+            searching: true,
+            ordering: true,
+            
+            order: [[1, 'desc']], 
+            
+            // Opciones de paginación
+            lengthMenu: [
+                [10, 20, 50, -1],
+                [10, 20, 50, "Todos"]
+            ],
+            
+            // Idioma en español
+            language: {
+                url: "//cdn.datatables.net/plug-ins/1.10.25/i18n/Spanish.json"
+            },
+            responsive: true,
+            dom: '<"flex justify-between items-center mb-4"Blf><"overflow-x-auto"rt><"flex justify-between items-center mt-4"ip>',
+            buttons: [
+       
+            {
+                extend: 'excelHtml5',
+                text: 'Excel',
+                title: 'Reporte de Ventas'
+            },
+            // Botón para PDF (requiere PDFMake)
+            {
+                extend: 'pdfHtml5',
+                text: 'PDF',
+                title: 'Reporte de Ventas',
+                orientation: 'landscape',
+                exportOptions: {
+                    // 🛑 Excluye la Columna 5 (Acciones) 🛑
+                    columns: [0, 1, 2, 3, 4,5] 
+                },
+                customize: function (doc) {
+                    doc.content[1].table.widths = Array(doc.content[1].table.body[0].length + 1).join('*').split('');
+                }
+            },
+         
+        ]
+        });
+    });
+</script>
