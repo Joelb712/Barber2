@@ -307,13 +307,44 @@
             </table>
         </div>
         </section>
+        <!--  GRAFICOS-->
+        <section class="bg-neutral-800 p-4 rounded-lg mb-6">
+            <div class="bg-neutral-800 p-4 rounded-lg mb-6">
+                <h3 class="text-lg font-semibold text-yellow-400 mb-4">Ingresos de la Semana</h3>
+                
+                <div class="h-64">
+                    <canvas id="chartIngresos" class="w-full h-full"></canvas>
+                </div>
+                
+            </div>
+        </section>
+        <!-- 🆕 NUEVA SECCIÓN: GRÁFICO LINEAL DE INGRESOS DIARIOS -->
+        <section class="bg-neutral-800 p-4 rounded-lg mb-6">
+            <div class="bg-neutral-800 p-4 rounded-lg mb-6">
+                <h3 class="text-lg font-semibold text-yellow-400 mb-4">Tendencia Diaria de Ingresos</h3>
+                <!-- Contenedor del Gráfico Lineal -->
+                <div class="h-80 md:h-96"> 
+                    <canvas id="chartLinealDiario" class="w-full h-full"></canvas>
+                </div>
+            </div>
+        </section>
+        <!--  NUEVA SECCIÓN: GRÁFICO DE BARRAS DE TURNOS -->
+        <section class="bg-neutral-800 p-4 rounded-lg mb-6 shadow-xl">
+            <h3 class="text-xl font-bold text-yellow-400 mb-4 border-b border-neutral-700 pb-2">
+                Análisis Semanal de Turnos (Completados vs. Cancelados)
+            </h3>
+            <!-- Contenedor del Gráfico de Barras -->
+            <div class="h-80 md:h-96"> 
+                <canvas id="chartTurnosBarras" class="w-full h-full"></canvas>
+            </div>
+        </section>
 
         <!-- Fila 3: Ingresos y pagos -->
         <section class="grid grid-cols-1 lg:grid-cols-3 gap-4">
         <!-- Ingresos por empleado -->
         <div class="bg-neutral-800 p-4 rounded-lg lg:col-span-2">
             <div class="flex items-center justify-between mb-3">
-            <h3 class="text-lg font-semibold text-yellow-400">Ingresos por empleado (hoy)</h3>
+            <h3 class="text-lg font-semibold text-yellow-400">Ingresos por empleado y Monto a pagar (hoy)</h3>
             <span class="text-xs text-neutral-400">Datos demo</span>
             </div>
             <div class="overflow-x-auto">
@@ -323,7 +354,7 @@
                     <th class="px-3 py-2 text-left">Empleado</th>
                     <th class="px-3 py-2 text-left">Servicios</th>
                     <th class="px-3 py-2 text-left">Ingresos</th>
-                    <th class="px-3 py-2 text-left">Ticket prom.</th>
+                    <th class="px-3 py-2 text-left">A pagar</th>
                 </tr>
                 </thead>
                 <tbody>
@@ -331,46 +362,25 @@
                     <td class="px-3 py-2">Fede</td>
                     <td class="px-3 py-2">22</td>
                     <td class="px-3 py-2 text-green-400">$ 38.500</td>
-                    <td class="px-3 py-2">$ 1.750</td>
+                    <td class="px-3 py-2 text-green-400">$ 1.750</td>
                 </tr>
                 <tr class="border-b border-neutral-800">
                     <td class="px-3 py-2">Lautaro</td>
                     <td class="px-3 py-2">18</td>
                     <td class="px-3 py-2 text-green-400">$ 30.200</td>
-                    <td class="px-3 py-2">$ 1.678</td>
+                    <td class="px-3 py-2 text-green-400">$ 1.678</td>
                 </tr>
                 <tr class="border-b border-neutral-800">
                     <td class="px-3 py-2">Brisa</td>
                     <td class="px-3 py-2">14</td>
                     <td class="px-3 py-2 text-green-400">$ 24.400</td>
-                    <td class="px-3 py-2">$ 1.742</td>
+                    <td class="px-3 py-2 text-green-400">$ 1.742</td>
                 </tr>
                 </tbody>
             </table>
             </div>
         </div>
 
-        <!-- Pagos pendientes -->
-        <div class="bg-neutral-800 p-4 rounded-lg">
-            <div class="flex items-center justify-between mb-3">
-            <h3 class="text-lg font-semibold text-yellow-400">Pagos pendientes a peluqueros</h3>
-            <button class="text-xs px-2 py-1 rounded bg-neutral-700 hover:bg-neutral-600">Ver todo</button>
-            </div>
-            <ul class="divide-y divide-neutral-800 text-sm">
-            <li class="py-3 flex items-center justify-between">
-                <span>Fede</span>
-                <span class="text-green-400 font-semibold">$ 18.000</span>
-            </li>
-            <li class="py-3 flex items-center justify-between">
-                <span>Lautaro</span>
-                <span class="text-green-400 font-semibold">$ 15.500</span>
-            </li>
-            <li class="py-3 flex items-center justify-between">
-                <span>Brisa</span>
-                <span class="text-green-400 font-semibold">$ 12.800</span>
-            </li>
-            </ul>
-        </div>
         </section>
     </div>
     </div>
@@ -379,3 +389,303 @@
 </div>
 
 </div>
+
+<script>
+
+    // ----------------------------------------------------
+    // GRÁFICO 1: TORTA (Ingresos Productos vs Servicios)
+    // ----------------------------------------------------
+    function iniciarGraficoIngresos() {
+        const canvas = document.getElementById("chartIngresos");
+        if (!canvas) {
+            console.log("DEPURACIÓN: Canvas 'chartIngresos' no encontrado.");
+            return;
+        }
+        
+        const ctx = canvas.getContext("2d");
+        const urlDatos = "{% url 'datos_torta' %}";
+        
+        fetch(urlDatos)
+            .then(response => {
+                if (!response.ok) throw new Error(`Error HTTP! Estado: ${response.status}`);
+                return response.json();
+            })
+            .then(data => {
+                console.log("DEPURACIÓN: Datos Torta recibidos:", data);
+                
+                let ingresosServicios = data.ingresos_servicios || 0;
+                let ingresosProductos = data.ingresos_productos || 0;
+                const totalIngresos = ingresosServicios + ingresosProductos;
+                
+                if (totalIngresos === 0) {
+                    ctx.font = "16px sans-serif";
+                    ctx.fillStyle = "#A1A1AA"; 
+                    ctx.textAlign = "center";
+                    // Aseguramos que el texto se dibuje en el centro del contenedor (si no está estirado)
+                    ctx.fillText("No hay datos de ingresos esta semana.", canvas.width / 2, canvas.height / 2);
+                    return; 
+                }
+
+                if (window.graficoTorta) { window.graficoTorta.destroy(); }
+
+                window.graficoTorta = new Chart(ctx, {
+                    type: "pie",
+                    data: {
+                        labels: ["Servicios", "Productos"],
+                        datasets: [{
+                            data: [ingresosServicios, ingresosProductos],
+                            backgroundColor: [
+                                '#f59e0b', // Amarillo/Naranja 
+                                '#3b82f6'  // Azul 
+                            ], 
+                            hoverOffset: 16
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        layout: { padding: 10 },
+                        plugins: {
+                            legend: {
+                                display: true,
+                                position: 'bottom',
+                                labels: { color: '#e5e5e5' }
+                            },
+                            tooltip: {
+                                callbacks: {
+                                    label: function(context) {
+                                        let label = context.label || '';
+                                        if (label) { label += ': '; }
+                                        const value = new Intl.NumberFormat('es-AR', {
+                                            style: 'currency',
+                                            currency: 'ARS',
+                                            minimumFractionDigits: 0
+                                        }).format(context.raw);
+                                        return label + value;
+                                    }
+                                }
+                            }
+                        }
+                    }
+                });
+            })
+            .catch(error => {
+                console.error("DEPURACIÓN: Error en el gráfico de torta:", error);
+            });
+    }
+
+
+    // ----------------------------------------------------
+    // 🆕 GRÁFICO 2: LINEAL (Tendencia Diaria)
+    // ----------------------------------------------------
+    function iniciarGraficoLineal() {
+        const canvas = document.getElementById("chartLinealDiario");
+        if (!canvas) {
+            console.log("DEPURACIÓN: Canvas 'chartLinealDiario' no encontrado.");
+            return;
+        }
+        
+        const ctx = canvas.getContext("2d");
+        const urlDatos = "{% url 'datos_lineal' %}"; // Usamos la nueva URL
+        
+        fetch(urlDatos)
+            .then(response => {
+                if (!response.ok) throw new Error(`Error HTTP! Estado: ${response.status}`);
+                return response.json();
+            })
+            .then(data => {
+                console.log("DEPURACIÓN: Datos Lineal recibidos:", data);
+                
+                const labels = data.labels; // Lun, Mar, Mié...
+                const ingresosData = data.data; // [100, 200, 0, 0, ...]
+                const totalIngresos = ingresosData.reduce((sum, current) => sum + current, 0);
+
+                if (totalIngresos === 0) {
+                    // Si el total es 0, dibujamos el mensaje en el canvas
+                    ctx.font = "16px sans-serif";
+                    ctx.fillStyle = "#A1A1AA"; 
+                    ctx.textAlign = "center";
+                    ctx.fillText("No hay ingresos registrados esta semana.", canvas.width / 2, canvas.height / 2);
+                    return; 
+                }
+
+                if (window.graficoLineal) { window.graficoLineal.destroy(); }
+
+                window.graficoLineal = new Chart(ctx, {
+                    type: 'line',
+                    data: {
+                        labels: labels,
+                        datasets: [{
+                            label: 'Ingresos Diarios (ARS)',
+                            data: ingresosData,
+                            backgroundColor: 'rgba(245, 158, 11, 0.2)', // Fondo suave
+                            borderColor: '#f59e0b', // Línea principal (Amarillo/Naranja)
+                            pointBackgroundColor: '#f59e0b',
+                            pointBorderColor: '#fff',
+                            pointHoverBackgroundColor: '#fff',
+                            pointHoverBorderColor: '#f59e0b',
+                            borderWidth: 2,
+                            fill: true, // Rellenar debajo de la línea
+                            tension: 0.4 // Curva suave
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        layout: { padding: 5 },
+                        scales: {
+                            y: {
+                                beginAtZero: true,
+                                grid: { color: 'rgba(255, 255, 255, 0.1)' }, // Líneas de grid tenues
+                                ticks: {
+                                    color: '#e5e5e5', // Color de los números del eje Y
+                                    callback: function(value) {
+                                        return '$' + new Intl.NumberFormat('es-AR').format(value); // Formato ARS
+                                    }
+                                }
+                            },
+                            x: {
+                                grid: { display: false },
+                                ticks: { color: '#e5e5e5' } // Color de los días
+                            }
+                        },
+                        plugins: {
+                            legend: {
+                                display: false, // La etiqueta es clara en la línea
+                            },
+                            tooltip: {
+                                callbacks: {
+                                    label: function(context) {
+                                        let label = context.dataset.label || '';
+                                        if (label) { label += ': '; }
+                                        const value = new Intl.NumberFormat('es-AR', {
+                                            style: 'currency',
+                                            currency: 'ARS',
+                                            minimumFractionDigits: 0
+                                        }).format(context.raw);
+                                        return value;
+                                    }
+                                }
+                            }
+                        }
+                    }
+                });
+            })
+            .catch(error => {
+                console.error("DEPURACIÓN: Error en el gráfico lineal:", error);
+            });
+    }
+    function iniciarGraficoTurnos() {
+        const canvas = document.getElementById("chartTurnosBarras");
+        if (!canvas) {
+            console.warn("Canvas 'chartTurnosBarras' no encontrado. Asegúrese de que el ID esté en el HTML.");
+            return;
+        }
+        
+        const ctx = canvas.getContext("2d");
+        // ⚠️ Asegúrate de que esta URL sea correcta. Si estás en un template de Django, usa:
+        // const urlDatos = "{% url 'datos_turnos' %}"; 
+        // Si no estás en un template, usa la URL directa:
+        const urlDatos = "/datos-turnos/"; 
+        
+        fetch(urlDatos)
+            .then(response => {
+                if (!response.ok) throw new Error(`Error HTTP! Estado: ${response.status}`);
+                return response.json();
+            })
+            .then(data => {
+                console.log("DEPURACIÓN: Datos Turnos recibidos:", data);
+                
+                const labels = data.labels; // Lun, Mar, Mié...
+                const completadosData = data.completados || [];
+                const canceladosData = data.cancelados || [];
+                
+                const totalTurnos = completadosData.reduce((sum, current) => sum + current, 0) +
+                                    canceladosData.reduce((sum, current) => sum + current, 0);
+
+                if (totalTurnos === 0) {
+                    // Si no hay datos, muestra un mensaje en el canvas
+                    ctx.font = "16px sans-serif";
+                    ctx.fillStyle = "#A1A1AA"; 
+                    ctx.textAlign = "center";
+                    ctx.fillText("No hay turnos Completados o Cancelados esta semana.", canvas.width / 2, canvas.height / 2);
+                    return; 
+                }
+
+                // Destruye la instancia anterior si existe (para refrescos)
+                if (window.graficoTurnos) { window.graficoTurnos.destroy(); }
+
+                window.graficoTurnos = new Chart(ctx, {
+                    type: 'bar',
+                    data: {
+                        labels: labels,
+                        datasets: [
+                            {
+                                label: 'Completados',
+                                data: completadosData,
+                                backgroundColor: '#10b981', // Verde esmeralda
+                                borderRadius: 6,
+                            },
+                            {
+                                label: 'Cancelados',
+                                data: canceladosData,
+                                backgroundColor: '#ef4444', // Rojo
+                                borderRadius: 6,
+                            }
+                        ]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        layout: { padding: 10 },
+                        scales: {
+                            x: {
+                                stacked: false, // Barras agrupadas (una al lado de la otra)
+                                grid: { display: false },
+                                ticks: { color: '#e5e5e5' }
+                            },
+                            y: {
+                                stacked: false,
+                                beginAtZero: true,
+                                grid: { color: 'rgba(255, 255, 255, 0.1)' },
+                                ticks: {
+                                    color: '#e5e5e5',
+                                    precision: 0 
+                                }
+                            }
+                        },
+                        plugins: {
+                            legend: {
+                                display: true,
+                                position: 'top',
+                                labels: { color: '#e5e5e5' }
+                            },
+                            tooltip: {
+                                callbacks: {
+                                    label: function(context) {
+                                        let label = context.dataset.label || '';
+                                        if (label) { label += ': '; }
+                                        return label + context.raw + ' turnos';
+                                    }
+                                }
+                            }
+                        }
+                    }
+                });
+            })
+            .catch(error => {
+                console.error("Error al obtener datos del gráfico de turnos:", error);
+            });
+    }
+    
+    // Llamamos a ambas funciones en la carga del DOM y directamente (para AJAX/HTMX)
+    document.addEventListener("DOMContentLoaded", iniciarGraficoIngresos);
+    document.addEventListener("DOMContentLoaded", iniciarGraficoLineal);
+    document.addEventListener("DOMContentLoaded", iniciarGraficoTurnos);
+    
+    // Llamada directa como respaldo para carga dinámica
+    iniciarGraficoIngresos();
+    iniciarGraficoLineal();
+    iniciarGraficoTurnos();
+
+</script>

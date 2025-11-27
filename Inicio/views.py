@@ -3,11 +3,13 @@ from django.contrib.auth.decorators import login_required
 from django.contrib import messages
 from django.utils import timezone
 from django.utils.timezone import now
-from Otros.models import Cliente,Turno,EstadoTurno,Empleado,Caja,Pago,Venta,MovimientoCaja
+from Otros.models import Cliente,Turno,EstadoTurno,Empleado,Caja,Pago,Venta,MovimientoCaja,DetalleVenta
 from datetime import date, timedelta
-from django.db.models import Sum, Q
+from django.db.models import Sum, Q, F
 from django.http import JsonResponse
 from decimal import Decimal
+from collections import OrderedDict 
+from django.db.models import Sum, Case, When, Value, IntegerField
 
 # Create your views here.
 def Inicio(request):
@@ -213,6 +215,10 @@ def home_empleado(request):
     else:
         monto_total_caja = 'No hay caja abierta'
         venta_mas_reciente_total = 0.00
+
+    ##Graficos
+    
+    
     context = {
         'empleado': empleado,
         'especialidad': especialidad,
@@ -237,9 +243,211 @@ def home_empleado(request):
         'total_pendientes_hoy': total_pendientes_hoy,
         'monto_total_caja': monto_total_caja,
         'venta_mas_reciente_total': venta_mas_reciente_total,
+        #graficos
+       
 
     }
     return render(request, 'home.html', context)
+
+
+def datos_torta(request):
+    # 1. Obtener el momento actual en la zona horaria configurada de Django
+    now = timezone.localtime(timezone.now())
+    
+    # 2. Calcular el inicio de la semana (Lunes a las 00:00:00)
+    # now.weekday() devuelve 0 para Lunes, 6 para Domingo.
+    dias_restar = now.weekday() 
+    inicio_sem_date = now.date() - timedelta(days=dias_restar)
+    
+    # Creamos un objeto datetime consciente de la zona horaria: Lunes 00:00:00
+    inicio_sem_dt = timezone.make_aware(
+        timezone.datetime(inicio_sem_date.year, inicio_sem_date.month, inicio_sem_date.day, 0, 0, 0)
+    )
+    
+    # 3. Calcular el inicio de la siguiente semana (Lunes de la próxima semana a las 00:00:00)
+    # Esto nos permite usar el filtro < (menor que), que es más robusto.
+    inicio_sig_sem_dt = inicio_sem_dt + timedelta(days=7)
+
+    # 4. Aplicar el filtro de rango de fecha y hora
+    detalles_semana = DetalleVenta.objects.filter(
+        activo=True,
+        venta__activo=True,
+        # FILTRO CORREGIDO: Usamos objetos datetime y __lt
+        venta__fecha__gte=inicio_sem_dt,        # Mayor o igual a Lunes 00:00:00
+        venta__fecha__lt=inicio_sig_sem_dt,     # Estrictamente menor que Lunes de la próxima semana 00:00:00
+    )
+
+    # --- INGRESOS POR SERVICIOS ---
+    ingresos_servicios = detalles_semana.filter(
+        servicio__isnull=False
+    ).aggregate(
+        total=Sum('subtotal')
+    )['total'] or Decimal(0)
+
+    # --- INGRESOS POR PRODUCTOS ---
+    ingresos_productos = detalles_semana.filter(
+        producto__isnull=False
+    ).aggregate(
+        total=Sum('subtotal')
+    )['total'] or Decimal(0)
+    
+    data = {
+        'ingresos_servicios': float(ingresos_servicios),
+        'ingresos_productos': float(ingresos_productos),
+    }
+    return JsonResponse(data)
+
+
+def datos_lineal(request):
+    # Días de la semana para etiquetas del gráfico (Lunes a Domingo)
+    dias_semana_labels = ["Lun", "Mar", "Mié", "Jue", "Vie", "Sáb", "Dom"]
+    
+    now = timezone.localtime(timezone.now())
+    hoy_weekday = now.weekday() # 0=Lunes, 6=Domingo
+
+    # 1. Definir el rango de la semana
+    dias_restar = now.weekday() 
+    inicio_sem_date = now.date() - timedelta(days=dias_restar)
+    
+    inicio_sem_dt = timezone.make_aware(
+        timezone.datetime(inicio_sem_date.year, inicio_sem_date.month, inicio_sem_date.day, 0, 0, 0)
+    )
+    inicio_sig_sem_dt = inicio_sem_dt + timedelta(days=7)
+
+    # 2. Obtener todas las ventas activas de la semana
+    ventas_semana = Venta.objects.filter(
+        activo=True,
+        fecha__gte=inicio_sem_dt,
+        fecha__lt=inicio_sig_sem_dt,
+    ).extra(
+        # 🚨 CORRECCIÓN PARA MySQL: Usamos WEEKDAY() que devuelve 0=Lunes a 6=Domingo
+        select={'dia_semana': 'WEEKDAY(fecha)'}
+    ).values(
+        'dia_semana'
+    ).annotate(
+        # Sumamos los montos totales del campo 'total' (corregido en el turno anterior)
+        ingreso_diario=Sum('total') 
+    ).order_by('dia_semana')
+
+    # Mapeo de ingresos diarios: inicializa de Lunes a Domingo con 0
+    ingresos_por_dia = OrderedDict()
+    for i in range(7):
+        ingresos_por_dia[i] = Decimal(0)
+
+    # Rellenar con los datos de la base de datos
+    for venta in ventas_semana:
+        # WEEKDAY() de MySQL devuelve el índice 0 para Lunes, que es perfecto.
+        dia_index = int(venta['dia_semana']) 
+        
+        # Aseguramos que el índice esté dentro del rango 0-6
+        if 0 <= dia_index <= 6:
+            ingresos_por_dia[dia_index] = venta['ingreso_diario'] or Decimal(0)
+
+    # 3. Preparar los datos para el JSON
+    datos_grafico = []
+    
+    # Solo mostramos datos hasta HOY (incluido) y forzamos 0 para días futuros
+    for i in range(7):
+        monto = float(ingresos_por_dia[i])
+        
+        # Si estamos en un día que ya pasó o es HOY, usamos el monto real
+        if i <= hoy_weekday:
+            datos_grafico.append(monto)
+        # Si el día es futuro (Jueves, Viernes, etc.), forzamos el 0
+        else:
+            datos_grafico.append(0.0)
+
+    data = {
+        'labels': dias_semana_labels, # Nombres de los días
+        'data': datos_grafico         # Montos de ingresos
+    }
+    
+    return JsonResponse(data)
+
+
+def datos_turnos(request):
+    dias_semana_labels = ["Lun", "Mar", "Mié", "Jue", "Vie", "Sáb", "Dom"]
+    
+    now = timezone.localtime(timezone.now())
+    hoy_weekday = now.weekday() # 0=Lunes, 6=Domingo
+
+    # 1. Definir el rango de la semana
+    dias_restar = now.weekday() 
+    inicio_sem_date = now.date() - timedelta(days=dias_restar)
+    
+    inicio_sem_dt = timezone.make_aware(
+        timezone.datetime(inicio_sem_date.year, inicio_sem_date.month, inicio_sem_date.day, 0, 0, 0)
+    )
+    inicio_sig_sem_dt = inicio_sem_dt + timedelta(days=7)
+
+    # 2. Obtener los turnos de la semana con agregación condicional
+    turnos_semana = Turno.objects.filter(
+        # El modelo Turno no tiene 'activo', solo lo filtramos por fecha
+        fecha__gte=inicio_sem_dt,
+        fecha__lt=inicio_sig_sem_dt,
+        # 🚨 CORRECCIÓN: Filtramos por el campo 'nombre' del modelo EstadoTurno (FK)
+        estado__nombre__in=['completado', 'cancelado'] 
+    ).extra(
+        # CORRECCIÓN PARA MySQL: Usamos WEEKDAY() (0=Lunes)
+        select={'dia_semana': 'WEEKDAY(fecha)'}
+    ).values(
+        'dia_semana'
+    ).annotate(
+        # Contar turnos 'completados' (usando estado__nombre)
+        completados_count=Sum(
+            Case(
+                When(estado__nombre='completado', then=Value(1)),
+                default=Value(0),
+                output_field=IntegerField()
+            )
+        ),
+        # Contar turnos 'cancelados' (usando estado__nombre)
+        cancelados_count=Sum(
+            Case(
+                When(estado__nombre='cancelado', then=Value(1)),
+                default=Value(0),
+                output_field=IntegerField()
+            )
+        )
+    ).order_by('dia_semana')
+
+    # 3. Mapeo de resultados
+    turnos_completados_dia = OrderedDict()
+    turnos_cancelados_dia = OrderedDict()
+    for i in range(7):
+        turnos_completados_dia[i] = 0
+        turnos_cancelados_dia[i] = 0
+
+    for turno_data in turnos_semana:
+        dia_index = int(turno_data['dia_semana']) 
+        
+        if 0 <= dia_index <= 6:
+            turnos_completados_dia[dia_index] = turno_data['completados_count']
+            turnos_cancelados_dia[dia_index] = turno_data['cancelados_count']
+
+    # 4. Preparar los datos para el JSON, aplicando el filtro de 'días futuros = 0'
+    datos_completados = []
+    datos_cancelados = []
+    
+    for i in range(7):
+        # Si el día ya pasó o es hoy, usamos los datos reales
+        if i <= hoy_weekday:
+            datos_completados.append(turnos_completados_dia[i])
+            datos_cancelados.append(turnos_cancelados_dia[i])
+        # Si el día es futuro, forzamos el 0
+        else:
+            datos_completados.append(0)
+            datos_cancelados.append(0)
+
+    data = {
+        'labels': dias_semana_labels,
+        'completados': datos_completados,
+        'cancelados': datos_cancelados,
+    }
+    
+    return JsonResponse(data)
+
+
 
 @login_required
 def mi_perfil(request):

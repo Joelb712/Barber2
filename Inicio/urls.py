@@ -12,4 +12,7 @@ urlpatterns=[
     path('home/',home_empleado,name='home'),
     path('mi-perfil/', mi_perfil, name='mi_perfil'),
     path('historial-turnos/', historial_turnos_empleado, name='historial_turnos'),
+    path('datos-torta/', datos_torta, name='datos_torta'),
+    path('datos-lineal/', datos_lineal, name='datos_lineal'),
+    path('datos-turnos/', datos_turnos, name='datos_turnos'),
 ]
