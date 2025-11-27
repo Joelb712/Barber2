@@ -10,7 +10,7 @@
         <!-- Sección Barbero -->
         {% if especialidad == 'Barbero' %}
             <div class="bg-neutral-900 text-gray-200 antialiased">
-                <div class="max-w-5xl mx-auto px-4 py-6">
+                <div class="max-w-5xl mx-auto px-4">
                     <!-- Encabezado -->
                     <header class="mb-6 flex items-center justify-between">
                     <div>
@@ -98,7 +98,7 @@
         <!-- Sección Recepcionista -->
         {% if especialidad == 'Recepcionista' %}
         <div class="bg-neutral-900 text-gray-200 antialiased">
-            <div class="max-w-6xl mx-auto px-4 py-6">
+            <div class="max-w-6xl mx-auto px-4">
                 <!-- Encabezado -->
                 <header class="mb-6 flex flex-col md:flex-row md:items-center md:justify-between gap-3">
                 <div>
@@ -150,224 +150,162 @@
                 </div>
                 </section>
 
-                <!-- Fila 2: Caja actual + Últimos cobros -->
-                <section class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
-                <div class="bg-neutral-800 p-4 rounded-lg md:col-span-2">
-                    <div class="flex items-center justify-between mb-3">
-                    <h3 class="text-lg font-semibold text-yellow-400">Turnos del Día</h3>
-                    <span class="text-xs text-neutral-400">{{hoy}}</span>
-                    </div>
-
-                    <div id="tablaturnosrecep" class="overflow-x-auto">
-                        <table class="min-w-full text-sm text-gray-300">
-                            <thead class="bg-neutral-700">
-                                <tr>
-                                    <th class="px-3 py-2 text-left">Hora</th>
-                                    <th class="px-3 py-2 text-left">Cliente</th>
-                                    <th class="px-3 py-2 text-left">Peluquero</th>
-                                    <th class="px-3 py-2 text-left">Estado</th>
-                                    <th class="px-3 py-2 text-left">Cobrar</th> <!-- Nueva columna -->
-                                </tr>
-                            </thead>
-                            <tbody>
-                                {% for turno in turnostodos %}
-                                <tr class="border-b border-neutral-800">
-                                    <td class="px-3 py-2">{{ turno.horario.hora_inicio|time:"H:i" }}</td>
-                                    <td class="px-3 py-2">{{ turno.cliente }}</td>
-                                    <td class="px-3 py-2">{{ turno.empleado }}</td>
-                                    <td class="px-3 py-2">{{ turno.estado.nombre }}</td>
-                                    <td class="px-3 py-2">
-                                        {% if turno.estado.nombre == 'cancelado' %}
-                                            <span class="text-gray-400 font-semibold">---</span>
-
-                                        {% elif not turno.pagado %}
-                                            <button 
-                                                class="btn-ajax-form bg-green-600 text-black py-1 px-3 rounded"
-                                                data-url="{% url 'cobrar_turno' turno.id %}"
-                                                data-titulo="Cobrar Turno">
-                                                Cobrar
-                                            </button>
-
-                                        {% else %}
-                                            <span class="text-green-400 font-semibold">Pagado</span>
-                                        {% endif %}
-                                    </td>
-                                </tr>
-                                {% empty %}
-                                <tr>
-                                    <td colspan="5" class="text-center">No hay turnos para hoy</td>
-                                </tr>
-                                {% endfor %}
-                            </tbody>
-                        </table>
-                    </div>
-                </div>
-                </section>
+                
             </div>
-            </div>
+        </div>
         {% endif %}
 
         <!-- Sección Gerente -->
         {% if especialidad == 'Gerente' %}
         <div class="bg-neutral-900 text-gray-200 antialiased">
-            <div class="max-w-6xl mx-auto px-4 py-6">
-                <!-- Encabezado -->
+            <div class="max-w-6xl mx-auto px-4">
+                
                 <header class="mb-6">
-                <h1 class="text-3xl font-bold text-yellow-400">Panel de Gerencia</h1>
-                <p class="text-neutral-400 text-sm mt-1">Resumen general y turnos del día</p>
+                    <h1 class="text-3xl font-bold text-yellow-400">Panel de Gerencia</h1>
+                    <p class="text-neutral-400 text-sm mt-1">Resumen general y turnos del día</p>
                 </header>
 
-                <!-- Fila 1: KPIs -->
                 <section class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
-                <!-- Ventas del día -->
-                <div class="bg-neutral-800 p-4 rounded-lg flex items-center justify-between">
-                    <div>
-                    <p class="text-neutral-400 text-sm">Ventas del día</p>
-                    <h2 class="text-3xl font-extrabold text-yellow-400">$ {{total_hoy}}</h2>
+                    <div class="bg-neutral-800 p-4 rounded-lg flex items-center justify-between">
+                        <div>
+                            <p class="text-neutral-400 text-sm">Ventas del día</p>
+                            <h2 class="text-3xl font-extrabold text-yellow-400">$ {{total_hoy}}</h2>
+                        </div>
+                        <i class="fa-solid fa-sack-dollar text-yellow-400 text-3xl"></i>
                     </div>
-                    <i class="fa-solid fa-sack-dollar text-yellow-400 text-3xl"></i>
-                </div>
-
-                <!-- Servicios realizados -->
-                <div class="bg-neutral-800 p-4 rounded-lg flex items-center justify-between">
-                    <div>
-                    <p class="text-neutral-400 text-sm">Servicios completados</p>
-                    <h2 class="text-3xl font-extrabold text-green-400">{{total_completados_hoy}}</h2>
-                    <p class="text-xs text-neutral-400 mt-1">Pendientes: {{total_pendientes_hoy}}</p>
+                    <div class="bg-neutral-800 p-4 rounded-lg flex items-center justify-between">
+                        <div>
+                            <p class="text-neutral-400 text-sm">Servicios completados</p>
+                            <h2 class="text-3xl font-extrabold text-green-400">{{total_completados_hoy}}</h2>
+                            <p class="text-xs text-neutral-400 mt-1">Pendientes: {{total_pendientes_hoy}}</p>
+                        </div>
+                        <i class="fa-solid fa-scissors text-green-400 text-3xl"></i>
                     </div>
-                    <i class="fa-solid fa-scissors text-green-400 text-3xl"></i>
-                </div>
-
-                <!-- Caja actual -->
-                <div class="bg-neutral-800 p-4 rounded-lg flex items-center justify-between">
-                    <div>
-                    <p class="text-neutral-400 text-sm">Caja actual</p>
-                    <h2 class="text-3xl font-extrabold text-blue-400">$ {{monto_total_caja}}</h2>
-                    <p class="text-xs text-neutral-400 mt-1">Últ. mov.: +${{venta_mas_reciente_total}}</p>
+                    <div class="bg-neutral-800 p-4 rounded-lg flex items-center justify-between">
+                        <div>
+                            <p class="text-neutral-400 text-sm">Caja actual</p>
+                            <h2 class="text-3xl font-extrabold text-blue-400">$ {{monto_total_caja}}</h2>
+                            <p class="text-xs text-neutral-400 mt-1">Últ. mov.: +${{venta_mas_reciente_total}}</p>
+                        </div>
+                        <i class="fa-solid fa-cash-register text-blue-400 text-3xl"></i>
                     </div>
-                    <i class="fa-solid fa-cash-register text-blue-400 text-3xl"></i>
-                </div>
                 </section>
 
-                <!-- Fila 2: Turnos pendientes -->
-                <section class="bg-neutral-800 p-4 rounded-lg mb-6">
-                <div class="flex items-center justify-between mb-3">
-                    <h3 class="text-lg font-semibold text-yellow-400">Turnos Pendientes de Hoy</h3>
-                    <span class="text-xs text-neutral-400">Datos de ejemplo</span>
-                </div>
-
-                <div class="overflow-x-auto">
-                    <table class="min-w-full text-sm text-gray-300">
-                    <thead class="bg-neutral-700">
-                        <tr>
-                        <th class="px-3 py-2 text-left">Hora</th>
-                        <th class="px-3 py-2 text-left">Cliente</th>
-                        <th class="px-3 py-2 text-left">Peluquero</th>
-                        <th class="px-3 py-2 text-left">Servicio</th>
-                        <th class="px-3 py-2 text-left">Estado</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        <tr class="border-b border-neutral-800">
-                        <td class="px-3 py-2">09:00</td>
-                        <td class="px-3 py-2">Martín López</td>
-                        <td class="px-3 py-2">Fede</td>
-                        <td class="px-3 py-2">Corte clásico</td>
-                        <td class="px-3 py-2 text-yellow-400">Pendiente</td>
-                        </tr>
-                        <tr class="border-b border-neutral-800">
-                        <td class="px-3 py-2">09:30</td>
-                        <td class="px-3 py-2">Carlos Ruiz</td>
-                        <td class="px-3 py-2">Lautaro</td>
-                        <td class="px-3 py-2">Corte + barba</td>
-                        <td class="px-3 py-2 text-yellow-400">Pendiente</td>
-                        </tr>
-                        <tr class="border-b border-neutral-800">
-                        <td class="px-3 py-2">10:15</td>
-                        <td class="px-3 py-2">Diego Ramos</td>
-                        <td class="px-3 py-2">Brisa</td>
-                        <td class="px-3 py-2">Color + corte</td>
-                        <td class="px-3 py-2 text-yellow-400">Pendiente</td>
-                        </tr>
-                        <tr class="border-b border-neutral-800">
-                        <td class="px-3 py-2">11:00</td>
-                        <td class="px-3 py-2">Luciano Pérez</td>
-                        <td class="px-3 py-2">Mati</td>
-                        <td class="px-3 py-2">Barba</td>
-                        <td class="px-3 py-2 text-yellow-400">Pendiente</td>
-                        </tr>
-                        <tr>
-                        <td class="px-3 py-2">11:30</td>
-                        <td class="px-3 py-2">Santiago Ferreyra</td>
-                        <td class="px-3 py-2">Rami</td>
-                        <td class="px-3 py-2">Corte fade</td>
-                        <td class="px-3 py-2 text-yellow-400">Pendiente</td>
-                        </tr>
-                    </tbody>
-                    </table>
-                </div>
-                </section>
-                <!--  GRAFICOS-->
-                <section class="bg-neutral-800 p-4 rounded-lg mb-6">
-                    <div class="bg-neutral-800 p-4 rounded-lg mb-6">
-                        <h3 class="text-lg font-semibold text-yellow-400 mb-4">Ingresos de la Semana</h3>
-                        
-                        <div class="h-64">
+                <section class="grid grid-cols-1 lg:grid-cols-4 gap-4 mb-6">
+                    
+                    <div class="bg-neutral-800 p-4 rounded-lg lg:col-span-1">
+                        <h3 class="text-lg font-semibold text-yellow-400 mb-2">Productos vs Servicios</h3>
+                        <div class="h-64"> 
                             <canvas id="chartIngresos" class="w-full h-full"></canvas>
                         </div>
-                        
                     </div>
+
+                    <div class="bg-neutral-800 p-4 rounded-lg lg:col-span-3">
+                        <div class="flex items-center justify-between mb-3">
+                            <h3 class="text-lg font-semibold text-yellow-400">Rendimiento por Empleado y Monto a pagar (hoy)</h3>
+                            <span class="text-xs text-neutral-400">Datos Actualizados</span>
+                        </div>
+                        <div class="overflow-x-auto">
+                            <table id="tabla-rendimiento-barberos" class="min-w-full text-sm"> 
+                                <thead class="bg-neutral-700 text-gray-200">
+                                    <tr>
+                                        <th class="px-3 py-2 text-left">Empleado</th>
+                                        <th class="px-3 py-2 text-left">Turnos</th>
+                                        <th class="px-3 py-2 text-left">Servicios</th>
+                                        <th class="px-3 py-2 text-left">Ingresos</th>
+                                        <th class="px-3 py-2 text-left">Ganancia</th>
+                                        <th class="px-3 py-2 text-left">A pagar</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    </tbody>
+                            </table>
+                        </div>
+                    </div>
+                    
                 </section>
-                <!-- 🆕 NUEVA SECCIÓN: GRÁFICO LINEAL DE INGRESOS DIARIOS -->
-                <section class="bg-neutral-800 p-4 rounded-lg mb-6">
-                    <div class="bg-neutral-800 p-4 rounded-lg mb-6">
+
+                <section class="grid grid-cols-1 lg:grid-cols-2 gap-4 mb-6">
+                    
+                    <div class="bg-neutral-800 p-4 rounded-lg">
                         <h3 class="text-lg font-semibold text-yellow-400 mb-4">Tendencia Diaria de Ingresos</h3>
-                        <!-- Contenedor del Gráfico Lineal -->
-                        <div class="h-80 md:h-96"> 
+                        <div class="h-80"> 
                             <canvas id="chartLinealDiario" class="w-full h-full"></canvas>
                         </div>
                     </div>
-                </section>
-                <!--  NUEVA SECCIÓN: GRÁFICO DE BARRAS DE TURNOS -->
-                <section class="bg-neutral-800 p-4 rounded-lg mb-6 shadow-xl">
-                    <h3 class="text-xl font-bold text-yellow-400 mb-4 border-b border-neutral-700 pb-2">
-                        Análisis Semanal de Turnos (Completados vs. Cancelados)
-                    </h3>
-                    <!-- Contenedor del Gráfico de Barras -->
-                    <div class="h-80 md:h-96"> 
-                        <canvas id="chartTurnosBarras" class="w-full h-full"></canvas>
+                    
+                    <div class="bg-neutral-800 p-4 rounded-lg">
+                        <h3 class="text-lg font-semibold text-yellow-400 mb-4">Análisis Semanal de Turnos</h3>
+                        <div class="h-80"> 
+                            <canvas id="chartTurnosBarras" class="w-full h-full"></canvas>
+                        </div>
                     </div>
+                    
                 </section>
 
-                <!-- Fila 4: Ingresos y pagos -->
-                <section class="grid grid-cols-1 lg:grid-cols-3 gap-4">
-                <div class="bg-neutral-800 p-4 rounded-lg lg:col-span-2">
-                    <div class="flex items-center justify-between mb-3">
-                        <h3 class="text-lg font-semibold text-yellow-400">Ingresos por empleado y Monto a pagar (hoy)</h3>
-                        <span class="text-xs text-neutral-400">Datos Actualizados</span>
-                    </div>
-                    <div class="overflow-x-auto">
-                        <table id="tabla-rendimiento-barberos" class="min-w-full text-sm"> 
-                            <thead class="bg-neutral-700 text-gray-200">
-                            <tr>
-                                <th class="px-3 py-2 text-left">Empleado</th>
-                                <th class="px-3 py-2 text-left">Turnos</th>
-                                <th class="px-3 py-2 text-left">Servicios</th>
-                                <th class="px-3 py-2 text-left">Ingresos</th>
-                                <th class="px-3 py-2 text-left">Ganancia</th>
-                                <th class="px-3 py-2 text-left">A pagar</th>
-                            </tr>
-                            </thead>
-                            <tbody>
-                                </tbody>
-                        </table>
-                    </div>
-                </div>
-            </section>
             </div>
-            </div>
+        </div>
         {% endif %}
 
+        {% if especialidad == 'Gerente' or especialidad == 'Recepcionista' %}
+        <!-- TABLA DE TURNOS PARA GERENTE Y RECEPCION -->
+            <div class="bg-neutral-900 text-gray-200 antialiased">
+                <div class="max-w-6xl mx-auto px-4 pb-6">
+                    <section class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
+                    <div class="bg-neutral-800 p-4 rounded-lg md:col-span-2">
+                        <div class="flex items-center justify-between mb-3">
+                        <h3 class="text-lg font-semibold text-yellow-400">Turnos del Día</h3>
+                        <span class="text-xs text-neutral-400">{{hoy}}</span>
+                        </div>
+
+                        <div id="tablaturnosrecep" class="overflow-x-auto">
+                            <table class="min-w-full text-sm text-gray-300">
+                                <thead class="bg-neutral-700">
+                                    <tr>
+                                        <th class="px-3 py-2 text-left">Hora</th>
+                                        <th class="px-3 py-2 text-left">Cliente</th>
+                                        <th class="px-3 py-2 text-left">Peluquero</th>
+                                        <th class="px-3 py-2 text-left">Estado</th>
+                                        <th class="px-3 py-2 text-left">Cobrar</th> <!-- Nueva columna -->
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for turno in turnostodos %}
+                                    <tr class="border-b border-neutral-800">
+                                        <td class="px-3 py-2">{{ turno.horario.hora_inicio|time:"H:i" }}</td>
+                                        <td class="px-3 py-2">{{ turno.cliente }}</td>
+                                        <td class="px-3 py-2">{{ turno.empleado }}</td>
+                                        <td class="px-3 py-2">{{ turno.estado.nombre }}</td>
+                                        <td class="px-3 py-2">
+                                            {% if turno.estado.nombre == 'cancelado' %}
+                                                <span class="text-gray-400 font-semibold">---</span>
+
+                                            {% elif not turno.pagado %}
+                                                <button 
+                                                    class="btn-ajax-form bg-green-600 text-black py-1 px-3 rounded"
+                                                    data-url="{% url 'cobrar_turno' turno.id %}"
+                                                    data-titulo="Cobrar Turno">
+                                                    Cobrar
+                                                </button>
+
+                                            {% else %}
+                                                <span class="text-green-400 font-semibold">Pagado</span>
+                                            {% endif %}
+                                        </td>
+                                    </tr>
+                                    {% empty %}
+                                    <tr>
+                                        <td colspan="5" class="text-center">No hay turnos para hoy</td>
+                                    </tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                    </section>
+                </div>
+            </div>
+        {% endif %}
     </div>
 </div>
 
